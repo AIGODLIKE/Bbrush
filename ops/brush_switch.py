@@ -192,7 +192,7 @@ class BBrushSwitch(SwitchProperty):
     def smoot_mode(self):
         if self.event_left_mouse_press:
             return self.switch_shift()
-        elif self.event_is_f:
+        elif self.event_is_f or self.event_is_r:
             return {'PASS_THROUGH'}
 
         elif self.event_key_middlemouse:

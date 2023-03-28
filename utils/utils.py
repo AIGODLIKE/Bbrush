@@ -605,6 +605,10 @@ class PublicOperator(PublicClass, Operator):
         return self.event_type('F')
 
     @property
+    def event_is_r(self):
+        return self.event_type('R')
+
+    @property
     def event_is_tab(self):
         return self.event_type('TAB')
 
