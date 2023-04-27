@@ -2,7 +2,7 @@ import bpy
 
 
 def startup_timer():
-    from .utils import PublicClass
+    from .public import PublicClass
     PublicClass.update_interface()
     return 1 / 60
 

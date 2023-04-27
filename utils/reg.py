@@ -1,6 +1,6 @@
 from . import preferences, update, bbrush_toolbar
 from .. import ops, ui
-from .utils import register_submodule_factory, PublicClass
+from .public import register_submodule_factory, PublicClass
 
 model_tuple = (
     ui,

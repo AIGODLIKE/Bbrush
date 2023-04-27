@@ -1,10 +1,8 @@
 import bpy
-import gpu
 import numpy as np
 from bl_ui.space_toolsystem_common import ToolSelectPanelHelper
-from gpu_extras.batch import batch_for_shader
 
-from . import PublicClass
+from utils.public import PublicClass
 
 
 class Buffer(PublicClass):

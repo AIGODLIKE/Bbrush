@@ -2,7 +2,7 @@ import bpy
 from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty
 from bpy_types import AddonPreferences
 
-from .utils import ADDON_NAME, PublicClass
+from .public import ADDON_NAME, PublicClass
 from . import key
 
 
@@ -33,7 +33,7 @@ class BBrushAddonPreferences(AddonPreferences, PublicClass):
                          options={'SKIP_SAVE'},
                          update=sculpt_update)
 
-    depth_sampling_number: IntProperty(name='深度采样值',
+    depth_sampling_number: IntProperty(name='深度采样值',  # TODO
                                        description='采样越高越快,相应的质量越低',
                                        default=3,
                                        max=8,
@@ -53,19 +53,23 @@ class BBrushAddonPreferences(AddonPreferences, PublicClass):
                                default=0.3,
                                max=2,
                                min=0.1,
-                               step=0.1)
+                               step=0.1
+                               )
 
     always_use_sculpt_mode: BoolProperty(
         name='始终使用Bbrush雕刻模式', description='如果进入雕刻模式则自动开启Bbrush模式,退出雕刻模式则退出Bbrush模式',
         default=False)
 
     depth_ray_size: IntProperty(
-        name='深度射线检查大小', description='检查鼠标是否放在模型上,鼠标范围大小', default=100, min=10, max=300)
+        name='深度射线检查大小(px)', description='检查鼠标是否放在模型上,鼠标范围大小', default=100, min=10, max=300)
+
+    show_shortcut_keys: BoolProperty(
+        name='显示快捷键',
+        default=True
+    )
 
     def draw(self, context):
         layout = self.layout
-        layout.prop(self, 'sculpt')
-        layout.prop(self, 'depth_sampling_number')
         layout.prop(self, 'depth_display_mode')
         layout.prop(self, 'depth_scale')
         layout.prop(self, 'depth_ray_size')

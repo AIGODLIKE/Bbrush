@@ -8,7 +8,7 @@ from gpu_extras.batch import batch_for_shader
 from mathutils import Vector
 
 from ..utils.log import log
-from ..utils.utils import PublicOperator, PublicDraw
+from ..utils.public import PublicOperator, PublicDraw
 
 
 def draw_line(vertices, color, line_width=1):
@@ -159,15 +159,15 @@ class MaskDrawArea(MaskClick):
         return self._xy[1]
 
     @property
-    def _polygonns_draw(self):
+    def poly_gon_draw(self):
         return self.mouse_pos + [self.mouse_co, self.mouse_pos[0]]
 
     @property
-    def _polygonns_data(self):
+    def poly_gon_data(self):
         return self.line_to_dit(self.mouse_pos)
 
     @property
-    def _ellipse_data(self):
+    def ellipse_data(self):
         circular = get_circular(abs(self._x), abs(self._y), self.segments)
         draw_data = list((np.add(i, self.start_mouse))
                          for i in circular)
@@ -194,7 +194,6 @@ class MaskDrawArea(MaskClick):
     def draw_box(self):
         x1, y1 = self.start_mouse
         x2, y2 = self.mouse_co
-        # log.debug(f'draw_box{self.start_mouse, self.mouse_co}')
 
         vertices = ((x1, y1), (x2, y1), (x1, y2), (x2, y2))
         # draw area
@@ -225,12 +224,12 @@ class MaskDrawArea(MaskClick):
         if self.is_box_mode:
             self.draw_box()
         elif self.is_ellipse_mode:
-            draw_line(self._ellipse_data, self.color, line_width=2)
+            draw_line(self.ellipse_data, self.color, line_width=2)
         elif self.is_circular_mode:
             draw_line(self._circular_data, self.color, line_width=2)
         elif self.is_polygon_mode:
             if self.mouse_pos:
-                draw_line(self._polygonns_draw, self.color, line_width=2)
+                draw_line(self.poly_gon_draw, self.color, line_width=2)
         gpu.state.blend_set('NONE')
 
 
@@ -263,12 +262,12 @@ class MaskClickDrag(MaskDrawArea):
 
         if self.is_polygon_mode:
             if self.get_shape_in_model_up():
-                self._lasso_path(self._polygonns_data, value)
+                self._lasso_path(self.poly_gon_data, value)
             else:
                 bpy.ops.paint.mask_flood_fill(mode='VALUE', value=value)
         elif self.is_ellipse_mode:
             if in_modal:
-                self._lasso_path(self._ellipse_data, value)
+                self._lasso_path(self.ellipse_data, value)
             else:
                 self.exit_exception()
         elif self.is_circular_mode:
@@ -314,8 +313,15 @@ class MaskClickDrag(MaskDrawArea):
         self.init_modal(context, event)
         self.handler_add(self.__class__.draw_2d_handles, (self, context, event))
         self.tag_redraw(context)
-        log.debug(
-            f'modal {self.start_mouse, self.mouse_co, event.mouse_region_x, event.mouse_region_y, event, event.type, event.value,}')
+
+        log.debug(f'''modal {
+        self.start_mouse,
+        self.mouse_co,
+        event.mouse_region_x,
+        event.mouse_region_y,
+        event,
+        event.type,
+        event.value,}''')
         if self.event_is_esc or self.is_exit_modal:
             self.handler_remove()
             context.area.header_text_set(None)

@@ -3,8 +3,7 @@ from functools import cache
 
 import bpy
 
-from ..utils.utils import all_operator_listen
-from . import PublicClass
+from ..utils.public import all_operator_listen, PublicClass
 
 G_UiReplaceDit = {}
 
@@ -46,6 +45,7 @@ def append_top_editor_menus(self, context):
             row = layout.row(align=True)
             row.prop(pref, 'depth_display_mode', emboss=True, )
             row.prop(pref, 'depth_scale', emboss=True, )
+            row.prop(pref, 'show_shortcut_keys', emboss=True, icon='EVENT_K', text='')
             draw_restart_button(row)
 
         if screen.show_fullscreen and pref.sculpt:
@@ -65,7 +65,7 @@ def __set_menu_fun(origin_menu_class, origin_menu_class_path, replace,
             G_UiReplaceDit[func_path_ + ' draw' +
                            origin_menu_class.__name__] = i
             tmp_draw_funcs_list.append(replace_func)
-        elif func_path_ == replace_func_path and replace == False:
+        elif func_path_ == replace_func_path and (not replace):
             tmp_draw_funcs_list.append(G_UiReplaceDit[menu_key])
         else:
             tmp_draw_funcs_list.append(i)

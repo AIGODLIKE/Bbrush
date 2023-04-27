@@ -4,7 +4,7 @@ import numpy as np
 from mathutils import Matrix
 from gpu_extras.batch import batch_for_shader
 
-from . import PublicClass
+from ..utils.public import PublicClass
 
 
 def get_coord(st=(-1, -1), interval=(2, 2)):
