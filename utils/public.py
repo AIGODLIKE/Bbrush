@@ -21,7 +21,11 @@ def get_pref():
     return bpy.context.preferences.addons[ADDON_NAME].preferences
 
 
-class PublicMath:
+class PublicData:
+    draw_shortcut_keys = []  # 绘制快捷键信息
+
+
+class PublicMath(PublicData):
     @staticmethod
     def to_vector(data):
         return [Vector(i).freeze() for i in data]
@@ -103,7 +107,6 @@ class PublicMath:
         bm = bmesh.new()
         bm.from_mesh(me)
         bmesh.ops.remove_doubles(bm, verts=bm.verts[:], dist=0.0001)
-        # bmesh.ops.edgeloop_fill(bm,edges=bm.edges[:])
         bmesh.ops.triangle_fill(bm, edges=bm.edges[:])
         bm.to_mesh(me)
         bm.free()
@@ -205,8 +208,9 @@ class PublicMath:
                 from_point, to_point = to_point, find_point
                 try:
                     from_idx = pos.index(find_point)
-                except:
+                except IndexError as e:
                     from_idx = -9999
+                    log.debug(e.args)
             #   退出条件
             if to_point == origin_point:
                 circle.append(from_point)
@@ -217,7 +221,7 @@ class PublicMath:
             if counter > len(pos) * 12:
                 break
         if link:
-            return circle, cls.circle_test(circle, 1)
+            return circle, cls.circle_test(circle, True)
         return circle
 
 
@@ -256,21 +260,6 @@ class PublicDraw:
                     shader_name='3D_POLYLINE_UNIFORM_COLOR',
                     draw_type='LINES',
                     ):
-        """
-        :param pos:
-        :type pos:list ((0,0,0),(1,1,1))
-        2D_FLAT_COLOR - 2D_IMAGE - 2D_SMOOTH_COLOR - 2D_UNIFORM_COLOR - 3D_FLAT_COLOR - 3D_SMOOTH_COLOR - 3D_UNIFORM_COLOR - 3D_POLYLINE_FLAT_COLOR - 3D_POLYLINE_SMOOTH_COLOR - 3D_POLYLINE_UNIFORM_COLOR
-        ('POINTS', 'LINES', 'TRIS', 'LINE_STRIP', 'LINE_LOOP','TRI_STRIP',
-         'TRI_FAN', 'LINES_ADJ', 'TRIS_ADJ', 'LINE_STRIP_ADJ')
-        `NONE`, `ALWAYS`, `LESS`, `LESS_EQUAL`, `EQUAL`, `GREATER` and `GREATER_EQUAL`
-
-        Args:
-            pos:
-            indices:
-            color:
-            shader_name:
-            draw_type:
-        """
 
         shader = gpu.shader.from_builtin(shader_name)
         if draw_type == 'POINTS':
@@ -550,9 +539,15 @@ class PublicOperator(PublicClass, Operator):
                                        == 'VIEW_3D')
 
     def set_event_key(self):
-        self.not_key, self.only_ctrl, self.only_alt, self.only_shift, self.shift_alt, self.ctrl_alt, self.ctrl_shift, self.ctrl_shift_alt = \
-            self.get_event_key(
-                self.event)
+        (self.not_key,
+         self.only_ctrl,
+         self.only_alt,
+         self.only_shift,
+         self.shift_alt,
+         self.ctrl_alt,
+         self.ctrl_shift,
+         self.ctrl_shift_alt) = self.get_event_key(
+            self.event)
 
     def _set_ce(self, context, event):
         self.context = context
@@ -672,7 +667,8 @@ class PublicExportPropertyOperator:
         maxlen=255,  # Max internal buffer length, longer would be clamped.
     )
 
-    def get_data(self, context) -> dict:
+    @staticmethod
+    def get_data(context) -> dict:
         return {'emm': 'emm_test'}
 
     def execute(self, context) -> set:

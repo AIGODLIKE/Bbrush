@@ -4,7 +4,7 @@ from bpy.props import BoolProperty
 from gpu_extras.batch import batch_for_shader
 from mathutils import Vector
 
-from ..utils.utils import PublicOperator, PublicDraw
+from ..utils.public import PublicOperator, PublicDraw
 from ..utils.log import log
 
 
@@ -85,7 +85,7 @@ class DepthUpdate(OperatorProperty):
 class BBrushSculpt(DepthUpdate):
     bl_idname = 'bbrush.bbrush_sculpt'
     bl_label = 'Bbrush雕刻'
-    bl_description = '使用zbrush的方式雕刻'
+    bl_description = '使用Zbrush的方式雕刻'
     bl_options = {'REGISTER'}
 
     def invoke(self, context, event):

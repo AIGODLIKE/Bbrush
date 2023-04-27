@@ -4,7 +4,7 @@ from bl_ui.space_toolsystem_common import ToolSelectPanelHelper
 
 from ..utils.bbrush_toolbar import BrushTool
 from ..utils.log import log
-from ..utils.utils import PublicOperator
+from ..utils.public import PublicOperator
 
 
 class SwitchProperty(PublicOperator):
@@ -42,40 +42,44 @@ class SwitchProperty(PublicOperator):
     def _set_brushes(self, value):
         ToolSelectPanelHelper._tool_class_from_space_type('VIEW_3D')._tools['SCULPT'] = value
 
-    def _bbrushes(self, key):
+    @staticmethod
+    def B_brushes(key):
         return BrushTool.TOOLBAR_Dit[key]
 
     @property
     def _hide_brushes(self):
-        return self._bbrushes('HIDE')
+        return self.B_brushes('HIDE')
 
     @property
     def _mask_brushes(self):
-        return self._bbrushes('MASK')
+        return self.B_brushes('MASK')
 
     @property
     def _sculpt_brushes(self):
-        return self._bbrushes('SCULPT')
+        return self.B_brushes('SCULPT')
 
     @property
     def active_hide_brush(self):
         return BrushTool.active_brush['HIDE']
 
-    def set_hide_brush(self, value):
+    @staticmethod
+    def set_hide_brush(value):
         BrushTool.active_brush['HIDE'] = value
 
     @property
     def active_mask_brush(self):
         return BrushTool.active_brush['MASK']
 
-    def set_mask_brush(self, value):
+    @staticmethod
+    def set_mask_brush(value):
         BrushTool.active_brush['MASK'] = value
 
     @property
     def active_sculpt_brush(self):
         return BrushTool.active_brush['SCULPT']
 
-    def set_sculpt_brush(self, value):
+    @staticmethod
+    def set_sculpt_brush(value):
         BrushTool.active_brush['SCULPT'] = value
 
     @property
@@ -86,6 +90,10 @@ class SwitchProperty(PublicOperator):
     @property
     def is_change_brush(self):
         return self.active_not_in_active_brushes
+
+    @property
+    def mouse_is_in_model_up(self):
+        return self.get_mouse_location_ray_cast(self.context, self.event)
 
 
 class BBrushSwitch(SwitchProperty):
@@ -110,13 +118,13 @@ class BBrushSwitch(SwitchProperty):
 
     def modal(self, context, event):
         self.init_modal(context, event)
+        self.update_shortcut_keys()
 
         if self.is_exit:
             return self.exit(context, event)
         elif self.is_pass:  # ctrl tab切换模式
             self.is_esc = True
             return {'PASS_THROUGH'}
-
         elif self.is_hide_mode:
             self.hide_mode()
         elif self.is_mask_mode:
@@ -190,21 +198,24 @@ class BBrushSwitch(SwitchProperty):
             self.set_mask_brush(self.active_tool_name)
 
     def smoot_mode(self):
-        if self.event_left_mouse_press:
-            return self.switch_shift()
-        elif self.event_is_f or self.event_is_r:
-            return {'PASS_THROUGH'}
+        shift_ops = self.only_shift and not self.event_is_left
 
+        if self.event_is_left and not self.mouse_is_in_model_up:
+            bpy.ops.view3d.view_roll('INVOKE_DEFAULT', type='ANGLE')
+            return {'PASS_THROUGH'}
+        elif self.event_is_f or self.event_is_r or shift_ops:
+            return {'PASS_THROUGH'}
+        elif self.event_left_mouse_press:
+            return self.switch_shift()
         elif self.event_key_middlemouse:
             bpy.ops.view3d.move('INVOKE_DEFAULT')
-
         return {'RUNNING_MODAL'}
 
     def switch_shift(self):
         settings = UnifiedPaintPanel.paint_settings(bpy.context)
         log.debug(f'event_left_mouse_press,{self.shift_alt}')
+        brush = settings.brush
         try:
-            brush = settings.brush
             # self.is_esc = True
             if self.shift_alt:
                 setattr(self, 'or_dir', brush.direction)
@@ -216,5 +227,13 @@ class BBrushSwitch(SwitchProperty):
         if getattr(self, 'or_dir', False):
             brush.direction = self.or_dir
             delattr(self, 'or_dir')
-
         return {'PASS_THROUGH'}
+
+    def update_shortcut_keys(self):
+        if self.is_exit or self.is_pass:
+            # self.draw_shortcut_keys.clear()
+            self.draw_shortcut_keys.append('exit')
+        elif self.is_hide_mode:
+            self.draw_shortcut_keys.append('hide')
+        elif self.is_mask_mode:
+            self.draw_shortcut_keys.append('mask')

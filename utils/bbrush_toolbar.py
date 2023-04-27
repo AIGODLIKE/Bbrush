@@ -126,7 +126,7 @@ class BrushTool:
         mask = cls.TOOLBAR_Dit['MASK']
         hide = cls.TOOLBAR_Dit['HIDE']
         from collections.abc import Iterable
-        def _tool(tool):
+        def tool_ops(tool):
             for i in tool:
                 if isinstance(i, ToolDef):
                     idname = i.idname
@@ -137,15 +137,15 @@ class BrushTool:
                     else:
                         sculpt.append(i)
                 elif isinstance(i, Iterable):
-                    _tool(i)
+                    tool_ops(i)
                 elif getattr(i, '__call__', False):
-                    _tool(i(bpy.context))
+                    tool_ops(i(bpy.context))
                 else:
                     if i != sculpt[-1]:
                         sculpt.append(i)
 
         cls.init_active_brush()
-        _tool(toolbar)
+        tool_ops(toolbar)
         mask.extend([bbrush_circular_mask,
                      bbrush_ellipse_mask,
                      bbrush_polygon_mask, ])

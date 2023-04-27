@@ -2,7 +2,7 @@ import bpy
 from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty
 from bpy_types import AddonPreferences
 
-from .utils import ADDON_NAME, PublicClass
+from .public import ADDON_NAME, PublicClass
 from . import key
 
 
@@ -26,6 +26,7 @@ class BBrushAddonPreferences(AddonPreferences, PublicClass):
             BrushTool.toolbar_switch('ORIGINAL_TOOLBAR')
             inputs.use_mouse_emulate_3_button = self.use_mouse_emulate_3_button
             key.unregister()
+            self.draw_shortcut_keys.clear()
         bpy.ops.wm.redraw_timer(type='DRAW', iterations=2)
 
     sculpt: BoolProperty(name='Bbrush',
@@ -53,7 +54,8 @@ class BBrushAddonPreferences(AddonPreferences, PublicClass):
                                default=0.3,
                                max=2,
                                min=0.1,
-                               step=0.1)
+                               step=0.1
+                               )
 
     always_use_sculpt_mode: BoolProperty(
         name='始终使用Bbrush雕刻模式', description='如果进入雕刻模式则自动开启Bbrush模式,退出雕刻模式则退出Bbrush模式',
@@ -61,6 +63,11 @@ class BBrushAddonPreferences(AddonPreferences, PublicClass):
 
     depth_ray_size: IntProperty(
         name='深度射线检查大小', description='检查鼠标是否放在模型上,鼠标范围大小', default=100, min=10, max=300)
+
+    show_shortcut_keys: BoolProperty(
+        name='显示快捷键',
+        default=True
+    )
 
     def draw(self, context):
         layout = self.layout
@@ -70,6 +77,7 @@ class BBrushAddonPreferences(AddonPreferences, PublicClass):
         layout.prop(self, 'depth_scale')
         layout.prop(self, 'depth_ray_size')
         layout.prop(self, 'always_use_sculpt_mode')
+        layout.prop(self, 'show_shortcut_keys')
 
 
 def register():
