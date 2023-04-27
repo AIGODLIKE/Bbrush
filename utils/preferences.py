@@ -74,7 +74,6 @@ class BBrushAddonPreferences(AddonPreferences, PublicClass):
         layout.prop(self, 'depth_scale')
         layout.prop(self, 'depth_ray_size')
         layout.prop(self, 'always_use_sculpt_mode')
-        layout.prop(self, 'show_shortcut_keys')
 
 
 def register():
