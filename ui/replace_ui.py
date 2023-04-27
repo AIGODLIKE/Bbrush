@@ -45,7 +45,7 @@ def append_top_editor_menus(self, context):
             row = layout.row(align=True)
             row.prop(pref, 'depth_display_mode', emboss=True, )
             row.prop(pref, 'depth_scale', emboss=True, )
-            row.prop(pref, 'show_shortcut_keys', emboss=True, icon='EVENT_K')
+            row.prop(pref, 'show_shortcut_keys', emboss=True, icon='EVENT_K', text='')
             draw_restart_button(row)
 
         if screen.show_fullscreen and pref.sculpt:

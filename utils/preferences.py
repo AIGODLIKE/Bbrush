@@ -26,7 +26,6 @@ class BBrushAddonPreferences(AddonPreferences, PublicClass):
             BrushTool.toolbar_switch('ORIGINAL_TOOLBAR')
             inputs.use_mouse_emulate_3_button = self.use_mouse_emulate_3_button
             key.unregister()
-            self.draw_shortcut_keys.clear()
         bpy.ops.wm.redraw_timer(type='DRAW', iterations=2)
 
     sculpt: BoolProperty(name='Bbrush',
@@ -34,7 +33,7 @@ class BBrushAddonPreferences(AddonPreferences, PublicClass):
                          options={'SKIP_SAVE'},
                          update=sculpt_update)
 
-    depth_sampling_number: IntProperty(name='深度采样值',
+    depth_sampling_number: IntProperty(name='深度采样值',  # TODO
                                        description='采样越高越快,相应的质量越低',
                                        default=3,
                                        max=8,
@@ -62,7 +61,7 @@ class BBrushAddonPreferences(AddonPreferences, PublicClass):
         default=False)
 
     depth_ray_size: IntProperty(
-        name='深度射线检查大小', description='检查鼠标是否放在模型上,鼠标范围大小', default=100, min=10, max=300)
+        name='深度射线检查大小(px)', description='检查鼠标是否放在模型上,鼠标范围大小', default=100, min=10, max=300)
 
     show_shortcut_keys: BoolProperty(
         name='显示快捷键',
@@ -71,8 +70,6 @@ class BBrushAddonPreferences(AddonPreferences, PublicClass):
 
     def draw(self, context):
         layout = self.layout
-        layout.prop(self, 'sculpt')
-        layout.prop(self, 'depth_sampling_number')
         layout.prop(self, 'depth_display_mode')
         layout.prop(self, 'depth_scale')
         layout.prop(self, 'depth_ray_size')

@@ -121,6 +121,7 @@ class BBrushSwitch(SwitchProperty):
         self.update_shortcut_keys()
 
         if self.is_exit:
+            self.set_shortcut_keys('NORMAL')
             return self.exit(context, event)
         elif self.is_pass:  # ctrl tab切换模式
             self.is_esc = True
@@ -129,6 +130,9 @@ class BBrushSwitch(SwitchProperty):
             self.hide_mode()
         elif self.is_mask_mode:
             self.mask_mode()
+        else:
+            self.set_shortcut_keys('NORMAL')
+
         self.tag_redraw(context)  # 进行重绘，避免更改工具栏后内容还是旧的
         return self.event_ops(event)
 
@@ -150,11 +154,11 @@ class BBrushSwitch(SwitchProperty):
                 bpy.ops.sculpt.mask_filter('INVOKE_DEFAULT',
                                            filter_type='SHRINK',
                                            auto_iteration_count=True)
-            elif event.type == 'UP_ARROW':
+            elif event.type in ('UP_ARROW', 'NUMPAD_ASTERIX'):
                 bpy.ops.sculpt.mask_filter('INVOKE_DEFAULT',
                                            filter_type='CONTRAST_INCREASE',
                                            auto_iteration_count=False)
-            elif event.type == 'DOWN_ARROW':
+            elif event.type in ('DOWN_ARROW', 'NUMPAD_SLASH'):
                 bpy.ops.sculpt.mask_filter('INVOKE_DEFAULT',
                                            filter_type='CONTRAST_DECREASE',
                                            auto_iteration_count=False)
@@ -220,7 +224,7 @@ class BBrushSwitch(SwitchProperty):
             if self.shift_alt:
                 setattr(self, 'or_dir', brush.direction)
                 brush.direction = 'ENHANCE_DETAILS' if brush.direction == 'SMOOTH' else 'SMOOTH'
-                # TODO bpy.ops.sculpt.brush_stroke('INVOKE_DEFAULT', mode='INVERT')
+                # TODO ERROR bpy.ops.sculpt.brush_stroke('INVOKE_DEFAULT', mode='INVERT')
         except Exception as e:
             log.debug(e)
         bpy.ops.sculpt.brush_stroke('INVOKE_DEFAULT', mode='NORMAL')
@@ -231,9 +235,10 @@ class BBrushSwitch(SwitchProperty):
 
     def update_shortcut_keys(self):
         if self.is_exit or self.is_pass:
-            # self.draw_shortcut_keys.clear()
-            self.draw_shortcut_keys.append('exit')
-        elif self.is_hide_mode:
-            self.draw_shortcut_keys.append('hide')
+            self.set_shortcut_keys('NORMAL')
+        if self.is_hide_mode:
+            self.set_shortcut_keys('HIDE')
         elif self.is_mask_mode:
-            self.draw_shortcut_keys.append('mask')
+            self.set_shortcut_keys('MASK')
+        else:
+            self.set_shortcut_keys('NORMAL')
