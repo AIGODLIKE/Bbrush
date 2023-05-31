@@ -3,7 +3,7 @@ from .utils import reg
 bl_info = {
     "name": "Bbrush",
     "author": "AIGODLIKE Community(BlenderCN辣椒,小萌新)",
-    "version": (1, 0, 0),
+    "version": (1, 1, 0),
     "blender": (3, 4, 0),
     "location": "进入雕刻模式将会在顶栏显示",
     "description": "",
