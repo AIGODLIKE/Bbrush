@@ -34,10 +34,10 @@ class BBrushAddonPreferences(AddonPreferences, PublicClass):
                          update=sculpt_update)
 
     depth_display_items = (
-        ('ALWAYS_DISPLAY', '一直显示', '一直保持显示'),
-        ('ONLY_SCULPT', '仅雕刻模式', '仅在雕刻模式显示'),
-        ('ONLY_BBRUSH', '仅Bbrush模式', '仅在Bbrush模式显示'),
-        ('NOT_DISPLAY', '不显示', '不显示剪影图'),
+        ('ALWAYS_DISPLAY', '一直显示', '一直保持显示剪影图,即使不在雕刻模式'),
+        ('ONLY_SCULPT', '仅雕刻模式', '仅在雕刻模式显示剪影图'),
+        ('ONLY_BBRUSH', '仅Bbrush模式', '仅在Bbrush模式时,显示剪影图'),
+        ('NOT_DISPLAY', '不显示', '任何时候都不显示剪影图'),
     )
 
     depth_display_mode: EnumProperty(name='剪影图显示模式',
