@@ -25,7 +25,7 @@ def append_top_editor_menus(self, context):
     layout = self.layout
     region = context.region
     screen = context.screen
-    right = (not region.alignment == 'RIGHT')
+    right = region.alignment != 'RIGHT'
 
     pref = PublicClass.pref_()
     sculpt = pref.sculpt or pref.is_sculpt_mode

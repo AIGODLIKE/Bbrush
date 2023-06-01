@@ -24,7 +24,8 @@ class SwitchProperty(PublicOperator):
 
     @property
     def is_exit(self):
-        return (self.event.type in ('ESC', 'SPACE')) or self.not_key or self.is_esc
+        return (self.event.type in (
+            'ESC', 'SPACE')) or self.not_key or self.is_esc
 
     @property
     def is_pass(self):
@@ -36,15 +37,19 @@ class SwitchProperty(PublicOperator):
 
     @property
     def brushes(self):
-        return ToolSelectPanelHelper._tool_class_from_space_type('VIEW_3D')._tools['SCULPT']
+        return ToolSelectPanelHelper._tool_class_from_space_type(
+            'VIEW_3D'
+        )._tools['SCULPT']
 
     @brushes.setter
     def _set_brushes(self, value):
-        ToolSelectPanelHelper._tool_class_from_space_type('VIEW_3D')._tools['SCULPT'] = value
+        ToolSelectPanelHelper._tool_class_from_space_type(
+            'VIEW_3D'
+        )._tools['SCULPT'] = value
 
     @staticmethod
     def B_brushes(key):
-        return BrushTool.TOOLBAR_Dit[key]
+        return BrushTool.toolbar_dit[key]
 
     @property
     def _hide_brushes(self):
@@ -84,11 +89,16 @@ class SwitchProperty(PublicOperator):
 
     @property
     def active_not_in_active_brushes(self):  # 活动笔刷没在几个活动项里面
-        return self.active_tool_name and self.active_tool_name != self.active_sculpt_brush and (
-                self.active_tool_name not in BrushTool.active_brush.values())
+        return self.active_tool_name and self.active_tool_name != \
+            self.active_sculpt_brush and (
+                    self.active_tool_name not in
+                    BrushTool.active_brush.values())
 
     @property
     def is_change_brush(self):
+        print(self.active_tool_name,
+              self.active_sculpt_brush,
+              BrushTool.active_brush.values())
         return self.active_not_in_active_brushes
 
     @property
@@ -132,7 +142,6 @@ class BBrushSwitch(SwitchProperty):
             self.mask_mode()
         else:
             self.set_shortcut_keys('NORMAL')
-
         self.tag_redraw(context)  # 进行重绘，避免更改工具栏后内容还是旧的
         return self.event_ops(event)
 
@@ -147,28 +156,35 @@ class BBrushSwitch(SwitchProperty):
 
         if press:
             if event.type == 'NUMPAD_PLUS':
-                bpy.ops.sculpt.mask_filter('INVOKE_DEFAULT',
+                bpy.ops.sculpt.mask_filter('EXEC_DEFAULT',
+                                           True,
                                            filter_type='GROW',
                                            auto_iteration_count=True)
             elif event.type == 'NUMPAD_MINUS':
-                bpy.ops.sculpt.mask_filter('INVOKE_DEFAULT',
+                bpy.ops.sculpt.mask_filter('EXEC_DEFAULT',
+                                           True,
                                            filter_type='SHRINK',
                                            auto_iteration_count=True)
             elif event.type in ('UP_ARROW', 'NUMPAD_ASTERIX'):
-                bpy.ops.sculpt.mask_filter('INVOKE_DEFAULT',
+                bpy.ops.sculpt.mask_filter('EXEC_DEFAULT',
+                                           True,
                                            filter_type='CONTRAST_INCREASE',
                                            auto_iteration_count=False)
             elif event.type in ('DOWN_ARROW', 'NUMPAD_SLASH'):
-                bpy.ops.sculpt.mask_filter('INVOKE_DEFAULT',
+                bpy.ops.sculpt.mask_filter('EXEC_DEFAULT',
+                                           True,
                                            filter_type='CONTRAST_DECREASE',
                                            auto_iteration_count=False)
 
         if self.is_smoot_mode:
             return self.smoot_mode()
         elif self.event_is_w and self.only_ctrl and press:
-            bpy.ops.sculpt.face_sets_create('INVOKE_DEFAULT', mode='MASKED')
-            bpy.ops.paint.mask_flood_fill(
-                'INVOKE_DEFAULT', mode='VALUE', value=0)
+            bpy.ops.sculpt.face_sets_create('EXEC_DEFAULT',
+                                            True,
+                                            mode='MASKED')
+            bpy.ops.paint.mask_flood_fill('EXEC_DEFAULT',
+                                          True,
+                                          mode='VALUE', value=0)
             return {'RUNNING_MODAL'}
         return {'PASS_THROUGH'}
 
@@ -220,11 +236,11 @@ class BBrushSwitch(SwitchProperty):
         log.debug(f'event_left_mouse_press,{self.shift_alt}')
         brush = settings.brush
         try:
-            # self.is_esc = True
             if self.shift_alt:
+                direction = 'ENHANCE_DETAILS' if brush.direction == \
+                                                 'SMOOTH' else 'SMOOTH'
                 setattr(self, 'or_dir', brush.direction)
-                brush.direction = 'ENHANCE_DETAILS' if brush.direction == 'SMOOTH' else 'SMOOTH'
-                # TODO ERROR bpy.ops.sculpt.brush_stroke('INVOKE_DEFAULT', mode='INVERT')
+                brush.direction = direction
         except Exception as e:
             log.debug(e)
         bpy.ops.sculpt.brush_stroke('INVOKE_DEFAULT', mode='NORMAL')

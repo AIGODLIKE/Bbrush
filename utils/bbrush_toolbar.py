@@ -102,18 +102,21 @@ def bbrush_mask_border():
     )
 
 
-toolbar = ToolSelectPanelHelper._tool_class_from_space_type('VIEW_3D')._tools['SCULPT']
-mask_brush = 'builtin_brush.Mask'
+toolbar = ToolSelectPanelHelper._tool_class_from_space_type('VIEW_3D')._tools['SCULPT'].copy()
+builtin_mask_brush = 'builtin_brush.Mask'
 
 
 class BrushTool:
-    MaskBrush = (
-        mask_brush,
+    active_brush: dict
+    toolbar_dit: dict
+
+    mask_brush = (
+        builtin_mask_brush,
         'builtin.box_mask',
         'builtin.lasso_mask',
         'builtin.line_mask',
     )
-    HideBrush = (
+    hide_brush = (
         'builtin.box_hide',
         'builtin.box_trim',
         'builtin.lasso_trim',
@@ -122,51 +125,59 @@ class BrushTool:
 
     @classmethod
     def update_toolbar(cls):
-        sculpt = cls.TOOLBAR_Dit['SCULPT']
-        mask = cls.TOOLBAR_Dit['MASK']
-        hide = cls.TOOLBAR_Dit['HIDE']
-        from collections.abc import Iterable
-        def tool_ops(tool):
-            for i in tool:
-                if isinstance(i, ToolDef):
-                    idname = i.idname
-                    if idname in cls.MaskBrush:
-                        mask.append(i)
-                    elif idname in cls.HideBrush:
-                        hide.append(i)
-                    else:
-                        sculpt.append(i)
-                elif isinstance(i, Iterable):
-                    tool_ops(i)
-                elif getattr(i, '__call__', False):
-                    tool_ops(i(bpy.context))
-                else:
-                    if i != sculpt[-1]:
-                        sculpt.append(i)
-
         cls.init_active_brush()
+        cls.init_all_brush()
+
+    @classmethod
+    def init_all_brush(cls):
+        cls.toolbar_dit = {
+            'SCULPT': [],
+            'MASK': [],
+            'HIDE': [],
+            'ORIGINAL_TOOLBAR': toolbar.copy(),
+        }
+
+        sculpt = cls.toolbar_dit['SCULPT']
+        mask = cls.toolbar_dit['MASK']
+        from collections.abc import Iterable
+        def tool_ops(tools):
+            for tool in tools:
+                if isinstance(tool, ToolDef):
+                    cls.append_brush(tool)
+                elif isinstance(tool, Iterable):
+                    tool_ops(tool)
+                elif getattr(tool, '__call__', False):
+                    tool_ops(tool(bpy.context))
+                else:
+                    if tool != sculpt[-1]:
+                        sculpt.append(tool)
+
         tool_ops(toolbar)
+
         mask.extend([bbrush_circular_mask,
                      bbrush_ellipse_mask,
                      bbrush_polygon_mask, ])
 
     @classmethod
+    def append_brush(cls, brush):
+        sculpt = cls.toolbar_dit['SCULPT']
+        mask = cls.toolbar_dit['MASK']
+        hide = cls.toolbar_dit['HIDE']
+        idname = brush.idname
+        if idname in cls.mask_brush:
+            mask.append(brush)
+        elif idname in cls.hide_brush:
+            hide.append(brush)
+        else:
+            sculpt.append(brush)
+
+    @classmethod
     def init_active_brush(cls):
-        cls.active_brush = cls._active_brush
-
-    TOOLBAR_Dit = {
-        'SCULPT': [],
-        'MASK': [],
-        'HIDE': [],
-        'ORIGINAL_TOOLBAR': toolbar.copy(),
-    }
-
-    _active_brush = {  # 记录活动笔刷的名称
-        'SCULPT': 'builtin_brush.Draw',
-        'MASK': mask_brush,
-        'HIDE': 'builtin.box_hide',
-    }
-    active_brush = _active_brush
+        cls.active_brush = {  # 记录活动笔刷的名称
+            'SCULPT': 'builtin_brush.Draw',
+            'MASK': builtin_mask_brush,
+            'HIDE': 'builtin.box_hide',
+        }
 
     @classmethod
     def toolbar_switch(cls, mode):
@@ -180,7 +191,7 @@ class BrushTool:
                     'HIDE',
                     'ORIGINAL_TOOLBAR',
                     ):
-            set_tool(cls.TOOLBAR_Dit[mode])
+            set_tool(cls.toolbar_dit[mode])
 
 
 def register():

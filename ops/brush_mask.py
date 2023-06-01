@@ -26,13 +26,15 @@ def get_circular(x, y, segments=64):
     if segments <= 0:
         raise ValueError('Amount of segments must be greater than 0.')
     mul = (1.0 / (segments - 1)) * (pi * 2)
-    vert = [Vector((sin(i * mul) * x, cos(i * mul) * y)) for i in range(segments)]
+    vert = [Vector((sin(i * mul) * x, cos(i * mul) * y)) for i in
+            range(segments)]
     return vert
 
 
 class MaskProperty(PublicOperator, PublicDraw):
     use_front_faces_only: BoolProperty(name='仅前面的面')
-    is_click: BoolProperty(name='按键操作是单击', default=True, options={'SKIP_SAVE'})
+    is_click: BoolProperty(name='按键操作是单击', default=True,
+                           options={'SKIP_SAVE'})
 
     is_esc = False
     alpha = 0.9
@@ -55,25 +57,32 @@ class MaskProperty(PublicOperator, PublicDraw):
 
     is_box_mode = False
 
-    def _is_box_mode_update(self):
-        ev = self.only_ctrl or self.ctrl_alt or self.ctrl_shift or self.ctrl_shift_alt
-        is_draw_box = (ev and not self.mouse_is_in_model_up)
+    def box_mode_update(self):
         brush = self.active_tool_name in ('builtin.box_mask',
                                           'builtin.box_hide',
                                           'builtin_brush.Mask')
-        self.is_box_mode = brush or is_draw_box
+        self.is_box_mode = brush
 
     @property
     def is_circular_mode(self):
         return self.active_tool_name == 'bbrush.circular_mask'
 
     @property
-    def is_ellipse_mode(self):
+    def is_ellipse_mask_brush(self):
         return self.active_tool_name == 'bbrush.ellipse_mask'
 
     @property
+    def is_lasso_mask_brush(self):
+        return self.active_tool_name == 'builtin.lasso_mask'
+
+    @property
+    def is_line_mask_brush(self):
+        return self.active_tool_name == 'builtin.line_mask'
+
+    @property
     def is_bbrush_brush(self):  # 是bbrush的笔刷
-        return self.is_polygon_mode or self.is_circular_mode or self.is_ellipse_mode
+        return self.is_polygon_mode or self.is_circular_mode or \
+            self.is_ellipse_mask_brush
 
     @property
     def is_mask_brush(self):
@@ -90,9 +99,35 @@ class MaskProperty(PublicOperator, PublicDraw):
     @property
     def is_exit_modal(self):
         # 除多边形需要左键和右键配合之外其它情况松开这两个键都退出
-        other_exit = (not self.is_polygon_mode) and self.event_left_mouse_release
+        other_exit = (
+                         not self.is_polygon_mode) and \
+                     self.event_left_mouse_release
         brush_exit = self.polygon_not_pos or other_exit
         return self.event_key_enter or brush_exit or self.is_esc
+
+    @property
+    def is_use_front_faces_only(self):
+        return self.active_tool.operator_properties(
+            "bbrush.mask").use_front_faces_only
+
+    @property
+    def is_lasso_trim_brush(self):
+        return self.active_tool_name == 'builtin.lasso_trim'
+
+    @property
+    def is_box_trim_brush(self):
+        return self.active_tool_name == 'builtin.box_trim'
+
+    @property
+    def is_line_project_brush(self):
+        return self.active_tool_name == 'builtin.line_project'
+
+    @property
+    def is_normal_invoke(self):
+        mask = self.is_lasso_mask_brush or self.is_line_mask_brush
+        hide = self.is_line_project_brush or self.is_box_trim_brush or \
+               self.is_lasso_trim_brush
+        return mask or hide
 
 
 class MaskClick(MaskProperty):
@@ -103,39 +138,56 @@ class MaskClick(MaskProperty):
         sculpt = ops.sculpt
         paint = ops.paint
         if self.only_ctrl:
-            if in_model:  # 平滑遮罩
-                sculpt.mask_filter('INVOKE_DEFAULT',
-                                   filter_type='SMOOTH',
-                                   auto_iteration_count=True)
-
-            else:  # 切换遮罩
-                paint.mask_flood_fill(mode='INVERT')
+            self.mask_click_only_ctrl(in_model, sculpt, paint)
         elif self.ctrl_alt:
-            if in_model:  # 硬化遮罩
-                sculpt.mask_filter('INVOKE_DEFAULT',
-                                   filter_type='SHARPEN',
-                                   auto_iteration_count=True)
-            else:  # 切换遮罩
-                sculpt.face_set_change_visibility(
-                    'INVOKE_DEFAULT', mode='TOGGLE')
-
+            self.mask_click_ctrl_alt(in_model, sculpt)
         elif self.only_alt:
             if in_model:  # 切换雕刻物体
                 ops.object.transfer_mode('INVOKE_DEFAULT')
         elif self.shift_alt:
-            if in_model:  # 切换面组 TODO 仅显示鼠标所在面组
+            if in_model:
                 sculpt.face_set_change_visibility(
-                    'INVOKE_DEFAULT', mode='TOGGLE')
-                paint.mask_flood_fill('INVOKE_DEFAULT', mode='INVERT')
+                    mode='TOGGLE')
+                paint.mask_flood_fill(mode='INVERT')
                 sculpt.face_set_change_visibility(
-                    'INVOKE_DEFAULT', mode='TOGGLE')
+                    mode='TOGGLE')
         elif self.ctrl_shift:
             if in_model:
-                sculpt.face_set_change_visibility(mode='INVERT')
+                sculpt.face_set_change_visibility('EXEC_DEFAULT',
+                                                  True,
+                                                  mode='INVERT')
             else:
-                paint.hide_show(action='SHOW', area='ALL')
+                paint.hide_show('EXEC_DEFAULT',
+                                True,
+                                action='SHOW',
+                                area='ALL')
         self.handler_remove()
         return {'FINISHED'}
+
+    @staticmethod
+    def mask_click_only_ctrl(in_model, sculpt, paint):
+        if in_model:  # 平滑遮罩
+            sculpt.mask_filter('EXEC_DEFAULT',
+                               True,
+                               filter_type='SMOOTH',
+                               auto_iteration_count=True)
+        else:  # 切换遮罩
+            paint.mask_flood_fill('EXEC_DEFAULT',
+                                  True,
+                                  mode='INVERT',
+                                  )
+
+    @staticmethod
+    def mask_click_ctrl_alt(in_model, sculpt):
+        if in_model:  # 硬化遮罩
+            sculpt.mask_filter('EXEC_DEFAULT',
+                               True,
+                               filter_type='SHARPEN',
+                               auto_iteration_count=True)
+        else:  # 切换遮罩
+            sculpt.face_set_change_visibility('EXEC_DEFAULT',
+                                              True,
+                                              mode='TOGGLE')
 
 
 class MaskDrawArea(MaskClick):
@@ -144,7 +196,7 @@ class MaskDrawArea(MaskClick):
 
     mouse_pos = list()
     start_mouse: Vector
-    start_time: int
+    start_time: float
 
     @property
     def _xy(self):
@@ -164,7 +216,12 @@ class MaskDrawArea(MaskClick):
 
     @property
     def poly_gon_data(self):
-        return self.line_to_dit(self.mouse_pos)
+        try:
+            return self.line_to_convex_shell(self.mouse_pos)
+        except ValueError as v:
+            log.error(v.args)
+            print(v.args)
+            return self.mouse_pos
 
     @property
     def ellipse_data(self):
@@ -213,37 +270,44 @@ class MaskDrawArea(MaskClick):
         line_length = 5
         x = int((x1 + x2) / 2)
         y = int((y1 + y2) / 2)
-        self.draw_line(((x - line_length, y), (x + line_length, y)), (1, 1, 1, 1),
+        self.draw_line(((x - line_length, y), (x + line_length, y)),
+                       (1, 1, 1, 1),
                        line_width=1)
-        self.draw_line(((x, y - line_length), (x, y + line_length)), (1, 1, 1, 1),
+        self.draw_line(((x, y - line_length), (x, y + line_length)),
+                       (1, 1, 1, 1),
                        line_width=1)
         self.draw_lift_up_text()
 
     def draw_2d_handles(self, context, event):
         gpu.state.blend_set('ALPHA')
+        print(self.is_box_mode, self.is_ellipse_mask_brush,
+              self.is_circular_mode,
+              self.is_polygon_mode, self.mouse_pos)
+
         if self.is_box_mode:
             self.draw_box()
-        elif self.is_ellipse_mode:
+        elif self.is_ellipse_mask_brush:
             draw_line(self.ellipse_data, self.color, line_width=2)
         elif self.is_circular_mode:
             draw_line(self._circular_data, self.color, line_width=2)
-        elif self.is_polygon_mode:
-            if self.mouse_pos:
-                draw_line(self.poly_gon_draw, self.color, line_width=2)
+        elif self.is_polygon_mode and self.mouse_pos:
+            draw_line(self.poly_gon_draw, self.color, line_width=2)
         gpu.state.blend_set('NONE')
 
 
 class MaskClickDrag(MaskDrawArea):
-    def _lasso_path(self, path_, value):
+    def mask_ops_lasso_path(self, path_, value):
         path = [{
             'name': '',
             'loc': i,
             'time': 0
         } for i in path_]
         bpy.ops.paint.mask_lasso_gesture(
+            'EXEC_DEFAULT',
+            True,
             path=path,
             value=value,
-            use_front_faces_only=self.use_front_faces_only
+            use_front_faces_only=self.is_use_front_faces_only
         )
 
     def exit_modal_handle(self):
@@ -261,80 +325,78 @@ class MaskClickDrag(MaskDrawArea):
         value = 0 if self.event.alt else 1
 
         if self.is_polygon_mode:
-            if self.get_shape_in_model_up():
-                self._lasso_path(self.poly_gon_data, value)
-            else:
-                bpy.ops.paint.mask_flood_fill(mode='VALUE', value=value)
-        elif self.is_ellipse_mode:
-            if in_modal:
-                self._lasso_path(self.ellipse_data, value)
-            else:
-                self.exit_exception()
+            self.exit_polygon_mode(value)
+        elif self.is_ellipse_mask_brush:
+            self.exit_ellipse_mask_brush(in_modal, value)
         elif self.is_circular_mode:
             if in_modal:
-                self._lasso_path(self._circular_data, value)
+                self.mask_ops_lasso_path(self._circular_data, value)
             else:
                 self.exit_exception()
         elif in_modal:
-            if self.only_ctrl:
-                paint.mask_box_gesture(**args,
-                                       value=1,
-                                       use_front_faces_only=self.use_front_faces_only
-                                       )
-            elif self.ctrl_alt:
-                paint.mask_box_gesture(**args,
-                                       value=0)
-            elif self.ctrl_shift_alt:
-                paint.hide_show(action='HIDE',
-                                **args, )
-            elif self.ctrl_shift:
-                paint.hide_show(action='HIDE',
-                                area='OUTSIDE',
-                                **args, )
+            self.exit_in_modal(paint, args)
         else:
             self.exit_exception()
         self.mouse_pos.clear()
 
+    def exit_polygon_mode(self, value):
+        if not len(self.mouse_pos):
+            return
+        if self.get_shape_in_model_up():
+            self.mask_ops_lasso_path(self.poly_gon_data, value)
+        else:
+            bpy.ops.paint.mask_flood_fill(mode='VALUE', value=value)
+
+    def exit_ellipse_mask_brush(self, in_modal, value):
+        if in_modal:
+            self.mask_ops_lasso_path(self.ellipse_data, value)
+        else:
+            self.exit_exception()
+
+    def exit_in_modal(self, paint, args):
+        if self.only_ctrl:
+            paint.mask_box_gesture(
+                'EXEC_DEFAULT',
+                True,
+                **args,
+                value=1,
+                use_front_faces_only=self.is_use_front_faces_only,
+            )
+        elif self.ctrl_alt:
+            paint.mask_box_gesture(
+                'EXEC_DEFAULT',
+                True,
+                **args,
+                value=0,
+                use_front_faces_only=self.is_use_front_faces_only,
+            )
+        elif self.ctrl_shift_alt:
+            paint.hide_show(action='HIDE',
+                            **args, )
+        elif self.ctrl_shift:
+            paint.hide_show('EXEC_DEFAULT',
+                            True,
+                            action='HIDE',
+                            area='OUTSIDE',
+                            **args, )
+
     def exit_exception(self):
         paint = bpy.ops.paint
         if self.only_ctrl:
-            paint.mask_flood_fill('INVOKE_DEFAULT',
+            paint.mask_flood_fill('EXEC_DEFAULT',
+                                  True,
                                   mode='VALUE',
                                   value=0)
         elif self.ctrl_alt:
-            paint.mask_flood_fill('INVOKE_DEFAULT',
+            paint.mask_flood_fill('EXEC_DEFAULT',
+                                  True,
                                   mode='VALUE',
                                   value=1)
         elif self.ctrl_shift_alt or self.ctrl_shift:
-            bpy.ops.sculpt.face_set_change_visibility('INVOKE_DEFAULT',
-                                                      mode='INVERT')
-
-    def modal(self, context, event):
-        self.init_modal(context, event)
-        self.handler_add(self.__class__.draw_2d_handles, (self, context, event))
-        self.tag_redraw(context)
-
-        log.debug(f'''modal {
-        self.start_mouse,
-        self.mouse_co,
-        event.mouse_region_x,
-        event.mouse_region_y,
-        event,
-        event.type,
-        event.value,}''')
-        if self.event_is_esc or self.is_exit_modal:
-            self.handler_remove()
-            context.area.header_text_set(None)
-            self.exit_modal_handle()
-            log.debug('exit modal\n')
-            return {'FINISHED'}
-
-        elif self.is_bbrush_brush:
-            if self.is_polygon_mode:  # todo
-                self.polygons_mask()
-
-        self.event_move_update()
-        return {'RUNNING_MODAL'}
+            bpy.ops.sculpt.face_set_change_visibility(
+                'EXEC_DEFAULT',
+                True,
+                mode='INVERT')
 
     def event_move_update(self):
         """
@@ -347,7 +409,7 @@ class MaskClickDrag(MaskDrawArea):
             log.debug(f'move,{move, have_tmp}')
             self.start_mouse -= move
             setattr(self, 'mouse_co_tmp', self.mouse_co)
-            for index, _ in enumerate(self.mouse_pos):  # TODO pos
+            for index, _ in enumerate(self.mouse_pos):
                 self.mouse_pos[index] = self.mouse_pos[index] - move
 
         if self.event_is_space:
@@ -389,15 +451,22 @@ class MaskClickDrag(MaskDrawArea):
 
     def mask_click_drag(self, context, event):
         log.debug(f'mask_click_drag {self.start_mouse, self.mouse_co}')
-
-        if self.is_mask_brush:
-            if self.mouse_is_in_model_up:
-                if self.ctrl_alt:
-                    bpy.ops.sculpt.brush_stroke('INVOKE_DEFAULT', mode='INVERT')
-                else:
-                    bpy.ops.sculpt.brush_stroke('INVOKE_DEFAULT', mode='NORMAL')
-                log.debug('is_mask_brush')
-                return {'FINISHED'}
+        mask = self.is_mask_brush and self.mouse_is_in_model_up
+        print(self.is_normal_invoke, 'self.is_normal_invoke',
+              self.active_tool_name)
+        if mask:
+            if self.ctrl_alt:
+                bpy.ops.sculpt.brush_stroke('INVOKE_DEFAULT',
+                                            True,
+                                            mode='INVERT')
+            else:
+                bpy.ops.sculpt.brush_stroke('INVOKE_DEFAULT',
+                                            True,
+                                            mode='NORMAL')
+            log.debug('is_mask_brush')
+            return {'FINISHED'}
+        elif self.is_normal_invoke:
+            return {'FINISHED', 'PASS_THROUGH'}
 
         if self.is_3d_view:
             if self.is_polygon_mode:
@@ -420,13 +489,37 @@ class BBrushMask(MaskClickDrag):
         self.cache_clear()  # 清
         self.start_time = time()
         self.start_mouse = self.mouse_co
-        self._is_box_mode_update()
+        self.box_mode_update()
         log.debug(f'invoke {self.start_mouse, self.mouse_co}')
-
         self.tag_redraw(context)
-
         log.debug(self.bl_idname)
         if self.is_click:
             return self.mask_click()
         else:
             return self.mask_click_drag(context, event)
+
+    def modal(self, context, event):
+        self.init_modal(context, event)
+        self.handler_add(self.__class__.draw_2d_handles, (self, context, event))
+        self.tag_redraw(context)
+
+        log.debug(f'''modal {
+        self.start_mouse,
+        self.mouse_co,
+        event.mouse_region_x,
+        event.mouse_region_y,
+        event,
+        event.type,
+        event.value,}''')
+        if self.event_is_esc or self.is_exit_modal:
+            self.handler_remove()
+            context.area.header_text_set(None)
+            self.exit_modal_handle()
+            log.debug('exit modal\n')
+            return {'FINISHED'}
+
+        elif self.is_bbrush_brush and self.is_polygon_mode:
+            self.polygons_mask()
+
+        self.event_move_update()
+        return {'RUNNING_MODAL'}

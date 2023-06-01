@@ -1,7 +1,6 @@
 import logging
 import os
 
-
 def log_path():
     folder = os.path.join(os.environ["TMP"], r"blender")
     if not os.path.isdir(folder):

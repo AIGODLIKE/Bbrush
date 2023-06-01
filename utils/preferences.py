@@ -33,12 +33,6 @@ class BBrushAddonPreferences(AddonPreferences, PublicClass):
                          options={'SKIP_SAVE'},
                          update=sculpt_update)
 
-    depth_sampling_number: IntProperty(name='深度采样值',  # TODO
-                                       description='采样越高越快,相应的质量越低',
-                                       default=3,
-                                       max=8,
-                                       min=3)
-
     depth_display_items = (
         ('ALWAYS_DISPLAY', '一直显示', '一直保持显示'),
         ('ONLY_SCULPT', '仅雕刻模式', '仅在雕刻模式显示'),

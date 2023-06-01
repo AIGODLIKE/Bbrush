@@ -45,7 +45,7 @@ class PublicData:
     def set_shortcut_keys(shortcut_type: str) -> None:
         """
         set draw shortcut info
-        @param shortcut_type: str shortcut type 
+        @param shortcut_type: str shortcut type
         """
         PublicData.draw_shortcut_type = shortcut_type
 
@@ -143,16 +143,6 @@ class PublicMath(PublicEvent):
                     tmp_dict['intersect'][get_int] = [cur_line, line]
                     tmp_dict['line'][line].append(get_int)
                     tmp_dict['line'][cur_line].append(get_int)
-        """
-        print("Intersect Points:")
-        for i in tmp_dict['intersect']:
-            print(i, tmp_dict['intersect'][i])
-        print("\n\n")
-        print('intersect')
-        for i in tmp_dict['line']:
-            print(i, tmp_dict['line'][i])
-        print("\n\n")
-        """
         return tmp_dict
 
     @staticmethod
@@ -211,10 +201,9 @@ class PublicMath(PublicEvent):
         return (i.vertices[:] for i in me.polygons)
 
     @classmethod
-    def line_to_dit(cls, pos, link=False):
+    def line_to_convex_shell(cls, pos, link=False):
         """提取多边形的外边框
         """
-
         # [v1, v2, v3, v1]
         pos = cls.to_vector(pos)
         pos_neibor = {
@@ -404,7 +393,6 @@ class PublicDraw:
                 area_draw_data = pos_data + [self.mouse_co]
 
             v, link = self.line_to_dit(area_draw_data, 1)
-            print(list(link), '\n', v)
 
             self.draw_shader(v, link, (1, 1, 1, 1),
                              shader_name='2D_UNIFORM_COLOR', draw_type='TRIS')
@@ -450,10 +438,10 @@ class PublicClass(PublicProperty,
         data = {}
 
         def get_():
-            buffer = PublicClass.get_gpu_buffer((x, y), wh=(w, h), centered=False)
-            numpy_buffer = np.asarray(buffer, dtype=np.float32).ravel()
+            _buffer = PublicClass.get_gpu_buffer((x, y), wh=(w, h), centered=False)
+            numpy_buffer = np.asarray(_buffer, dtype=np.float32).ravel()
             min_depth = np.min(numpy_buffer)
-            data['is_in_model'] = (not (min_depth == (0 or 1)))
+            data['is_in_model'] = (min_depth != (0 or 1))
 
         context = bpy.context
         view3d = context.space_data
@@ -498,6 +486,8 @@ class PublicClass(PublicProperty,
     def tag_redraw(context):
         if context.area:
             context.area.tag_redraw()
+        if context.region:
+            context.region.tag_redraw()
 
     @classmethod
     def update_interface(cls):
@@ -514,10 +504,10 @@ class PublicClass(PublicProperty,
     def gpu_depth_ray_cast(cls, x, y, data):
         size = cls.pref_().depth_ray_size
 
-        buffer = cls.get_gpu_buffer((x, y), wh=(size, size), centered=True)
-        numpy_buffer = np.asarray(buffer, dtype=np.float32).ravel()
+        _buffer = cls.get_gpu_buffer((x, y), wh=(size, size), centered=True)
+        numpy_buffer = np.asarray(_buffer, dtype=np.float32).ravel()
         min_depth = np.min(numpy_buffer)
-        data['is_in_model'] = (not (min_depth == (0 or 1)))
+        data['is_in_model'] = (min_depth != (0 or 1))
 
     @cache
     def get_mouse_location_ray_cast(self, context, event):
@@ -640,8 +630,7 @@ class PublicOperator(PublicClass, Operator):
         self._set_mouse(context, event)
 
     def init_modal(self, context, event) -> None:
-        self._set_ce(context, event)
-        self._set_mouse(context, event)
+        self.init_invoke(context, event)
 
     @property
     def mouse_co(self) -> Vector:
@@ -679,7 +668,7 @@ class PublicExportPropertyOperator:
     filter_glob: StringProperty(
         default="*.json",
         options={'HIDDEN'},
-        maxlen=255,  # Max internal buffer length, longer would be clamped.
+        maxlen=255,  # Max internal depth_buffer length, longer would be clamped.
     )
 
     @staticmethod
@@ -690,14 +679,14 @@ class PublicExportPropertyOperator:
         import json
         try:
             data = self.get_data(context)
-            file = open(self.filepath,
-                        'w+',
-                        encoding='utf8')
-            file.write(json.dumps(data,
-                                  separators=(',', ': '),
-                                  indent=1,
-                                  ensure_ascii=True))
-            file.close()
+            _file = open(self.filepath,
+                         'w+',
+                         encoding='utf8')
+            _file.write(json.dumps(data,
+                                   separators=(',', ': '),
+                                   indent=1,
+                                   ensure_ascii=True))
+            _file.close()
         except Exception as e:
             print(f'ERROR {self.filepath} 写入属性文件错误')
             print(e)

@@ -11,10 +11,10 @@ class Buffer(PublicClass):
     def gpu_depth_ray_cast(cls, x, y, data):
         size = cls.pref_().depth_ray_size
 
-        buffer = cls.get_gpu_buffer((x, y), wh=(size, size), centered=True)
-        numpy_buffer = np.asarray(buffer, dtype=np.float32).ravel()
+        _buffer = cls.get_gpu_buffer((x, y), wh=(size, size), centered=True)
+        numpy_buffer = np.asarray(_buffer, dtype=np.float32).ravel()
         min_depth = np.min(numpy_buffer)
-        data['is_in_model'] = (not (min_depth == (0 or 1)))
+        data['is_in_model'] = min_depth != (0 or 1)
 
 
 def get_active_operator():
@@ -28,6 +28,6 @@ def get_active_operator():
         context)
 
     cls = ToolSelectPanelHelper._tool_class_from_space_type(space_type)
-    item, tool, icon_value = cls._tool_get_active(
+    _, tool, _ = cls._tool_get_active(
         context, space_type, mode, with_icon=True)
     return tool

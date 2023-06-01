@@ -48,36 +48,37 @@ view_3d_window = {'space_type': 'VIEW_3D', 'region_type': 'WINDOW'}
 empty_window_modal = {**empty_window, 'modal': True}
 l_any = {'type': 'LEFTMOUSE', 'value': 'ANY', 'any': True}
 bbrush_mask = 'bbrush.mask'
+bbrush_sculpt = 'bbrush.bbrush_sculpt'
 
 bbrush_key_items = (
-    ('bbrush.bbrush_sculpt',
+    (bbrush_sculpt,
      {'type': 'LEFTMOUSE', 'value': 'CLICK', 'any': False},
      {'properties': [('is_click', True)]}),
-    ('bbrush.bbrush_sculpt',
+    (bbrush_sculpt,
      {'type': 'LEFTMOUSE', 'value': 'CLICK_DRAG', 'any': False},
      {'properties': [('is_click', False)]}),
-    ('bbrush.bbrush_sculpt',
+    (bbrush_sculpt,
      {'type': 'LEFTMOUSE', 'value': 'CLICK', 'alt': False},
      {'properties': [('is_click', True)]}),
-    ('bbrush.bbrush_sculpt',
+    (bbrush_sculpt,
      {'type': 'LEFTMOUSE', 'value': 'CLICK_DRAG', 'alt': False},
      {'properties': [('is_click', False)]}),
 
-    ('bbrush.bbrush_sculpt',
+    (bbrush_sculpt,
      {'type': 'LEFTMOUSE', 'value': 'CLICK_DRAG', 'any': False, 'alt': True},
      {'properties': [('is_click', False)]}),
 
-    ('bbrush.mask',
+    (bbrush_mask,
      {'type': 'LEFTMOUSE', 'value': 'CLICK', 'any': True, 'ctrl': True},
      {'properties': [('is_click', True)]}),
-    ('bbrush.mask',
+    (bbrush_mask,
      {'type': 'LEFTMOUSE', 'value': 'CLICK_DRAG', 'any': True, 'ctrl': True},
      {'properties': [('is_click', False)]}),
 
-    ('bbrush.mask',
+    (bbrush_mask,
      {'type': 'RIGHTMOUSE', 'value': 'CLICK', 'any': True, 'ctrl': True},
      {'properties': [('is_click', True)]}),
-    ('bbrush.mask',
+    (bbrush_mask,
      {'type': 'RIGHTMOUSE', 'value': 'CLICK_DRAG', 'any': True, 'ctrl': True},
      {'properties': [('is_click', False)]}),
 )
@@ -264,10 +265,8 @@ def change_keymap(is_modify: bool):
 def register():
     keymap_register(sculpt_keys_items)
     change_keymap(True)
-    print('keymap_register')
 
 
 def unregister():
     keymap_unregister(sculpt_keys_items)
     change_keymap(False)
-    print('keymap_unregister')

@@ -1,7 +1,12 @@
 这是一个模拟类似ZBrush雕刻方式的插件<br>
 [演示视频](https://www.bilibili.com/video/BV1zY4y1D732/)
+[文档](https://gitee.com/AIGODLIKE/Bbrush/wikis/Bbrush)
 
 # 更新日志
+### v1.2.0
+    添加雕刻操作撤销,每一笔绘制可撤销
+    修复重复启动插件笔刷变多bug
+    修复遮罩
 
 ### v1.1.0
 

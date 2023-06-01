@@ -78,8 +78,8 @@ class DepthUpdate(OperatorProperty):
 
     def init_depth(self):
         from ..ui.draw_depth import DrawDepth
-        buffer = DrawDepth.buffer
-        self.draw_in_depth_up = ('wh' in buffer) and self.mouse_in_area_in(self.event, buffer['wh'])
+        _buffer = DrawDepth.depth_buffer
+        self.draw_in_depth_up = ('wh' in _buffer) and self.mouse_in_area_in(self.event, _buffer['wh'])
 
 
 class BBrushSculpt(DepthUpdate):
@@ -125,12 +125,20 @@ class BBrushSculpt(DepthUpdate):
         in_modal = self.mouse_is_in_model_up
         if in_modal:
             if self.only_alt:
-                bpy.ops.sculpt.brush_stroke('INVOKE_DEFAULT', mode='INVERT')
+                bpy.ops.sculpt.brush_stroke('INVOKE_DEFAULT',
+                                            True,
+                                            mode='INVERT')
             else:
-                bpy.ops.sculpt.brush_stroke('INVOKE_DEFAULT', mode='NORMAL')
+                bpy.ops.sculpt.brush_stroke('INVOKE_DEFAULT',
+                                            True,
+                                            mode='NORMAL')
         else:
             if self.only_alt:
-                bpy.ops.view3d.move('INVOKE_DEFAULT')
+                bpy.ops.view3d.move('INVOKE_DEFAULT',
+                                    True,
+                                    )
             else:
-                bpy.ops.view3d.rotate('INVOKE_DEFAULT')
+                bpy.ops.view3d.rotate('INVOKE_DEFAULT',
+                                      True,
+                                      )
         return {'FINISHED'}

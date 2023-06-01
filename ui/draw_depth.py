@@ -115,7 +115,7 @@ def draw_shader_old(width, height):
 
 
 class DrawDepth(PublicClass):
-    buffer = {}
+    depth_buffer = {}
 
     @classmethod
     def register(cls):
@@ -130,8 +130,8 @@ class DrawDepth(PublicClass):
     def draw_gpu_buffer_new_buffer_funcs(cls, sam_width, sam_height, width, height, sampling):
         gpu.state.depth_mask_set(False)
 
-        if (width, height) not in cls.buffer:
-            cls.buffer.clear()
+        if (width, height) not in cls.depth_buffer:
+            cls.depth_buffer.clear()
             depth = np.empty(shape=(width * height), dtype=np.float32)
             depth_buffer = gpu.types.Buffer('FLOAT', height * width, depth)
             sam_all_depth = np.empty(shape=(sam_height, sam_width, 3),
@@ -148,11 +148,11 @@ class DrawDepth(PublicClass):
                     "texCoord": tex_coord
                 },
             )
-            cls.buffer[(width, height)] = [
+            cls.depth_buffer[(width, height)] = [
                 depth, depth_buffer, sam_all_depth, shader, batch
             ]
         else:
-            depth, depth_buffer, sam_all_depth, shader, batch = cls.buffer[(
+            depth, depth_buffer, sam_all_depth, shader, batch = cls.depth_buffer[(
                 width, height)]
             gpu.state.active_framebuffer_get().read_depth(0,
                                                           0,
@@ -177,7 +177,7 @@ class DrawDepth(PublicClass):
 
         gpu.matrix.reset()
         gpu.matrix.translate((-1, 1, 0))
-        gpu.matrix.translate(cls.buffer['translate'])
+        gpu.matrix.translate(cls.depth_buffer['translate'])
 
         depth_scale = cls.pref_().depth_scale
         gpu.matrix.scale((depth_scale, depth_scale))
@@ -197,7 +197,7 @@ class DrawDepth(PublicClass):
 
         gpu.matrix.reset()
         gpu.matrix.translate((-1, 1, 0))
-        gpu.matrix.translate(cls.buffer['translate'])
+        gpu.matrix.translate(cls.depth_buffer['translate'])
         gpu.matrix.scale((depth_scale, depth_scale))
 
         draw_shader_old(context.region.width,
@@ -219,15 +219,6 @@ class DrawDepth(PublicClass):
         is_draw = (always or only_sculpt or only_bbrush)
         depth_scale = pref.depth_scale
         if is_draw:
-            """
-            暂不使用此方法，直接使用自定义着色器绘制深度图
-            sampling = pref.depth_sampling_number  # 从插件属性获取采样值
-            sam_width = context.region.width // sampling
-            sam_height = context.region.height // sampling
-            width = sam_width * sampling
-            height = sam_height * sampling
-            """
-
             width = context.region.width
             height = context.region.height
 
@@ -238,18 +229,18 @@ class DrawDepth(PublicClass):
             x2 = int(width / 2 * depth_scale) + toolbar_width
             y2 = height - int(height / 2 * depth_scale) - header_height
             # 添加坐标 存起来笔刷的操作符判断鼠标有没有放在深度图上使用
-            cls.buffer['wh'] = ((x1, x2), (y1, y2))
+            cls.depth_buffer['wh'] = ((x1, x2), (y1, y2))
 
             w = 1 / width * toolbar_width * 2
             h = 1 / height * header_height * 2
-            cls.buffer['translate'] = (w, -h, 0)
+            cls.depth_buffer['translate'] = (w, -h, 0)
             cls.draw_gpu_buffer(context)
 
             """
             draw_gpu_buffer_new_buffer_funcs(sam_width, sam_height, width, height, sampling)
             """
         else:
-            cls.buffer = {}
+            cls.depth_buffer = {}
 
 
 def register():
