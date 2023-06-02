@@ -1,4 +1,5 @@
 from . import preferences, update, bbrush_toolbar
+from .bbrush_toolbar import BrushTool
 from .. import ops, ui
 from .public import register_submodule_factory, PublicClass
 
@@ -19,5 +20,6 @@ def register():
 
 
 def unregister():
+    BrushTool.toolbar_switch('ORIGINAL_TOOLBAR')
     unregister_module()
     PublicClass.cache_clear()
