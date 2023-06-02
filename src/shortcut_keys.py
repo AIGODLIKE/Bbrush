@@ -13,6 +13,9 @@ SHORTCUT_KEYS = {
         {'tool': '雕刻', 'key': '左键 在模型上绘制'},
         {'tool': '反向雕刻', 'key': 'ALT+左键 在模型上绘制'},
         {'tool': '平滑', 'key': 'SHIFT+左键 在模型上绘制'},
+
+        {'doc': '其它'},
+        {'tool': '切换雕刻物体', 'key': 'ALT+左键 在其它模型上点击'},
     ],
     'MASK': [
         {'doc': '遮罩'},
@@ -36,7 +39,9 @@ SHORTCUT_KEYS = {
         {'doc': '隐藏'},
         {'tool': '隐藏绘制框外', 'key': 'CTRL+SHIFT+左键 在模型上绘制'},
         {'tool': '隐藏绘制框内', 'key': 'CTRL+SHIFT+ALT+左键 在模型上绘制'},
-        {'tool': '取消隐藏', 'key': 'CTRL+SHIFT+左键 在空白区域点击(如果添加了多级细分修改器将会失效,这是Bl自身问题)'},
-        {'tool': '反转隐藏', 'key': 'CTRL+SHIFT+左键 or CTRL+SHIFT+ALT+左键 在空白区域绘制'},
+        {'tool': '取消隐藏',
+         'key': 'CTRL+SHIFT+左键 在空白区域点击(如果添加了多级细分修改器将会失效,这是Bl自身问题)'},
+        {'tool': '反转隐藏',
+         'key': 'CTRL+SHIFT+左键 or CTRL+SHIFT+ALT+左键 在空白区域绘制'},
     ],
 }
