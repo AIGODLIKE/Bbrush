@@ -298,10 +298,6 @@ class MaskDrawArea(MaskClick):
 
     def draw_2d_handles(self, context, event):
         gpu.state.blend_set('ALPHA')
-        print(self.is_box_mode, self.is_ellipse_mask_brush,
-              self.is_circular_mode,
-              self.is_polygon_mode, self.mouse_pos)
-
         if self.is_box_mode:
             self.draw_box()
         elif self.is_ellipse_mask_brush:
@@ -470,8 +466,6 @@ class MaskClickDrag(MaskDrawArea):
     def mask_click_drag(self, context, event):
         log.debug(f'mask_click_drag {self.start_mouse, self.mouse_co}')
         mask = self.is_mask_brush and self.mouse_is_in_model_up
-        print(self.is_normal_invoke, 'self.is_normal_invoke',
-              self.active_tool_name)
         if mask:
             if self.ctrl_alt:
                 bpy.ops.sculpt.brush_stroke('INVOKE_DEFAULT',

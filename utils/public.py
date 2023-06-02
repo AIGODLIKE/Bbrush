@@ -690,5 +690,4 @@ class PublicExportPropertyOperator:
         except Exception as e:
             print(f'ERROR {self.filepath} 写入属性文件错误')
             print(e)
-
         return {'FINISHED'}

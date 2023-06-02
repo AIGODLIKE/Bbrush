@@ -96,9 +96,6 @@ class SwitchProperty(PublicOperator):
 
     @property
     def is_change_brush(self):
-        print(self.active_tool_name,
-              self.active_sculpt_brush,
-              BrushTool.active_brush.values())
         return self.active_not_in_active_brushes
 
     @property
