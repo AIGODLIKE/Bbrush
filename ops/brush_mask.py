@@ -106,9 +106,27 @@ class MaskProperty(PublicOperator, PublicDraw):
         return self.event_key_enter or brush_exit or self.is_esc
 
     @property
-    def is_use_front_faces_only(self):
+    def bbrush_mask_is_use_front_faces_only(self):
         return self.active_tool.operator_properties(
-            "bbrush.mask").use_front_faces_only
+            "bbrush.mask"
+        ).use_front_faces_only
+
+    @property
+    def builtin_box_mask_is_use_front_faces_only(self):
+        return self.active_tool.operator_properties(
+            "builtin.box_mask"
+        ).use_front_faces_only
+
+    @property
+    def is_use_front_faces_only(self):
+        if self.is_box_mask_brush:
+            return self.builtin_box_mask_is_use_front_faces_only
+        else:
+            return self.bbrush_mask_is_use_front_faces_only
+
+    @property
+    def is_box_mask_brush(self):
+        return self.active_tool_name == 'builtin.box_mask'
 
     @property
     def is_lasso_trim_brush(self):
