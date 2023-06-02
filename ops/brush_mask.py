@@ -112,15 +112,15 @@ class MaskProperty(PublicOperator, PublicDraw):
         ).use_front_faces_only
 
     @property
-    def builtin_box_mask_is_use_front_faces_only(self):
+    def paint_mask_box_gesture_mask_is_use_front_faces_only(self):
         return self.active_tool.operator_properties(
-            "builtin.box_mask"
+            "paint.mask_box_gesture"
         ).use_front_faces_only
 
     @property
     def is_use_front_faces_only(self):
         if self.is_box_mask_brush:
-            return self.builtin_box_mask_is_use_front_faces_only
+            return self.paint_mask_box_gesture_mask_is_use_front_faces_only
         else:
             return self.bbrush_mask_is_use_front_faces_only
 
