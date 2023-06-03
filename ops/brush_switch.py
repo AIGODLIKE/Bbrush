@@ -231,19 +231,19 @@ class BBrushSwitch(SwitchProperty):
     def switch_shift(self):
         settings = UnifiedPaintPanel.paint_settings(bpy.context)
         log.debug(f'event_left_mouse_press,{self.shift_alt}')
-        brush = settings.brush
         try:
+            brush = settings.brush
             if self.shift_alt:
                 direction = 'ENHANCE_DETAILS' if brush.direction == \
                                                  'SMOOTH' else 'SMOOTH'
                 setattr(self, 'or_dir', brush.direction)
                 brush.direction = direction
+            bpy.ops.sculpt.brush_stroke('INVOKE_DEFAULT', mode='NORMAL')
+            if getattr(self, 'or_dir', False):
+                brush.direction = self.or_dir
+                delattr(self, 'or_dir')
         except Exception as e:
             log.debug(e)
-        bpy.ops.sculpt.brush_stroke('INVOKE_DEFAULT', mode='NORMAL')
-        if getattr(self, 'or_dir', False):
-            brush.direction = self.or_dir
-            delattr(self, 'or_dir')
         return {'PASS_THROUGH'}
 
     def update_shortcut_keys(self):
