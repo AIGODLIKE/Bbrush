@@ -51,11 +51,14 @@ class BBrushAddonPreferences(AddonPreferences, PublicClass):
                                )
 
     always_use_sculpt_mode: BoolProperty(
-        name='始终使用Bbrush雕刻模式', description='如果进入雕刻模式则自动开启Bbrush模式,退出雕刻模式则退出Bbrush模式',
+        name='始终使用Bbrush雕刻模式',
+        description='如果进入雕刻模式则自动开启Bbrush模式,退出雕刻模式则退出Bbrush模式',
         default=False)
 
     depth_ray_size: IntProperty(
-        name='深度射线检查大小(px)', description='检查鼠标是否放在模型上,鼠标范围大小', default=100, min=10, max=300)
+        name='深度射线检查大小(px)',
+        description='检查鼠标是否放在模型上,鼠标范围大小', default=100, min=10,
+        max=300)
 
     show_shortcut_keys: BoolProperty(
         name='显示快捷键',
@@ -72,6 +75,7 @@ class BBrushAddonPreferences(AddonPreferences, PublicClass):
 
 def register():
     bpy.utils.register_class(BBrushAddonPreferences)
+    BBrushAddonPreferences.pref_().sculpt = False
 
 
 def unregister():
