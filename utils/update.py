@@ -9,7 +9,9 @@ def startup_timer():
 
 def object_mode_toggle():
     if not bpy.app.timers.is_registered(startup_timer):
-        bpy.app.timers.register(startup_timer, first_interval=0.1)
+        bpy.app.timers.register(startup_timer,
+                                first_interval=0.1,
+                                persistent=True)
 
 
 owner = object()
@@ -23,7 +25,9 @@ def register():
         notify=object_mode_toggle,
     )
     if not bpy.app.timers.is_registered(startup_timer):
-        bpy.app.timers.register(startup_timer, first_interval=3)
+        bpy.app.timers.register(startup_timer,
+                                first_interval=3,
+                                persistent=True)
 
 
 def unregister():
