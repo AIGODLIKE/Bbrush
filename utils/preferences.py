@@ -26,7 +26,7 @@ class BBrushAddonPreferences(AddonPreferences, PublicClass):
             BrushTool.toolbar_switch('ORIGINAL_TOOLBAR')
             inputs.use_mouse_emulate_3_button = self.use_mouse_emulate_3_button
             key.unregister()
-        bpy.ops.wm.redraw_timer(type='DRAW', iterations=2)
+        self.tag_all_redraw(context)
 
     sculpt: BoolProperty(name='Bbrush',
                          default=False,
@@ -75,7 +75,6 @@ class BBrushAddonPreferences(AddonPreferences, PublicClass):
 
 def register():
     bpy.utils.register_class(BBrushAddonPreferences)
-    BBrushAddonPreferences.pref_().sculpt = False
 
 
 def unregister():
