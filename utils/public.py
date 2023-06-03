@@ -544,6 +544,10 @@ class PublicClass(PublicProperty,
     def active_tool_name(self):
         return self.active_tool.idname if self.active_tool else ''
 
+    @property
+    def is_builtin_brush_smooth_brush(self):
+        return self.active_tool_name == 'builtin_brush.Smooth'
+
 
 @cache
 def all_operator_listen() -> list[str]:

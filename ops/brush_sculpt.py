@@ -1,11 +1,8 @@
 import bpy
-import gpu
-from bpy.props import BoolProperty
-from gpu_extras.batch import batch_for_shader
 from mathutils import Vector
 
-from ..utils.public import PublicOperator, PublicDraw
 from ..utils.log import log
+from ..utils.public import PublicOperator, PublicDraw
 
 
 class OperatorProperty(PublicOperator, PublicDraw):
@@ -30,7 +27,7 @@ class OperatorProperty(PublicOperator, PublicDraw):
     @property
     def is_hide_mode(self):
         return self.active_tool_name == 'builtin.box_hide' and (
-                    self.ctrl_shift or self.ctrl_shift_alt)
+                self.ctrl_shift or self.ctrl_shift_alt)
 
     @property
     def is_make_mode(self):
@@ -44,8 +41,8 @@ class OperatorProperty(PublicOperator, PublicDraw):
     @property
     def is_draw_2d_box(self):
         return not self.is_click and (
-                    self.is_hide_mode or self.is_make_mode or
-                    self.is_box_make_brush)
+                self.is_hide_mode or self.is_make_mode or
+                self.is_box_make_brush)
 
     @property
     def is_exit(self):
@@ -135,9 +132,7 @@ class BBrushSculpt(DepthUpdate):
         in_modal = self.mouse_is_in_model_up
         if in_modal:
             if self.only_alt:
-                bpy.ops.sculpt.brush_stroke('INVOKE_DEFAULT',
-                                            True,
-                                            mode='INVERT')
+                self.smooth_brush_handle()
             else:
                 bpy.ops.sculpt.brush_stroke('INVOKE_DEFAULT',
                                             True,
@@ -152,3 +147,11 @@ class BBrushSculpt(DepthUpdate):
                                       True,
                                       )
         return {'FINISHED'}
+
+    def smooth_brush_handle(self):
+        if self.is_builtin_brush_smooth_brush:
+            ...
+        else:
+            bpy.ops.sculpt.brush_stroke('INVOKE_DEFAULT',
+                                        True,
+                                        mode='INVERT')
