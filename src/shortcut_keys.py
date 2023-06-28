@@ -40,7 +40,7 @@ SHORTCUT_KEYS = {
         {'tool': '隐藏绘制框外', 'key': 'CTRL+SHIFT+左键 在模型上绘制'},
         {'tool': '隐藏绘制框内', 'key': 'CTRL+SHIFT+ALT+左键 在模型上绘制'},
         {'tool': '取消隐藏',
-         'key': 'CTRL+SHIFT+左键 在空白区域点击(如果添加了多级细分修改器将会失效,这是Bl自身问题)'},
+         'key': 'CTRL+SHIFT+左键 在空白区域点击(如果添加了多级细分修改器将会失效,这是Bl自身问题 tip:3.6以上已修复)'},
         {'tool': '反转隐藏',
          'key': 'CTRL+SHIFT+左键 or CTRL+SHIFT+ALT+左键 在空白区域绘制'},
     ],
