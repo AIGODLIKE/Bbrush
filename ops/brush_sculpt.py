@@ -1,11 +1,8 @@
 import bpy
-import gpu
-from bpy.props import BoolProperty
-from gpu_extras.batch import batch_for_shader
 from mathutils import Vector
 
-from ..utils.public import PublicOperator, PublicDraw
 from ..utils.log import log
+from ..utils.public import PublicOperator, PublicDraw
 
 
 class OperatorProperty(PublicOperator, PublicDraw):
@@ -24,11 +21,13 @@ class OperatorProperty(PublicOperator, PublicDraw):
 
     @property
     def mouse_is_in_model_up(self):
-        return self.is_annotate_brush or self.get_mouse_location_ray_cast(self.context, self.event)
+        return self.is_annotate_brush or self.get_mouse_location_ray_cast(
+            self.context, self.event)
 
     @property
     def is_hide_mode(self):
-        return self.active_tool_name == 'builtin.box_hide' and (self.ctrl_shift or self.ctrl_shift_alt)
+        return self.active_tool_name == 'builtin.box_hide' and (
+                self.ctrl_shift or self.ctrl_shift_alt)
 
     @property
     def is_make_mode(self):
@@ -41,7 +40,9 @@ class OperatorProperty(PublicOperator, PublicDraw):
 
     @property
     def is_draw_2d_box(self):
-        return not self.is_click and (self.is_hide_mode or self.is_make_mode or self.is_box_make_brush)
+        return not self.is_click and (
+                self.is_hide_mode or self.is_make_mode or
+                self.is_box_make_brush)
 
     @property
     def is_exit(self):
@@ -49,7 +50,8 @@ class OperatorProperty(PublicOperator, PublicDraw):
 
     @property
     def use_front_faces_only(self):
-        return self.active_tool.operator_properties("bbrush.mask").use_front_faces_only
+        return self.active_tool.operator_properties(
+            "bbrush.mask").use_front_faces_only
 
     @property
     def color(self) -> Vector:
@@ -79,7 +81,8 @@ class DepthUpdate(OperatorProperty):
     def init_depth(self):
         from ..ui.draw_depth import DrawDepth
         _buffer = DrawDepth.depth_buffer
-        self.draw_in_depth_up = ('wh' in _buffer) and self.mouse_in_area_in(self.event, _buffer['wh'])
+        self.draw_in_depth_up = ('wh' in _buffer) and self.mouse_in_area_in(
+            self.event, _buffer['wh'])
 
 
 class BBrushSculpt(DepthUpdate):
@@ -109,25 +112,27 @@ class BBrushSculpt(DepthUpdate):
         self.init_modal(context, event)
         self.tag_redraw(context)
 
-        if self.is_exit:  # 退出模态操作
-            context.area.header_text_set(None)
-            log.info('ESC Bbrush Sculpt_____ FINISHED')
-            return {'FINISHED'}
+        try:
+            if self.is_exit:  # 退出模态操作
+                context.area.header_text_set(None)
+                log.info('ESC Bbrush Sculpt_____ FINISHED')
+                return {'FINISHED'}
 
-        elif self.draw_in_depth_up:  # 鼠标放在左上角深度图上操作
-            log.debug('draw_in_depth_up')
-            self.depth_scale_update(context, event)
-            return {'RUNNING_MODAL'}
-        else:
-            return self.modal_handle()
+            elif self.draw_in_depth_up:  # 鼠标放在左上角深度图上操作
+                log.debug('draw_in_depth_up')
+                self.depth_scale_update(context, event)
+                return {'RUNNING_MODAL'}
+            else:
+                return self.modal_handle()
+        except Exception as e:
+            log.error(e.args)
+            return {'FINISHED'}
 
     def modal_handle(self):
         in_modal = self.mouse_is_in_model_up
         if in_modal:
             if self.only_alt:
-                bpy.ops.sculpt.brush_stroke('INVOKE_DEFAULT',
-                                            True,
-                                            mode='INVERT')
+                self.smooth_brush_handle()
             else:
                 bpy.ops.sculpt.brush_stroke('INVOKE_DEFAULT',
                                             True,
@@ -142,3 +147,11 @@ class BBrushSculpt(DepthUpdate):
                                       True,
                                       )
         return {'FINISHED'}
+
+    def smooth_brush_handle(self):
+        if self.is_builtin_brush_smooth_brush:
+            ...
+        else:
+            bpy.ops.sculpt.brush_stroke('INVOKE_DEFAULT',
+                                        True,
+                                        mode='INVERT')

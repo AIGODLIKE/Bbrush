@@ -11,3 +11,4 @@
 鼠标放在深度图上拖动可缩放
 
 [tip 多级细分后切换隐藏面将失效](https://projects.blender.org/blender/blender/issues/95419)
+Blender 3.0 版本在平滑笔刷模式下使用反向雕刻将会闪退

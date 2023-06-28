@@ -17,6 +17,7 @@ register_module, unregister_module = register_submodule_factory(model_tuple)
 def register():
     register_module()
     PublicClass.cache_clear()
+    PublicClass.pref_().sculpt = False
 
 
 def unregister():

@@ -122,12 +122,14 @@ class PublicMath(PublicEvent):
     @staticmethod
     def get_all_intersect_pos(pos):
         po_len = pos.__len__()
-        indices_list = [(i - 1, i) for i in range(1, po_len)] + [(0, po_len - 1)]
+        indices_list = [(i - 1, i) for i in range(1, po_len)] + [
+            (0, po_len - 1)]
         tmp_dict = {'intersect': {}, 'line': {i: [] for i in indices_list}}
         while indices_list:
             cur_line = indices_list.pop()
             if cur_line not in tmp_dict['line']:
-                tmp_dict['line'][cur_line] = [pos[cur_line[0]], pos[cur_line[1]]]
+                tmp_dict['line'][cur_line] = [pos[cur_line[0]],
+                                              pos[cur_line[1]]]
             for line in indices_list:
                 if line not in tmp_dict['line']:
                     tmp_dict['line'][line] = [pos[line[0]], pos[line[1]]]
@@ -438,7 +440,8 @@ class PublicClass(PublicProperty,
         data = {}
 
         def get_():
-            _buffer = PublicClass.get_gpu_buffer((x, y), wh=(w, h), centered=False)
+            _buffer = PublicClass.get_gpu_buffer((x, y), wh=(w, h),
+                                                 centered=False)
             numpy_buffer = np.asarray(_buffer, dtype=np.float32).ravel()
             min_depth = np.min(numpy_buffer)
             data['is_in_model'] = (min_depth != (0 or 1))
@@ -489,6 +492,12 @@ class PublicClass(PublicProperty,
         if context.region:
             context.region.tag_redraw()
 
+    @staticmethod
+    def tag_all_redraw(context):
+        if context.screen:
+            for area in context.screen.areas:
+                area.tag_redraw()
+
     @classmethod
     def update_interface(cls):
         pref = cls.pref_()
@@ -535,6 +544,10 @@ class PublicClass(PublicProperty,
     def active_tool_name(self):
         return self.active_tool.idname if self.active_tool else ''
 
+    @property
+    def is_builtin_brush_smooth_brush(self):
+        return self.active_tool_name == 'builtin_brush.Smooth'
+
 
 @cache
 def all_operator_listen() -> list[str]:
@@ -563,7 +576,8 @@ def register_submodule_factory(submodule_tuple):
 
 
 class PublicOperator(PublicClass, Operator):
-    is_click: BoolProperty(name='按键操作是单击', default=True, options={'SKIP_SAVE'})
+    is_click: BoolProperty(name='按键操作是单击', default=True,
+                           options={'SKIP_SAVE'})
 
     bbrush_brush = {
         'bbrush.ellipse_mask': 'ELLIPSE',
@@ -597,7 +611,8 @@ class PublicOperator(PublicClass, Operator):
 
         ctrl_shift = (ctrl and (not alt) and shift)
         ctrl_shift_alt = (ctrl and alt and shift)
-        return not_key, only_ctrl, only_alt, only_shift, shift_alt, ctrl_alt, ctrl_shift, ctrl_shift_alt
+        return not_key, only_ctrl, only_alt, only_shift, shift_alt, ctrl_alt, \
+            ctrl_shift, ctrl_shift_alt
 
     @property
     def is_3d_view(self):
@@ -622,8 +637,10 @@ class PublicOperator(PublicClass, Operator):
         self.set_event_key()
 
     def _set_mouse(self, context, event):
-        setattr(self, '_mouse_x', min(max(0, event.mouse_region_x), context.region.width))
-        setattr(self, '_mouse_y', min(max(0, event.mouse_region_y), context.region.height))
+        setattr(self, '_mouse_x',
+                min(max(0, event.mouse_region_x), context.region.width))
+        setattr(self, '_mouse_y',
+                min(max(0, event.mouse_region_y), context.region.height))
 
     def init_invoke(self, context, event) -> None:
         self._set_ce(context, event)
@@ -668,7 +685,8 @@ class PublicExportPropertyOperator:
     filter_glob: StringProperty(
         default="*.json",
         options={'HIDDEN'},
-        maxlen=255,  # Max internal depth_buffer length, longer would be clamped.
+        maxlen=255,
+        # Max internal depth_buffer length, longer would be clamped.
     )
 
     @staticmethod
