@@ -147,8 +147,16 @@ class MaskProperty(PublicOperator, PublicDraw):
                self.is_lasso_trim_brush
         return mask or hide
 
-
 class MaskClick(MaskProperty):
+
+    @staticmethod
+    def invert_sculpt_hide_face():
+        is_3_6_up_version = bpy.app.version >= (3, 6, 0)
+        if is_3_6_up_version:
+            bpy.ops.sculpt.face_set_invert_visibility()
+        else:
+            mode = 'TOGGLE' if is_3_6_up_version else 'INVERT'
+            bpy.ops.sculpt.face_set_change_visibility('EXEC_DEFAULT', True, mode='INVERT')
 
     def mask_click(self):
         in_model = self.mouse_is_in_model_up
@@ -171,9 +179,7 @@ class MaskClick(MaskProperty):
                     mode='TOGGLE')
         elif self.ctrl_shift:
             if in_model:
-                sculpt.face_set_change_visibility('EXEC_DEFAULT',
-                                                  True,
-                                                  mode='INVERT')
+                self.invert_sculpt_hide_face()
             else:
                 paint.hide_show('EXEC_DEFAULT',
                                 True,
@@ -407,10 +413,7 @@ class MaskClickDrag(MaskDrawArea):
                                   mode='VALUE',
                                   value=1)
         elif self.ctrl_shift_alt or self.ctrl_shift:
-            bpy.ops.sculpt.face_set_change_visibility(
-                'EXEC_DEFAULT',
-                True,
-                mode='INVERT')
+            self.invert_sculpt_hide_face()
 
     def event_move_update(self):
         """
