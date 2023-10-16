@@ -13,7 +13,9 @@ sculpt_modify_keymaps = {
         (brush_stroke, (('mode', 0),)): {'active': False},
         (brush_stroke, (('mode', 1),)): {'active': False},
         (brush_stroke, (('mode', 2),)): {'active': False},
-        (mask_lasso_gesture, ()): {'active': False}},
+        (mask_lasso_gesture, ()): {'active': False},
+        (mask_lasso_gesture, (('value', 1.0),)): {'ctrl': True},
+        (mask_lasso_gesture, (('value', 0.0),)): {'alt': True}, },
     f'{view}: Sculpt, Box Mask': {
         ('paint.mask_box_gesture', (('value', 1.0),)): {'ctrl': True, 'active': False},
         ('paint.mask_box_gesture', (('value', 0.0),)): {'alt': True, 'active': False}},
