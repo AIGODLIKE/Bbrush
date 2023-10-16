@@ -21,8 +21,8 @@ class DrawShortcutKeys(PublicClass):
 
             blf.size(font_id, 18 * font_size)
             blf.color(font_id, 1, 1, 1, 1)
-            x = self.pref.shortcut_office_x
-            y = self.pref.shortcut_office_y
+            x = self.pref.shortcut_offset_x
+            y = self.pref.shortcut_offset_y
             for index, item in enumerate(reversed(self.draw_shortcut_keys)):
                 y += 18 * font_size + column_space_size
                 if 'doc' in item:

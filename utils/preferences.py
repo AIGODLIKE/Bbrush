@@ -49,10 +49,10 @@ class BBrushAddonPreferences(AddonPreferences, PublicClass):
                                min=0.1,
                                step=0.1
                                )
-    depth_office_x: IntProperty(
+    depth_offset_x: IntProperty(
         name='剪影图偏移X',
         default=0, max=114514, min=0)
-    depth_office_y: IntProperty(
+    depth_offset_y: IntProperty(
         name='剪影图偏移Y',
         default=80, max=114514, min=0)
 
@@ -70,10 +70,10 @@ class BBrushAddonPreferences(AddonPreferences, PublicClass):
         name='显示快捷键',
         default=True
     )
-    shortcut_office_x: IntProperty(
+    shortcut_offset_x: IntProperty(
         name='快捷键偏移X',
         default=150, max=114514, min=0)
-    shortcut_office_y: IntProperty(
+    shortcut_offset_y: IntProperty(
         name='快捷键偏移Y',
         default=20, max=114514, min=0)
     shortcut_show_size: FloatProperty(name='快捷键显示大小', min=0.1, default=1, max=114)
@@ -87,15 +87,15 @@ class BBrushAddonPreferences(AddonPreferences, PublicClass):
         layout.label(text='剪影图:')
         layout.prop(self, 'depth_scale')
         row = layout.row(align=True)
-        row.prop(self, 'depth_office_x')
-        row.prop(self, 'depth_office_y')
+        row.prop(self, 'depth_offset_x')
+        row.prop(self, 'depth_offset_y')
 
         layout.label(text='快捷键:')
         layout.prop(self, 'show_shortcut_keys')
         layout.prop(self, 'shortcut_show_size')
         row = layout.row(align=True)
-        row.prop(self, 'shortcut_office_x')
-        row.prop(self, 'shortcut_office_y')
+        row.prop(self, 'shortcut_offset_x')
+        row.prop(self, 'shortcut_offset_y')
 
 
 def register():
