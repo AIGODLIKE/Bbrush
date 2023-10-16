@@ -51,10 +51,10 @@ class BBrushAddonPreferences(AddonPreferences, PublicClass):
                                )
     depth_office_x: IntProperty(
         name='剪影图偏移X',
-        default=20, max=114514, min=0)
+        default=0, max=114514, min=0)
     depth_office_y: IntProperty(
         name='剪影图偏移Y',
-        default=20, max=114514, min=0)
+        default=80, max=114514, min=0)
 
     always_use_sculpt_mode: BoolProperty(
         name='始终使用Bbrush雕刻模式',
@@ -72,7 +72,7 @@ class BBrushAddonPreferences(AddonPreferences, PublicClass):
     )
     shortcut_office_x: IntProperty(
         name='快捷键偏移X',
-        default=20, max=114514, min=0)
+        default=150, max=114514, min=0)
     shortcut_office_y: IntProperty(
         name='快捷键偏移Y',
         default=20, max=114514, min=0)
