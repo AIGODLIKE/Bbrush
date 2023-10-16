@@ -222,8 +222,8 @@ class DrawDepth(PublicClass):
             width = context.region.width
             height = context.region.height
 
-            toolbar_width = get_toolbar_width()
-            header_height = get_toolbar_width(rt='HEADER')
+            toolbar_width = get_toolbar_width() + pref.depth_office_x
+            header_height = get_toolbar_width(rt='HEADER') + pref.depth_office_y
             x1 = toolbar_width
             y1 = height - header_height
             x2 = int(width / 2 * depth_scale) + toolbar_width

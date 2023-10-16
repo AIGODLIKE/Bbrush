@@ -2,8 +2,8 @@ import bpy
 from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty
 from bpy_types import AddonPreferences
 
-from .public import ADDON_NAME, PublicClass
 from . import key
+from .public import ADDON_NAME, PublicClass
 
 
 class BBrushAddonPreferences(AddonPreferences, PublicClass):
@@ -49,6 +49,12 @@ class BBrushAddonPreferences(AddonPreferences, PublicClass):
                                min=0.1,
                                step=0.1
                                )
+    depth_office_x: IntProperty(
+        name='剪影图偏移X',
+        default=20, max=114514, min=0)
+    depth_office_y: IntProperty(
+        name='剪影图偏移Y',
+        default=20, max=114514, min=0)
 
     always_use_sculpt_mode: BoolProperty(
         name='始终使用Bbrush雕刻模式',
@@ -64,13 +70,32 @@ class BBrushAddonPreferences(AddonPreferences, PublicClass):
         name='显示快捷键',
         default=True
     )
+    shortcut_office_x: IntProperty(
+        name='快捷键偏移X',
+        default=20, max=114514, min=0)
+    shortcut_office_y: IntProperty(
+        name='快捷键偏移Y',
+        default=20, max=114514, min=0)
+    shortcut_show_size: FloatProperty(name='快捷键显示大小', min=0.1, default=1, max=114)
 
     def draw(self, context):
         layout = self.layout
         layout.prop(self, 'depth_display_mode')
-        layout.prop(self, 'depth_scale')
         layout.prop(self, 'depth_ray_size')
         layout.prop(self, 'always_use_sculpt_mode')
+
+        layout.label(text='剪影图:')
+        layout.prop(self, 'depth_scale')
+        row = layout.row(align=True)
+        row.prop(self, 'depth_office_x')
+        row.prop(self, 'depth_office_y')
+
+        layout.label(text='快捷键:')
+        layout.prop(self, 'show_shortcut_keys')
+        layout.prop(self, 'shortcut_show_size')
+        row = layout.row(align=True)
+        row.prop(self, 'shortcut_office_x')
+        row.prop(self, 'shortcut_office_y')
 
 
 def register():

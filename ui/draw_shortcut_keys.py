@@ -15,16 +15,16 @@ class DrawShortcutKeys(PublicClass):
     def draw(self):
         if self.pref.sculpt and self.pref.show_shortcut_keys:
             font_id = self.font_info['font_id']
-            font_size = 18
+            font_size = self.pref.shortcut_show_size
             column_space_size = 10
             key_row_space = 150
 
-            blf.size(font_id, font_size)
+            blf.size(font_id, 18 * font_size)
             blf.color(font_id, 1, 1, 1, 1)
-            x = bpy.context.area.regions[2].width + 20
-            y = 10
+            x = self.pref.shortcut_office_x
+            y = self.pref.shortcut_office_y
             for index, item in enumerate(reversed(self.draw_shortcut_keys)):
-                y += font_size + column_space_size
+                y += 18 * font_size + column_space_size
                 if 'doc' in item:
                     blf.position(font_id, x - 10, y, 0)
                     blf.draw(font_id, item['doc'])
@@ -35,7 +35,7 @@ class DrawShortcutKeys(PublicClass):
                     blf.position(font_id, x, y, 0)
                     blf.draw(font_id, tool)
                     # draw key
-                    blf.position(font_id, x + key_row_space, y, 0)
+                    blf.position(font_id, (x + key_row_space) * font_size, y, 0)
                     blf.draw(font_id, key)
 
     @classmethod
