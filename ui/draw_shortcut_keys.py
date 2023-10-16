@@ -19,7 +19,7 @@ class DrawShortcutKeys(PublicClass):
             column_space_size = 10
             key_row_space = 150
 
-            blf.size(font_id, font_size, 72)
+            blf.size(font_id, font_size)
             blf.color(font_id, 1, 1, 1, 1)
             x = bpy.context.area.regions[2].width + 20
             y = 10

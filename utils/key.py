@@ -9,6 +9,7 @@ view = '3D View Tool'
 sculpt_modify_keymaps = {
     'Sculpt': {
         ('wm.call_panel', (('name', 'VIEW3D_PT_sculpt_context_menu'),)): {'active': False},
+        (brush_stroke, ()): {'active': False},
         (brush_stroke, (('mode', 0),)): {'active': False},
         (brush_stroke, (('mode', 1),)): {'active': False},
         (brush_stroke, (('mode', 2),)): {'active': False},

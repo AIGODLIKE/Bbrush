@@ -1,6 +1,3 @@
-from os.path import basename, dirname, realpath
-from functools import cache
-
 import blf
 import bpy
 import gpu
@@ -8,11 +5,13 @@ import numpy as np
 from bl_ui.space_toolsystem_common import ToolSelectPanelHelper
 from bpy.props import BoolProperty, StringProperty
 from bpy.types import Operator
+from functools import cache
 from gpu_extras.batch import batch_for_shader
 from mathutils import Vector, geometry
+from os.path import basename, dirname, realpath
 
-from ..src.shortcut_keys import SHORTCUT_KEYS
 from .log import log
+from ..src.shortcut_keys import SHORTCUT_KEYS
 
 ADDON_NAME = basename(dirname(dirname(realpath(__file__))))
 
@@ -318,13 +317,12 @@ class PublicDraw:
                   dpi=72,
                   column=0):
         blf.position(font_id, x, y - (size * (column + 1)), 0)
-        blf.size(font_id, size, dpi)
-        blf.draw(font_id, text)
+        blf.size(font_id, size)
         blf.color(font_id, *color)
 
     @staticmethod
     def draw_line(vertices, color, line_width=1):
-        shader = gpu.shader.from_builtin('2D_UNIFORM_COLOR')
+        shader = gpu.shader.from_builtin('UNIFORM_COLOR')
         gpu.state.line_width_set(line_width)
         batch = batch_for_shader(shader, 'LINE_STRIP', {"pos": vertices})
         shader.bind()
@@ -337,7 +335,7 @@ class PublicDraw:
                     indices,
                     color=None,
                     *,
-                    shader_name='3D_POLYLINE_UNIFORM_COLOR',
+                    shader_name='POLYLINE_SMOOTH_COLOR',
                     draw_type='LINES',
                     ):
 
@@ -381,7 +379,7 @@ class PublicDraw:
             vbo = GPUVertBuf(len=len(verts), format=fmt)
             vbo.attr_fill(id=pos_id, data=verts)
             batch = GPUBatch(type='LINE_STRIP', buf=vbo)
-            shader = gpu.shader.from_builtin('2D_UNIFORM_COLOR')
+            shader = gpu.shader.from_builtin('UNIFORM_COLOR')
             batch.program_set(shader)
             shader.uniform_float("color", color)
             batch.draw()
@@ -397,7 +395,7 @@ class PublicDraw:
             v, link = self.line_to_dit(area_draw_data, 1)
 
             self.draw_shader(v, link, (1, 1, 1, 1),
-                             shader_name='2D_UNIFORM_COLOR', draw_type='TRIS')
+                             shader_name='UNIFORM_COLOR', draw_type='TRIS')
 
 
 class PublicProperty:
