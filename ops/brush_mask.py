@@ -11,16 +11,6 @@ from ..utils.log import log
 from ..utils.public import PublicOperator, PublicDraw
 
 
-def draw_line(vertices, color, line_width=1):
-    shader = gpu.shader.from_builtin('UNIFORM_COLOR')
-    gpu.state.line_width_set(line_width)
-    batch = batch_for_shader(shader, 'LINE_STRIP', {"pos": vertices})
-    shader.bind()
-    shader.uniform_float("color", color)
-    batch.draw(shader)
-    gpu.state.line_width_set(1.0)
-
-
 def get_circular(x, y, segments=64):
     from math import sin, cos, pi
     if segments <= 0:
@@ -143,9 +133,10 @@ class MaskProperty(PublicOperator, PublicDraw):
     @property
     def is_normal_invoke(self):
         mask = self.is_lasso_mask_brush or self.is_line_mask_brush
-        hide = self.is_line_project_brush or self.is_box_trim_brush or \
-               self.is_lasso_trim_brush
-        return mask or hide
+        trim = self.is_box_trim_brush or self.is_lasso_trim_brush
+        hide = self.is_line_project_brush
+        return mask or hide or trim
+
 
 class MaskClick(MaskProperty):
 
@@ -155,7 +146,6 @@ class MaskClick(MaskProperty):
         if is_3_6_up_version:
             bpy.ops.sculpt.face_set_invert_visibility()
         else:
-            mode = 'TOGGLE' if is_3_6_up_version else 'INVERT'
             bpy.ops.sculpt.face_set_change_visibility('EXEC_DEFAULT', True, mode='INVERT')
 
     def mask_click(self):
@@ -307,11 +297,11 @@ class MaskDrawArea(MaskClick):
         if self.is_box_mode:
             self.draw_box()
         elif self.is_ellipse_mask_brush:
-            draw_line(self.ellipse_data, self.color, line_width=2)
+            self.draw_line(self.ellipse_data, self.color, line_width=2)
         elif self.is_circular_mode:
-            draw_line(self._circular_data, self.color, line_width=2)
+            self.draw_line(self._circular_data, self.color, line_width=2)
         elif self.is_polygon_mode and self.mouse_pos:
-            draw_line(self.poly_gon_draw, self.color, line_width=2)
+            self.draw_line(self.poly_gon_draw, self.color, line_width=2)
         gpu.state.blend_set('NONE')
 
 
@@ -419,7 +409,7 @@ class MaskClickDrag(MaskDrawArea):
         """
         mouse_co_tmp: Vector  # 临时位置,记录空格按下时的鼠标位置
         """
-        have_tmp = getattr(self, 'mouse_co_tmp', False)
+        have_tmp = getattr(self, 'mouse_co_tmp', None)
 
         if have_tmp:
             move = have_tmp - self.mouse_co
@@ -504,7 +494,7 @@ class BBrushMask(MaskClickDrag):
         self.cache_clear()  # 清
         self.start_time = time()
         self.start_mouse = self.mouse_co
-        self.box_mode_update()
+        self.box_mode_update()  # 更新框模式
         log.debug(f'invoke {self.start_mouse, self.mouse_co}')
         self.tag_redraw(context)
         log.debug(self.bl_idname)

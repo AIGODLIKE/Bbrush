@@ -1,3 +1,6 @@
+from functools import cache
+from os.path import basename, dirname, realpath
+
 import blf
 import bpy
 import gpu
@@ -5,10 +8,8 @@ import numpy as np
 from bl_ui.space_toolsystem_common import ToolSelectPanelHelper
 from bpy.props import BoolProperty, StringProperty
 from bpy.types import Operator
-from functools import cache
 from gpu_extras.batch import batch_for_shader
 from mathutils import Vector, geometry
-from os.path import basename, dirname, realpath
 
 from .log import log
 from ..src.shortcut_keys import SHORTCUT_KEYS
@@ -220,7 +221,6 @@ class PublicMath(PublicEvent):
         from_idx = convex_hull_2d[0]
         from_point = pos[from_idx]
         origin_point = from_point
-        end1_idx = end2_idx = 0
 
         # 查找 假设 查找到的都是端点线段
         end1_idx, end2_idx = pos_neibor[from_point]
@@ -314,11 +314,11 @@ class PublicDraw:
                   size=10,
                   *,
                   color=(0.5, 0.5, 0.5, 1),
-                  dpi=72,
                   column=0):
         blf.position(font_id, x, y - (size * (column + 1)), 0)
         blf.size(font_id, size)
         blf.color(font_id, *color)
+        blf.draw(font_id, text)
 
     @staticmethod
     def draw_line(vertices, color, line_width=1):

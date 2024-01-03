@@ -129,6 +129,22 @@ class BrushTool:
         cls.init_all_brush()
 
     @classmethod
+    def tool_ops(cls, tools):
+        sculpt = cls.toolbar_dit['SCULPT']
+
+        from collections.abc import Iterable
+        for tool in tools:
+            if isinstance(tool, ToolDef):
+                cls.append_brush(tool)
+            elif isinstance(tool, Iterable):
+                cls.tool_ops(tool)
+            elif getattr(tool, '__call__', False):
+                cls.tool_ops(tool(bpy.context))
+            else:
+                if tool != sculpt[-1]:
+                    sculpt.append(tool)
+
+    @classmethod
     def init_all_brush(cls):
         cls.toolbar_dit = {
             'SCULPT': [],
@@ -137,22 +153,9 @@ class BrushTool:
             'ORIGINAL_TOOLBAR': toolbar.copy(),
         }
 
-        sculpt = cls.toolbar_dit['SCULPT']
         mask = cls.toolbar_dit['MASK']
-        from collections.abc import Iterable
-        def tool_ops(tools):
-            for tool in tools:
-                if isinstance(tool, ToolDef):
-                    cls.append_brush(tool)
-                elif isinstance(tool, Iterable):
-                    tool_ops(tool)
-                elif getattr(tool, '__call__', False):
-                    tool_ops(tool(bpy.context))
-                else:
-                    if tool != sculpt[-1]:
-                        sculpt.append(tool)
 
-        tool_ops(toolbar)
+        cls.tool_ops(toolbar)
 
         mask.extend([bbrush_circular_mask,
                      bbrush_ellipse_mask,

@@ -8,7 +8,7 @@ f_active = {'active': False}
 view = '3D View Tool'
 sculpt_modify_keymaps = {
     'Sculpt': {
-        ('wm.call_panel', (('name', 'VIEW3D_PT_sculpt_context_menu'),)): {'active': False},
+        ('wm.call_panel', (('name', 'VIEW3D_PT_sculpt_context_menu'),)): {'value': "RELEASE"},
         (brush_stroke, ()): {'active': False},
         (brush_stroke, (('mode', 0),)): {'active': False},
         (brush_stroke, (('mode', 1),)): {'active': False},
@@ -77,13 +77,6 @@ bbrush_key_items = (
     (bbrush_mask,
      {'type': 'LEFTMOUSE', 'value': 'CLICK_DRAG', 'any': True, 'ctrl': True},
      {'properties': [('is_click', False)]}),
-
-    (bbrush_mask,
-     {'type': 'RIGHTMOUSE', 'value': 'CLICK', 'any': True, 'ctrl': True},
-     {'properties': [('is_click', True)]}),
-    (bbrush_mask,
-     {'type': 'RIGHTMOUSE', 'value': 'CLICK_DRAG', 'any': True, 'ctrl': True},
-     {'properties': [('is_click', False)]}),
 )
 
 sculpt_keys_items = (
@@ -112,7 +105,7 @@ sculpt_keys_items = (
         ('object.transfer_mode',
          {'type': 'LEFTMOUSE', 'value': 'CLICK', 'alt': True}, None),
         ('view3d.rotate',
-         {'type': 'RIGHTMOUSE', 'value': 'PRESS'}, None),
+         {'type': 'RIGHTMOUSE', 'value': 'CLICK_DRAG'}, None),
         ('view3d.move',
          {'type': 'RIGHTMOUSE', 'value': 'PRESS', 'alt': True}, None),
         ('view3d.move',
