@@ -33,6 +33,9 @@ class BBrushAddonPreferences(AddonPreferences, PublicClass):
                          options={'SKIP_SAVE'},
                          update=sculpt_update)
 
+    show_text: BoolProperty(name='显示顶部文本',
+                            default=False)
+
     depth_display_items = (
         ('ALWAYS_DISPLAY', '一直显示', '一直保持显示剪影图,即使不在雕刻模式'),
         ('ONLY_SCULPT', '仅雕刻模式', '仅在雕刻模式显示剪影图'),
@@ -80,6 +83,7 @@ class BBrushAddonPreferences(AddonPreferences, PublicClass):
 
     def draw(self, context):
         layout = self.layout
+        layout.prop(self, 'show_text')
         layout.prop(self, 'depth_display_mode')
         layout.prop(self, 'depth_ray_size')
         layout.prop(self, 'always_use_sculpt_mode')

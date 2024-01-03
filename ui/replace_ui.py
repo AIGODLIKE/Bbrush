@@ -32,12 +32,12 @@ def append_top_editor_menus(self, context):
     if right and sculpt:
 
         sub_row = layout.row(align=True)
-        sub_row.alert = True
+        icon = 'EVENT_ESC' if pref.sculpt else 'SCULPTMODE_HLT'
+        text = "Bbrush" if pref.show_text else ''
         sub_row.prop(pref,
                      'sculpt',
-                     emboss=False,
-                     icon='EVENT_ESC'
-                     if pref.sculpt else 'SCULPTMODE_HLT')
+                     text=text,
+                     icon=icon)
         if pref.sculpt:
             sub_row.prop(pref, 'always_use_sculpt_mode', emboss=True, icon='AUTO', text='')
 
