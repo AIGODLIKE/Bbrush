@@ -105,8 +105,8 @@ class SwitchProperty(PublicOperator):
 
 class BBrushSwitch(SwitchProperty):
     bl_idname = 'bbrush.bbrush_switch'
-    bl_label = '笔刷模式切换'
-    bl_description = '切换笔刷内容,每个键的列表，有[雕刻,遮罩,隐藏]三个功能'
+    bl_label = 'Brush mode switch'
+    bl_description = 'Switch brush content, with a list of options for each key, including [sculpt, mask, hide]'
 
     bl_options = {'REGISTER'}
 

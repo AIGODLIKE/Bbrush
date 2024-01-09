@@ -1,6 +1,6 @@
 from functools import cache
 from os.path import basename, dirname, realpath
-
+from bpy.app.translations import pgettext as _
 import blf
 import bpy
 import gpu
@@ -574,7 +574,7 @@ def register_submodule_factory(submodule_tuple):
 
 
 class PublicOperator(PublicClass, Operator):
-    is_click: BoolProperty(name='按键操作是单击', default=True,
+    is_click: BoolProperty(name=_('theKeyActionIsAClick'), default=True,
                            options={'SKIP_SAVE'})
 
     bbrush_brush = {
@@ -704,6 +704,6 @@ class PublicExportPropertyOperator:
                                    ensure_ascii=True))
             _file.close()
         except Exception as e:
-            print(f'ERROR {self.filepath} 写入属性文件错误')
+            print(f'ERROR {self.filepath} writePropertyFileError')
             print(e)
         return {'FINISHED'}

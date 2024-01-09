@@ -29,7 +29,7 @@ def bbrush_translate():
     return dict(
         idname="bbrush.translate",
         label="BBrush Move BrushTool",
-        description='用于移动雕刻原点的操作控制柄',
+        description='Control handle for moving the sculpting origin',
         icon="ops.transform.translate",
         cursor='EYEDROPPER',
         widget=None,
@@ -42,8 +42,8 @@ def bbrush_translate():
 def bbrush_polygon_mask():
     return dict(
         idname='bbrush.polygon_mask',
-        label='多边形绘制遮罩',
-        description='绘制多边形遮罩',
+        label='Polygon mask',
+        description='Draw polygonal mask',
         icon=get_dat_icon('brush.sculpt.polygons_mask'),
         cursor='EYEDROPPER',
         widget=None,
@@ -55,8 +55,8 @@ def bbrush_polygon_mask():
 def bbrush_square_mask():
     return dict(
         idname='bbrush.square_mask',
-        label='方形绘制遮罩',
-        description='绘制方形遮罩',
+        label='Square mask',
+        description='Draw square mask',
         icon=get_dat_icon('brush.sculpt.square_mask'),
         cursor='EYEDROPPER',
         widget=None,
@@ -68,8 +68,8 @@ def bbrush_square_mask():
 def bbrush_circular_mask():
     return dict(
         idname='bbrush.circular_mask',
-        label='圆形绘制遮罩',
-        description='绘制圆形遮罩',
+        label='Circular mask',
+        description='Draw circular mask',
         icon=get_dat_icon('brush.sculpt.circular_mask'),
         cursor='EYEDROPPER',
         widget=None,
@@ -81,8 +81,8 @@ def bbrush_circular_mask():
 def bbrush_ellipse_mask():
     return dict(
         idname='bbrush.ellipse_mask',
-        label='椭圆遮罩',
-        description='绘制椭圆遮罩',
+        label='Ellipse mask',
+        description='Draw elliptical mask',
         icon=get_dat_icon('brush.sculpt.ellipse_mask'),
         cursor='EYEDROPPER',
         widget=None,
