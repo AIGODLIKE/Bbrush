@@ -76,7 +76,7 @@ class DepthUpdate(OperatorProperty):
         y = 1 / context.region.height * value[1]
 
         value = self.pref.depth_scale = self.start_buffer_scale + max(x, y) * 2
-        context.area.header_text_set(f'深度图缩放值 {value}')
+        context.area.header_text_set(f'Depth map zoom value {value}')
 
     def init_depth(self):
         from ..ui.draw_depth import DrawDepth
@@ -87,8 +87,8 @@ class DepthUpdate(OperatorProperty):
 
 class BBrushSculpt(DepthUpdate):
     bl_idname = 'bbrush.bbrush_sculpt'
-    bl_label = 'Bbrush雕刻'
-    bl_description = '使用Zbrush的方式雕刻'
+    bl_label = 'Bbrush sculpting'
+    bl_description = 'Sculpting in the style of Zbrush'
     bl_options = {'REGISTER'}
 
     def invoke(self, context, event):
