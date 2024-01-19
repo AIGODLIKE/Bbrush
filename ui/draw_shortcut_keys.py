@@ -13,6 +13,8 @@ class DrawShortcutKeys(PublicClass):
     }
 
     def draw(self):
+        from bpy.app.translations import pgettext as _
+
         if self.pref.sculpt and self.pref.show_shortcut_keys:
             font_id = self.font_info['font_id']
             font_size = self.pref.shortcut_show_size
@@ -25,12 +27,13 @@ class DrawShortcutKeys(PublicClass):
             y = self.pref.shortcut_offset_y
             for index, item in enumerate(reversed(self.draw_shortcut_keys)):
                 y += 18 * font_size + column_space_size
+
                 if 'doc' in item:
                     blf.position(font_id, x - 10, y, 0)
-                    blf.draw(font_id, item['doc'])
+                    blf.draw(font_id, _(item['doc']))
                 else:
-                    tool = item['tool']
-                    key = item['key']
+                    tool = _(item['tool'])
+                    key = _(item['key'])
                     # draw tool
                     blf.position(font_id, x, y, 0)
                     blf.draw(font_id, tool)

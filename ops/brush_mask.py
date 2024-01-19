@@ -9,7 +9,7 @@ from mathutils import Vector
 
 from ..utils.log import log
 from ..utils.public import PublicOperator, PublicDraw
-
+from bpy.app.translations import pgettext as _
 
 def get_circular(x, y, segments=64):
     from math import sin, cos, pi
@@ -22,8 +22,8 @@ def get_circular(x, y, segments=64):
 
 
 class MaskProperty(PublicOperator, PublicDraw):
-    use_front_faces_only: BoolProperty(name='仅前面的面')
-    is_click: BoolProperty(name='按键操作是单击', default=True,
+    use_front_faces_only: BoolProperty(name=_('Only the front faces'))
+    is_click: BoolProperty(name=_('The key operation is a single click'), default=True,
                            options={'SKIP_SAVE'})
 
     is_esc = False
@@ -440,7 +440,7 @@ class MaskClickDrag(MaskDrawArea):
         try:
             return self.get_area_ray_cast(x, y, w, h)
         except ValueError as v:
-            log.info(f'{v.args}\n获取形状投射错误')
+            log.info(f'{v.args}\nError in acquiring shape projection')
 
     def polygons_mask(self):
         click_time = bpy.context.preferences.inputs.mouse_double_click_time
@@ -485,8 +485,8 @@ class MaskClickDrag(MaskDrawArea):
 
 class BBrushMask(MaskClickDrag):
     bl_idname = 'bbrush.mask'
-    bl_label = 'Bbrush遮罩'
-    bl_description = '遮罩笔刷'
+    bl_label = 'Bbrush mask'
+    bl_description = 'Mask brush'
     bl_options = {'REGISTER'}
 
     def invoke(self, context, event):
