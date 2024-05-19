@@ -11,6 +11,7 @@ from ..utils.log import log
 from ..utils.public import PublicOperator, PublicDraw
 from bpy.app.translations import pgettext as _
 
+
 def get_circular(x, y, segments=64):
     from math import sin, cos, pi
     if segments <= 0:
