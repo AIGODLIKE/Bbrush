@@ -4,13 +4,14 @@ from .utils import reg
 bl_info = {
     "name": "Bbrush",
     "author": "AIGODLIKE Community：小萌新",
-    "version": (1, 2, 3),
+    "version": (1, 2, 4),
     "blender": (4, 0, 0),
     "location": "Entering the sculpt mode will be displayed in the top bar",
     "description": "",
-    "warning": "",
     "category": "AIGODLIKE"
 }
+
+
 class TranslationHelper():
     def __init__(self, name: str, data: dict, lang='zh_CN'):
         self.name = name
@@ -25,7 +26,7 @@ class TranslationHelper():
     def register(self):
         try:
             bpy.app.translations.register(self.name, self.translations_dict)
-        except(ValueError):
+        except ValueError:
             pass
 
     def unregister(self):
@@ -49,9 +50,9 @@ def register():
         Bbrush_zh_CN.register()
         Bbrush_zh_HANS.register()
 
+
 def unregister():
     reg.unregister()
-
 
     if bpy.app.version < (4, 0, 0):
         Bbrush_zh_CN.unregister()
