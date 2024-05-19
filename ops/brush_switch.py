@@ -144,12 +144,15 @@ class BBrushSwitch(SwitchProperty):
 
     def event_ops(self, event):
         press = self.event_is_press
-        if self.only_shift:
-            setattr(self, '_tmp_brush', self.active_tool_name)
-            bpy.ops.wm.tool_set_by_id(name="builtin_brush.Smooth")
-        elif getattr(self, '_tmp_brush', False):
+        tmp = getattr(self, '_tmp_brush', False)
+        if self.only_shift and event.type in ('INBETWEEN_MOUSEMOVE', 'MOUSEMOVE', 'LEFTMOUSE'):
+            if self.active_tool_name != "builtin_brush.Smooth":
+                setattr(self, '_tmp_brush', self.active_tool_name)
+                bpy.ops.wm.tool_set_by_id(name="builtin_brush.Smooth")
+        elif tmp:
             bpy.ops.wm.tool_set_by_id(name=self._tmp_brush)
             delattr(self, '_tmp_brush')
+        print(event, event.type != 'F', event.type, event.value)
 
         if press:
             if event.type == 'NUMPAD_PLUS':
