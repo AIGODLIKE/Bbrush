@@ -1,10 +1,12 @@
 import bpy
+
+from . import zh_CN
 from .utils import reg
 
 bl_info = {
     "name": "Bbrush",
     "author": "AIGODLIKE Community：小萌新",
-    "version": (1, 2, 4),
+    "version": (1, 2, 5),
     "blender": (4, 0, 0),
     "location": "Entering the sculpt mode will be displayed in the top bar",
     "description": "",
@@ -32,10 +34,6 @@ class TranslationHelper():
     def unregister(self):
         bpy.app.translations.unregister(self.name)
 
-
-# Set
-############
-from . import zh_CN
 
 Bbrush_zh_CN = TranslationHelper('Bbrush_zh_CN', zh_CN.data)
 Bbrush_zh_HANS = TranslationHelper('Bbrush_zh_HANS', zh_CN.data, lang='zh_HANS')
