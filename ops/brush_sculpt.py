@@ -135,23 +135,21 @@ class BBrushSculpt(DepthUpdate):
             return {'FINISHED'}
 
     def modal_handle(self, event: bpy.types.Event):
-        print("modal_handle\t", self.active_tool_name, self, self.in_modal, self.only_alt)
         if self.in_modal:
             if self.only_alt:
                 self.smooth_brush_handle()
             else:
-                a = normal_brush_handle(self.active_tool_name)
-                print('sefsef0', a)
-                return a
+                normal_brush_handle()
         else:
             if self.only_alt:
                 bpy.ops.view3d.move('INVOKE_DEFAULT',
                                     True,
                                     )
-            if event.value_prev != "RELEASE":
-                bpy.ops.view3d.rotate('INVOKE_DEFAULT',
-                                      True,
-                                      )
+            else:
+                if event.value_prev != "RELEASE":
+                    bpy.ops.view3d.rotate('INVOKE_DEFAULT',
+                                          True,
+                                          )
         return {'FINISHED'}
 
     def smooth_brush_handle(self):
