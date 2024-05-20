@@ -2,6 +2,7 @@ import logging
 import os
 from bpy.app.translations import pgettext as _
 
+
 def log_path():
     folder = os.path.join(os.environ["TMP"], r"blender")
     if not os.path.isdir(folder):

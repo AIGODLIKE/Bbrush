@@ -75,7 +75,7 @@ class BBrushAddonPreferences(AddonPreferences, PublicClass):
     )
     shortcut_offset_x: IntProperty(
         name=_('Shortcut key offset X'),
-        default=150, max=114514, min=0)
+        default=20, max=114514, min=0)
     shortcut_offset_y: IntProperty(
         name=_('Shortcut key offset Y'),
         default=20, max=114514, min=0)

@@ -3,13 +3,14 @@ from time import time
 import bpy
 import gpu
 import numpy as np
+from bpy.app.translations import pgettext as _
 from bpy.props import BoolProperty
 from gpu_extras.batch import batch_for_shader
 from mathutils import Vector
 
+from .sculpt_operator import sculpt_invert_hide_face
 from ..utils.log import log
 from ..utils.public import PublicOperator, PublicDraw
-from bpy.app.translations import pgettext as _
 
 
 def get_circular(x, y, segments=64):
@@ -141,14 +142,6 @@ class MaskProperty(PublicOperator, PublicDraw):
 
 class MaskClick(MaskProperty):
 
-    @staticmethod
-    def invert_sculpt_hide_face():
-        is_3_6_up_version = bpy.app.version >= (3, 6, 0)
-        if is_3_6_up_version:
-            bpy.ops.sculpt.face_set_invert_visibility()
-        else:
-            bpy.ops.sculpt.face_set_change_visibility('EXEC_DEFAULT', True, mode='INVERT')
-
     def mask_click(self):
         in_model = self.mouse_is_in_model_up
         ops = bpy.ops
@@ -170,7 +163,7 @@ class MaskClick(MaskProperty):
                     mode='TOGGLE')
         elif self.ctrl_shift:
             if in_model:
-                self.invert_sculpt_hide_face()
+                sculpt_invert_hide_face()
             else:
                 paint.hide_show('EXEC_DEFAULT',
                                 True,
@@ -404,7 +397,7 @@ class MaskClickDrag(MaskDrawArea):
                                   mode='VALUE',
                                   value=1)
         elif self.ctrl_shift_alt or self.ctrl_shift:
-            self.invert_sculpt_hide_face()
+            sculpt_invert_hide_face()
 
     def event_move_update(self):
         """

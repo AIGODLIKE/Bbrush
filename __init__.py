@@ -1,4 +1,6 @@
 import bpy
+
+from . import zh_CN
 from .utils import reg
 
 bl_info = {
@@ -32,10 +34,6 @@ class TranslationHelper():
     def unregister(self):
         bpy.app.translations.unregister(self.name)
 
-
-# Set
-############
-from . import zh_CN
 
 Bbrush_zh_CN = TranslationHelper('Bbrush_zh_CN', zh_CN.data)
 Bbrush_zh_HANS = TranslationHelper('Bbrush_zh_HANS', zh_CN.data, lang='zh_HANS')

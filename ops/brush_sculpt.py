@@ -1,6 +1,7 @@
 import bpy
 from mathutils import Vector
 
+from .sculpt_operator import normal_brush_handle
 from ..utils.log import log
 from ..utils.public import PublicOperator, PublicDraw
 
@@ -91,6 +92,10 @@ class BBrushSculpt(DepthUpdate):
     bl_description = 'Sculpting in the style of Zbrush'
     bl_options = {'REGISTER'}
 
+    def __init__(self):
+        self.in_modal = None
+        self.mouse_move_count = None
+
     def invoke(self, context, event):
 
         log.debug(self.bl_idname)
@@ -101,17 +106,18 @@ class BBrushSculpt(DepthUpdate):
         self.start_mouse = self.mouse_co
 
         self.start_buffer_scale = self.pref.depth_scale
+
         if self.is_3d_view:
+            self.in_modal = self.mouse_is_in_model_up
             context.window_manager.modal_handler_add(self)
             return {'RUNNING_MODAL'}
         else:
             self.report({'WARNING'}, "Active space must be a View3d")
             return {'CANCELLED'}
 
-    def modal(self, context, event):
+    def modal(self, context: bpy.types.Context, event: bpy.types.Event):
         self.init_modal(context, event)
         self.tag_redraw(context)
-
         try:
             if self.is_exit:  # 退出模态操作
                 context.area.header_text_set(None)
@@ -123,26 +129,24 @@ class BBrushSculpt(DepthUpdate):
                 self.depth_scale_update(context, event)
                 return {'RUNNING_MODAL'}
             else:
-                return self.modal_handle()
+                return self.modal_handle(event)
         except Exception as e:
             log.error(e.args)
             return {'FINISHED'}
 
-    def modal_handle(self):
-        in_modal = self.mouse_is_in_model_up
-        if in_modal:
+    def modal_handle(self, event: bpy.types.Event):
+        print("modal_handle\t", self.active_tool_name, self, self.in_modal, self.only_alt)
+        if self.in_modal:
             if self.only_alt:
                 self.smooth_brush_handle()
             else:
-                bpy.ops.sculpt.brush_stroke('INVOKE_DEFAULT',
-                                            True,
-                                            mode='NORMAL')
+                return normal_brush_handle(self.active_tool_name)
         else:
             if self.only_alt:
                 bpy.ops.view3d.move('INVOKE_DEFAULT',
                                     True,
                                     )
-            else:
+            if event.value_prev != "RELEASE":
                 bpy.ops.view3d.rotate('INVOKE_DEFAULT',
                                       True,
                                       )

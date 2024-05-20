@@ -139,20 +139,21 @@ class BBrushSwitch(SwitchProperty):
             self.mask_mode()
         else:
             self.set_shortcut_keys('NORMAL')
-        self.tag_redraw(context)  # 进行重绘，避免更改工具栏后内容还是旧的
+        self.tag_redraw(context)
         return self.event_ops(event)
 
     def event_ops(self, event):
         press = self.event_is_press
         tmp = getattr(self, '_tmp_brush', False)
-        if self.only_shift and event.type in ('INBETWEEN_MOUSEMOVE', 'MOUSEMOVE', 'LEFTMOUSE'):
+        if self.only_shift and event.type == "LEFTMOUSE" and event.value == "PRESS":
             if self.active_tool_name != "builtin_brush.Smooth":
                 setattr(self, '_tmp_brush', self.active_tool_name)
                 bpy.ops.wm.tool_set_by_id(name="builtin_brush.Smooth")
+                self.tag_redraw(bpy.context)
         elif tmp:
             bpy.ops.wm.tool_set_by_id(name=self._tmp_brush)
             delattr(self, '_tmp_brush')
-        print(event, event.type != 'F', event.type, event.value)
+            self.tag_redraw(bpy.context)
 
         if press:
             if event.type == 'NUMPAD_PLUS':

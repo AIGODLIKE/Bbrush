@@ -1,8 +1,8 @@
 import bpy
 import gpu
 import numpy as np
-from mathutils import Matrix
 from gpu_extras.batch import batch_for_shader
+from mathutils import Matrix
 
 from ..utils.public import PublicClass
 
@@ -172,39 +172,30 @@ class DrawDepth(PublicClass):
                                                  format='RGB16F',
                                                  data=sam_all_depth_buffer)
 
-        mv = gpu.matrix.get_model_view_matrix()
-        p = gpu.matrix.get_projection_matrix()
+        with gpu.matrix.push_pop():
 
-        gpu.matrix.reset()
-        gpu.matrix.translate((-1, 1, 0))
-        gpu.matrix.translate(cls.depth_buffer['translate'])
+            gpu.matrix.reset()
+            gpu.matrix.translate((-1, 1, 0))
+            gpu.matrix.translate(cls.depth_buffer['translate'])
 
-        depth_scale = cls.pref_().depth_scale
-        gpu.matrix.scale((depth_scale, depth_scale))
-        shader.uniform_sampler("image", depth_gpu_texture)
-        batch.draw(shader)
-
-        gpu.matrix.load_projection_matrix(p)
-        gpu.matrix.load_matrix(mv)
+            depth_scale = cls.pref_().depth_scale
+            gpu.matrix.scale((depth_scale, depth_scale))
+            shader.uniform_sampler("image", depth_gpu_texture)
+            batch.draw(shader)
 
     @classmethod
     def draw_gpu_buffer(cls, context):
         gpu.state.depth_mask_set(False)
 
-        mv = gpu.matrix.get_model_view_matrix()
-        p = gpu.matrix.get_projection_matrix()
         depth_scale = cls.pref_().depth_scale
+        with gpu.matrix.push_pop():
+            # gpu.matrix.reset()
+            gpu.matrix.translate([-1, 1, 0])
+            gpu.matrix.translate(cls.depth_buffer['translate'])
+            gpu.matrix.scale([depth_scale, depth_scale])
 
-        gpu.matrix.reset()
-        gpu.matrix.translate((-1, 1, 0))
-        gpu.matrix.translate(cls.depth_buffer['translate'])
-        gpu.matrix.scale((depth_scale, depth_scale))
-
-        draw_shader_old(context.region.width,
-                        context.region.height)  # 使用自定义着色器绘制,将会快很多
-
-        gpu.matrix.load_projection_matrix(p)
-        gpu.matrix.load_matrix(mv)
+            draw_shader_old(context.region.width,
+                            context.region.height)  # 使用自定义着色器绘制,将会快很多
 
     @classmethod
     def draw_depth(cls):

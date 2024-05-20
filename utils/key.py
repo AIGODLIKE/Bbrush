@@ -9,11 +9,11 @@ view = '3D View Tool'
 sculpt_modify_keymaps = {
     'Sculpt': {
         ('wm.call_panel', (('name', 'VIEW3D_PT_sculpt_context_menu'),)): {'value': "RELEASE"},
-        (brush_stroke, ()): {'active': False},
-        (brush_stroke, (('mode', 0),)): {'active': False},
-        (brush_stroke, (('mode', 1),)): {'active': False},
-        (brush_stroke, (('mode', 2),)): {'active': False},
-        (mask_lasso_gesture, ()): {'active': False},
+        (brush_stroke, ()): f_active,
+        (brush_stroke, (('mode', 0),)): f_active,
+        (brush_stroke, (('mode', 1),)): f_active,
+        (brush_stroke, (('mode', 2),)): f_active,
+        (mask_lasso_gesture, ()): f_active,
         (mask_lasso_gesture, (('value', 1.0),)): {'ctrl': True},
         (mask_lasso_gesture, (('value', 0.0),)): {'alt': True}, },
     f'{view}: Sculpt, Box Mask': {
@@ -26,24 +26,33 @@ sculpt_modify_keymaps = {
         ('paint.mask_line_gesture', (('value', 1.0),)): {'ctrl': True},
         ('paint.mask_line_gesture', (('value', 0.0),)): {'alt': True}},
     f'{view}: Sculpt, Box Hide': {
-        (hide_show, (('action', 1),)): {'active': False},
-        (hide_show, (('action', 0),)): {'active': False},
-        (hide_show, (('action', 1), ('area', 2))): {'active': False}},
+        (hide_show, (('action', 1),)): f_active,
+        (hide_show, (('action', 0),)): f_active,
+        (hide_show, (('action', 1), ('area', 2))): f_active},
     f'{view}: Sculpt, Lasso Trim': {
         ('sculpt.trim_lasso_gesture', ()): {'ctrl': True, 'shift': True}},
     f'{view}: Sculpt, Box Trim': {
         ('sculpt.trim_box_gesture', ()): {'ctrl': True, 'shift': True}},
     f'{view}: Sculpt, Line Project': {
         ('sculpt.project_line_gesture', ()): {'ctrl': True, 'shift': True}},
+
+    f'{view}: Sculpt, Mesh Filter': {
+        ('sculpt.mesh_filter', ()): f_active},
+    f'{view}: Sculpt, Cloth Filter': {
+        ('sculpt.cloth_filter', ()): f_active},
+    f'{view}: Sculpt, Color Filter': {
+        ('sculpt.color_filter', ()): f_active},
+
     'Screen': {
         ('sculpt.project_line_gesture', ()): {'ctrl': True, 'shift': True}},
     '3D View': {
-        (select_lasso, (('mode', 1),)): {'active': False},
-        (select_lasso, (('mode', 2),)): {'active': False},
-        (select_lasso, ()): {'active': False},
-        ('view3d.cursor3d', ()): {'active': False},
-        ('transform.translate', ()): {'active': False},
-        ('emm.hdr_rotation', ()): {'active': False}, ('view3d.select', ()): {'active': False}}
+        (select_lasso, (('mode', 1),)): f_active,
+        (select_lasso, (('mode', 2),)): f_active,
+        (select_lasso, ()): f_active,
+        ('view3d.cursor3d', ()): f_active,
+        ('transform.translate', ()): f_active,
+        ('emm.hdr_rotation', ()): f_active,
+        ('view3d.select', ()): f_active}
 }
 
 empty_window = {'space_type': 'EMPTY', 'region_type': 'WINDOW'}
@@ -97,11 +106,12 @@ sculpt_keys_items = (
         ('SWITCH_TO_ROTATE', {'type': 'LEFT_CTRL', 'value': 'RELEASE'}, None),
         ('SWITCH_TO_MOVE', {'type': 'LEFT_CTRL', 'value': 'PRESS'}, None),
         ('SWITCH_TO_MOVE', {'type': 'LEFT_ALT', 'value': 'ANY'}, None), ]}),
+
     ('Sculpt', empty_window, {'items': [
+        *bbrush_key_items,
         (bbrush_switch, {'type': 'LEFT_CTRL', 'value': 'ANY'}, None),
         (bbrush_switch, {'type': 'LEFT_ALT', 'value': 'ANY'}, None),
         (bbrush_switch, {'type': 'LEFT_SHIFT', 'value': 'ANY'}, None),
-        *bbrush_key_items,
         ('object.transfer_mode',
          {'type': 'LEFTMOUSE', 'value': 'CLICK', 'alt': True}, None),
         ('view3d.rotate',
