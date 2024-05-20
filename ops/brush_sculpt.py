@@ -140,7 +140,9 @@ class BBrushSculpt(DepthUpdate):
             if self.only_alt:
                 self.smooth_brush_handle()
             else:
-                return normal_brush_handle(self.active_tool_name)
+                a = normal_brush_handle(self.active_tool_name)
+                print('sefsef0', a)
+                return a
         else:
             if self.only_alt:
                 bpy.ops.view3d.move('INVOKE_DEFAULT',

@@ -18,6 +18,13 @@ def sculpt_invert_hide_face():
 
 
 def normal_brush_handle(tool_name):
+    # if tool_name in ('builtin.mesh_filter', 'builtin.cloth_filter', 'builtin.color_filter'):
+    #     return {'FINISHED', 'PASS_THROUGH'}
+    # else:
+    #     bpy.ops.sculpt.brush_stroke('INVOKE_DEFAULT',
+    #                                 True,
+    #                                 mode='NORMAL')
+    #     return {'FINISHED'}
     if tool_name == 'builtin.mesh_filter':
         bpy.ops.sculpt.mesh_filter('INVOKE_DEFAULT',
                                    True, True)
@@ -31,3 +38,4 @@ def normal_brush_handle(tool_name):
         bpy.ops.sculpt.brush_stroke('INVOKE_DEFAULT',
                                     True,
                                     mode='NORMAL')
+    return {'FINISHED'}

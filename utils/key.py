@@ -36,12 +36,12 @@ sculpt_modify_keymaps = {
     f'{view}: Sculpt, Line Project': {
         ('sculpt.project_line_gesture', ()): {'ctrl': True, 'shift': True}},
 
-    f'{view}: Sculpt, Mesh Filter': {
-        ('sculpt.mesh_filter', ()): f_active},
-    f'{view}: Sculpt, Cloth Filter': {
-        ('sculpt.cloth_filter', ()): f_active},
-    f'{view}: Sculpt, Color Filter': {
-        ('sculpt.color_filter', ()): f_active},
+    # f'{view}: Sculpt, Mesh Filter': {
+    #     ('sculpt.mesh_filter', ()): f_active},
+    # f'{view}: Sculpt, Cloth Filter': {
+    #     ('sculpt.cloth_filter', ()): f_active},
+    # f'{view}: Sculpt, Color Filter': {
+    #     ('sculpt.color_filter', ()): f_active},
 
     'Screen': {
         ('sculpt.project_line_gesture', ()): {'ctrl': True, 'shift': True}},
@@ -106,7 +106,16 @@ sculpt_keys_items = (
         ('SWITCH_TO_ROTATE', {'type': 'LEFT_CTRL', 'value': 'RELEASE'}, None),
         ('SWITCH_TO_MOVE', {'type': 'LEFT_CTRL', 'value': 'PRESS'}, None),
         ('SWITCH_TO_MOVE', {'type': 'LEFT_ALT', 'value': 'ANY'}, None), ]}),
-
+    # ('3D View Tool: Sculpt, Mesh Filter', view_3d_window, {'items': [
+    #     *bbrush_key_items
+    # ]}),
+    # ('3D View Tool: Sculpt, Cloth Filter', view_3d_window, {'items': [
+    #     *bbrush_key_items
+    # ]}),
+    # ('3D View Tool: Sculpt, Color Filter', view_3d_window, {'items': [
+    #     *bbrush_key_items,
+    #     # ('sculpt.color_filter', {'type': 'LEFTMOUSE', 'value': 'CLICK_DRAG'}, None)
+    # ]}),
     ('Sculpt', empty_window, {'items': [
         *bbrush_key_items,
         (bbrush_switch, {'type': 'LEFT_CTRL', 'value': 'ANY'}, None),
@@ -269,10 +278,10 @@ def change_keymap(is_modify: bool):
 
 
 def register():
-    keymap_register(sculpt_keys_items)
     change_keymap(True)
+    keymap_register(sculpt_keys_items)
 
 
 def unregister():
-    keymap_unregister(sculpt_keys_items)
     change_keymap(False)
+    keymap_unregister(sculpt_keys_items)
