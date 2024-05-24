@@ -138,7 +138,7 @@ class BBrushSculpt(DepthUpdate):
         if self.in_modal:
             if self.only_alt:
                 self.smooth_brush_handle()
-            else:
+            elif event.value_prev == "PRESS":
                 normal_brush_handle()
         else:
             if self.only_alt:
