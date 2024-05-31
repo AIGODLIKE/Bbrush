@@ -1,7 +1,8 @@
 import bpy
+from bpy.app.translations import pgettext as _
 from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty
 from bpy_types import AddonPreferences
-from bpy.app.translations import pgettext as _
+
 from . import key
 from .public import ADDON_NAME, PublicClass
 
@@ -37,7 +38,8 @@ class BBrushAddonPreferences(AddonPreferences, PublicClass):
                             default=False)
 
     depth_display_items = (
-        ('ALWAYS_DISPLAY', 'DisplayedAllTheTime', 'Keep the silhouette displayed all the time, even when not in sculpting mode'),
+        ('ALWAYS_DISPLAY', 'DisplayedAllTheTime',
+         'Keep the silhouette displayed all the time, even when not in sculpting mode'),
         ('ONLY_SCULPT', 'SculptModeOnly', 'Display silhouette images only in sculpting mode'),
         ('ONLY_BBRUSH', 'BbrushModeOnly', 'Display silhouette images only in Bbrush mode'),
         ('NOT_DISPLAY', 'NotShown', 'Never display silhouette images at any time'),
@@ -61,7 +63,8 @@ class BBrushAddonPreferences(AddonPreferences, PublicClass):
 
     always_use_sculpt_mode: BoolProperty(
         name=_('Always use Bbrush sculpting mode'),
-        description=_('If entering sculpting mode, Bbrush mode will automatically activate; if exiting sculpting mode, Bbrush mode will deactivate'),
+        description=_(
+            'If entering sculpting mode, Bbrush mode will automatically activate; if exiting sculpting mode, Bbrush mode will deactivate'),
         default=False)
 
     depth_ray_size: IntProperty(
@@ -81,23 +84,48 @@ class BBrushAddonPreferences(AddonPreferences, PublicClass):
         default=20, max=114514, min=0)
     shortcut_show_size: FloatProperty(name=_('Shortcut key display size'), min=0.1, default=1, max=114)
 
+    def update_top(self, context):
+        from ..ui.replace_ui import update_top_bar
+        update_top_bar()
+
+    replace_top_bar: BoolProperty(name='Replace top bar', default=True, update=update_top)
+    alignment: EnumProperty(
+        items=[
+            ("LEFT", "LIFT", ""),
+            ("CENTER", "CENTER", ""),
+            ("RIGHT", "RIGHT", ""), ],
+        default="CENTER",
+    )
+
     def draw(self, context):
         layout = self.layout
-        layout.prop(self, 'show_text')
-        layout.prop(self, 'depth_display_mode')
-        layout.prop(self, 'depth_ray_size')
-        layout.prop(self, 'always_use_sculpt_mode')
 
-        layout.label(text='Silhouette:')
-        layout.prop(self, 'depth_scale')
-        row = layout.row(align=True)
+        box = layout.box()
+        box.prop(self, 'always_use_sculpt_mode')
+        row = box.row(align=True)
+        row.prop(self, 'depth_display_mode')
+        row.prop(self, 'depth_ray_size')
+        layout.separator()
+        layout.label(text="顶部栏")
+        row = layout.box().row(align=True)
+        row.prop(self, 'show_text')
+        row.prop(self, 'replace_top_bar')
+        row.prop(self, 'alignment')
+
+        layout.separator()
+        layout.label(text='Silhouette')
+        box = layout.box()
+        box.prop(self, 'depth_scale')
+        row = box.row(align=True)
         row.prop(self, 'depth_offset_x')
         row.prop(self, 'depth_offset_y')
 
-        layout.label(text=_('shortcut:'))
-        layout.prop(self, 'show_shortcut_keys')
-        layout.prop(self, 'shortcut_show_size')
-        row = layout.row(align=True)
+        layout.separator()
+        layout.label(text='Shortcut')
+        box = layout.box()
+        box.prop(self, 'show_shortcut_keys')
+        box.prop(self, 'shortcut_show_size')
+        row = box.row(align=True)
         row.prop(self, 'shortcut_offset_x')
         row.prop(self, 'shortcut_offset_y')
 

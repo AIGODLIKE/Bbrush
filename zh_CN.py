@@ -24,8 +24,8 @@ data = {
     'Display shortcut keys': '显示快捷键',
     'Shortcut key offset': '快捷键偏移',
     'Shortcut key display size': '快捷键显示大小',
-    'Silhouette:': '剪影图',
-    'shortcut:': '快捷键',
+    'Silhouette': '剪影图',
+    'Shortcut': '快捷键',
     'Setting log file path error': '设置Log文件路径错误',
     "Check if the mouse is placed over the model, mouse cursor's range size": '检查鼠标是否放在模型上,鼠标范围大小',
     'Control handle for moving the sculpting origin': '用于移动雕刻原点的操作控制柄',
@@ -70,7 +70,6 @@ data = {
     'ctrl+shift+left Click in blank area': '在空白处ctrl+shift+左键单击',
     'ctrl+shift+left or ctrl+shift+alt+left Drag in blank area': '在空白处ctrl+shift 或 ctrl+shift+alt+左键拖拽',
 
-
     'mouse_right': '右键',
     'middle': '中键',
     'left': '左键',
@@ -111,4 +110,7 @@ data = {
     'Mask brush': '遮罩笔刷',
     'Display top text': '显示顶部文本',
     'Depth ray check size(px)': '深度射线检查大小(px)',
+    'Replace top bar': '替换顶部栏',
+    'LIFT': '左',
+    'CENTER': '中',
 }
