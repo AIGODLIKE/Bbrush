@@ -17,7 +17,7 @@ class BBrushAddonPreferences(AddonPreferences, PublicClass):
         from ..ui.replace_ui import update_top_bar
         update_top_bar()
         inputs = context.preferences.inputs
-        from .bbrush_toolbar import BrushTool
+        from brush.bbrush_toolbar import BrushTool
         if self.sculpt:
             BrushTool.toolbar_switch('SCULPT')
             self.use_mouse_emulate_3_button = inputs.use_mouse_emulate_3_button

@@ -2,7 +2,7 @@ import bpy
 from bl_ui.properties_paint_common import UnifiedPaintPanel
 from bl_ui.space_toolsystem_common import ToolSelectPanelHelper
 
-from ..utils.bbrush_toolbar import BrushTool
+from brush.bbrush_toolbar import BrushTool
 from ..utils.log import log
 from ..utils.public import PublicOperator
 

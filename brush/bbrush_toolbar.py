@@ -122,6 +122,7 @@ class BrushTool:
         'builtin.lasso_trim',
         'builtin.line_project',
     )
+    BrushTool.toolbar_switch('ORIGINAL_TOOLBAR')
 
     @classmethod
     def update_toolbar(cls):

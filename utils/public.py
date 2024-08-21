@@ -1,20 +1,23 @@
 from functools import cache
-from os.path import basename, dirname, realpath
-from bpy.app.translations import pgettext as _
+
 import blf
 import bpy
 import gpu
 import numpy as np
 from bl_ui.space_toolsystem_common import ToolSelectPanelHelper
+from bpy.app.translations import pgettext as _
 from bpy.props import BoolProperty, StringProperty
 from bpy.types import Operator
 from gpu_extras.batch import batch_for_shader
 from mathutils import Vector, geometry
 
 from .log import log
+from .. import __package__ as __name__
 from ..src.shortcut_keys import SHORTCUT_KEYS
 
-ADDON_NAME = basename(dirname(dirname(realpath(__file__))))
+ADDON_NAME = __name__
+
+IS_BOTTOM_BAR = bpy.app.version >= (4, 3, 0)  # 4.2以上雕刻使用的底部栏雕刻
 
 
 @cache

@@ -27,10 +27,6 @@ def append_top_editor_menus(self, context):
     region = context.region
     screen = context.screen
 
-    # layout.label(text=self.__class__.__name__)
-    # layout.label(text=region.alignment)
-    # layout.label(text=pref.alignment)
-
     fs = screen.show_fullscreen
     cn = self.__class__.__name__
     if pref.alignment == 'LEFT':

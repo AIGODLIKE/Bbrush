@@ -1,9 +1,10 @@
 import bpy
 
-from . import preferences, update, bbrush_toolbar
-from .bbrush_toolbar import BrushTool
+from . import preferences, update
 from .public import register_submodule_factory, PublicClass
 from .. import ops, ui
+from brush import bbrush_toolbar
+from brush.bbrush_toolbar import BrushTool
 
 model_tuple = (
     ui,
@@ -27,6 +28,5 @@ def register():
 
 
 def unregister():
-    BrushTool.toolbar_switch('ORIGINAL_TOOLBAR')
     unregister_module()
     PublicClass.cache_clear()
