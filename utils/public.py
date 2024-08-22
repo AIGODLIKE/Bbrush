@@ -15,14 +15,10 @@ from .log import log
 from .. import __package__ as __name__
 from ..src.shortcut_keys import SHORTCUT_KEYS
 
-ADDON_NAME = __name__
-
-IS_BOTTOM_BAR = bpy.app.version >= (4, 3, 0)  # 4.2以上雕刻使用的底部栏雕刻
-
 
 @cache
 def get_pref():
-    return bpy.context.preferences.addons[ADDON_NAME].preferences
+    return bpy.context.preferences.addons[__name__].preferences
 
 
 class PublicData:
@@ -577,7 +573,7 @@ def register_submodule_factory(submodule_tuple):
 
 
 class PublicOperator(PublicClass, Operator):
-    is_click: BoolProperty(name=_('theKeyActionIsAClick'), default=True,
+    is_click: BoolProperty(name='theKeyActionIsAClick', default=True,
                            options={'SKIP_SAVE'})
 
     bbrush_brush = {

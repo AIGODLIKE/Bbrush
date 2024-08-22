@@ -26,5 +26,5 @@ try:
     log.addHandler(_file_handler)
     _file_handler.setFormatter(_formatter)
 except Exception as e:
-    print(_('Setting log file path error'))
+    print('Setting log file path error')
     print(e.args)

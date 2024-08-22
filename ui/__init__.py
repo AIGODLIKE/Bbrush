@@ -9,8 +9,10 @@ register_module, unregister_module = register_submodule_factory(module_tuple)
 
 
 def register():
-    register_module()
+    ...
+    # register_module()
 
 
 def unregister():
-    unregister_module()
+    ...
+    # unregister_module()

@@ -2,7 +2,7 @@ import bpy
 from bl_ui.properties_paint_common import UnifiedPaintPanel
 from bl_ui.space_toolsystem_common import ToolSelectPanelHelper
 
-from brush.bbrush_toolbar import BrushTool
+from ..adapter import Brush
 from ..utils.log import log
 from ..utils.public import PublicOperator
 
@@ -47,52 +47,53 @@ class SwitchProperty(PublicOperator):
             'VIEW_3D'
         )._tools['SCULPT'] = value
 
-    @staticmethod
-    def B_brushes(key):
-        return BrushTool.toolbar_dit[key]
 
     @property
     def _hide_brushes(self):
-        return self.B_brushes('HIDE')
+        return Brush.brush_hide_item()
 
     @property
     def _mask_brushes(self):
-        return self.B_brushes('MASK')
+        return Brush.brush_mask_item()
 
-    @property
-    def _sculpt_brushes(self):
-        return self.B_brushes('SCULPT')
 
     @property
     def active_hide_brush(self):
-        return BrushTool.active_brush['HIDE']
+        # return BrushTool.active_brush['HIDE']
+        ...
 
     @staticmethod
     def set_hide_brush(value):
-        BrushTool.active_brush['HIDE'] = value
+        # BrushTool.active_brush['HIDE'] = value
+        ...
 
     @property
     def active_mask_brush(self):
-        return BrushTool.active_brush['MASK']
+        # return BrushTool.active_brush['MASK']
+        ...
 
     @staticmethod
     def set_mask_brush(value):
-        BrushTool.active_brush['MASK'] = value
+        # BrushTool.active_brush['MASK'] = value
+        ...
 
     @property
     def active_sculpt_brush(self):
-        return BrushTool.active_brush['SCULPT']
+        # return BrushTool.active_brush['SCULPT']
+        ...
 
     @staticmethod
     def set_sculpt_brush(value):
-        BrushTool.active_brush['SCULPT'] = value
+        # BrushTool.active_brush['SCULPT'] = value
+        ...
 
     @property
     def active_not_in_active_brushes(self):  # 活动笔刷没在几个活动项里面
-        return self.active_tool_name and self.active_tool_name != \
-            self.active_sculpt_brush and (
-                    self.active_tool_name not in
-                    BrushTool.active_brush.values())
+        ...
+        # return self.active_tool_name and self.active_tool_name != \
+        #     self.active_sculpt_brush and (
+        #             self.active_tool_name not in
+        #             BrushTool.active_brush.values())
 
     @property
     def is_change_brush(self):
@@ -190,30 +191,31 @@ class BBrushSwitch(SwitchProperty):
         return {'PASS_THROUGH'}
 
     def exit(self, context, event):
-        BrushTool.toolbar_switch('SCULPT')
+        Brush.restore_brush()
         if self.is_sculpt_mode:
-            bpy.ops.wm.tool_set_by_id(name=BrushTool.active_brush['SCULPT'])
-
-        if not self.active_tool:
-            BrushTool.init_active_brush()
+            # bpy.ops.wm.tool_set_by_id(name=BrushTool.active_brush['SCULPT'])
+            ...
+        # if not self.active_tool:
+        #     BrushTool.init_active_brush()
 
         # 闪退，原因未知
         self.tag_redraw(context)
         self.handler_remove()
-        log.debug(BrushTool.active_brush)
+        # log.debug(BrushTool.active_brush)
         log.debug('exit BBrushSwitch \n')
         return {'FINISHED'}
 
     def hide_mode(self):
         if self.brushes != self._hide_brushes:
-            BrushTool.toolbar_switch('HIDE')
-            bpy.ops.wm.tool_set_by_id(name=BrushTool.active_brush['HIDE'])
+            # BrushTool.toolbar_switch('HIDE')
+            # bpy.ops.wm.tool_set_by_id(name=BrushTool.active_brush['HIDE'])
+            ...
         elif self.is_change_brush:
             self.set_hide_brush(self.active_tool_name)
 
     def mask_mode(self):
         if self.brushes != self._mask_brushes:
-            BrushTool.toolbar_switch('MASK')
+            # BrushTool.toolbar_switch('MASK')
             bpy.ops.wm.tool_set_by_id(name=self.active_mask_brush)
         elif self.is_change_brush:
             self.set_mask_brush(self.active_tool_name)

@@ -1,30 +1,29 @@
 import bpy
-from bpy.app.translations import pgettext as _
 from bpy.props import BoolProperty, EnumProperty, FloatProperty, IntProperty
 from bpy_types import AddonPreferences
 
-from . import key
-from .public import ADDON_NAME, PublicClass
+from .utils import key
+from .utils.public import PublicClass
 
 
 class BBrushAddonPreferences(AddonPreferences, PublicClass):
-    bl_idname = ADDON_NAME
+    bl_idname = __package__
     use_mouse_emulate_3_button: BoolProperty()
 
     layout: bpy.types.UILayout
 
     def sculpt_update(self, context):
-        from ..ui.replace_ui import update_top_bar
+        from .ui.replace_ui import update_top_bar
         update_top_bar()
         inputs = context.preferences.inputs
-        from brush.bbrush_toolbar import BrushTool
+        from .adapter import Brush
         if self.sculpt:
-            BrushTool.toolbar_switch('SCULPT')
+            Brush.normal_brush()
             self.use_mouse_emulate_3_button = inputs.use_mouse_emulate_3_button
             inputs.use_mouse_emulate_3_button = False
             key.register()
         else:
-            BrushTool.toolbar_switch('ORIGINAL_TOOLBAR')
+            Brush.restore_brush()
             inputs.use_mouse_emulate_3_button = self.use_mouse_emulate_3_button
             key.unregister()
         self.tag_all_redraw(context)
@@ -34,8 +33,7 @@ class BBrushAddonPreferences(AddonPreferences, PublicClass):
                          options={'SKIP_SAVE'},
                          update=sculpt_update)
 
-    show_text: BoolProperty(name=_('Display top text'),
-                            default=False)
+    show_text: BoolProperty(name='Display top text', default=False)
 
     depth_display_items = (
         ('ALWAYS_DISPLAY', 'DisplayedAllTheTime',
@@ -45,56 +43,57 @@ class BBrushAddonPreferences(AddonPreferences, PublicClass):
         ('NOT_DISPLAY', 'NotShown', 'Never display silhouette images at any time'),
     )
 
-    depth_display_mode: EnumProperty(name=_('Silhouette Display Mode'),
+    depth_display_mode: EnumProperty(name='Silhouette Display Mode',
                                      default='ONLY_SCULPT',
                                      items=depth_display_items)
-    depth_scale: FloatProperty(name=_('Silhouette image scaling'),
+    depth_scale: FloatProperty(name='Silhouette image scaling',
                                default=0.3,
                                max=2,
                                min=0.1,
                                step=0.1
                                )
     depth_offset_x: IntProperty(
-        name=_('Silhouette image offset X'),
+        name='Silhouette image offset X',
         default=0, max=114514, min=0)
     depth_offset_y: IntProperty(
-        name=_('Silhouette image offset Y'),
+        name='Silhouette image offset Y',
         default=80, max=114514, min=0)
 
     always_use_sculpt_mode: BoolProperty(
-        name=_('Always use Bbrush sculpting mode'),
-        description=_(
-            'If entering sculpting mode, Bbrush mode will automatically activate; if exiting sculpting mode, Bbrush mode will deactivate'),
+        name='Always use Bbrush sculpting mode',
+        description=
+        'If entering sculpting mode, Bbrush mode will automatically activate; if exiting sculpting mode, Bbrush mode will deactivate',
         default=False)
 
     depth_ray_size: IntProperty(
-        name=_('Depth ray check size(px)'),
-        description=_("Check if the mouse is placed over the model, mouse cursor's range size"), default=100, min=10,
+        name='Depth ray check size(px)',
+        description="Check if the mouse is placed over the model, mouse cursor's range size", default=100, min=10,
         max=300)
 
     show_shortcut_keys: BoolProperty(
-        name=_('Display shortcut keys'),
+        name='Display shortcut keys',
         default=True
     )
     shortcut_offset_x: IntProperty(
-        name=_('Shortcut key offset X'),
+        name='Shortcut key offset X',
         default=20, max=114514, min=0)
     shortcut_offset_y: IntProperty(
-        name=_('Shortcut key offset Y'),
+        name='Shortcut key offset Y',
         default=20, max=114514, min=0)
-    shortcut_show_size: FloatProperty(name=_('Shortcut key display size'), min=0.1, default=1, max=114)
+    shortcut_show_size: FloatProperty(name='Shortcut key display size', min=0.1, default=1, max=114)
 
-    def update_top(self, context):
-        from ..ui.replace_ui import update_top_bar
+    def __update_top__(self, context):
+        from .ui.replace_ui import update_top_bar
         update_top_bar()
 
-    replace_top_bar: BoolProperty(name='Replace top bar', default=True, update=update_top)
+    replace_top_bar: BoolProperty(name='Replace top bar', default=True, update=__update_top__)
     alignment: EnumProperty(
         items=[
             ("LEFT", "LIFT", ""),
             ("CENTER", "CENTER", ""),
-            ("RIGHT", "RIGHT", ""), ],
-        default="CENTER",
+            ("RIGHT", "RIGHT", ""),
+        ],
+        default="LEFT",
     )
 
     def draw(self, context):
@@ -106,7 +105,7 @@ class BBrushAddonPreferences(AddonPreferences, PublicClass):
         row.prop(self, 'depth_display_mode')
         row.prop(self, 'depth_ray_size')
         layout.separator()
-        layout.label(text="顶部栏")
+        layout.label(text="Top bar")
         row = layout.box().row(align=True)
         row.prop(self, 'show_text')
         row.prop(self, 'replace_top_bar')

@@ -24,8 +24,8 @@ def get_circular(x, y, segments=64):
 
 
 class MaskProperty(PublicOperator, PublicDraw):
-    use_front_faces_only: BoolProperty(name=_('Only the front faces'))
-    is_click: BoolProperty(name=_('The key operation is a single click'), default=True,
+    use_front_faces_only: BoolProperty(name='Only the front faces')
+    is_click: BoolProperty(name='The key operation is a single click', default=True,
                            options={'SKIP_SAVE'})
 
     is_esc = False

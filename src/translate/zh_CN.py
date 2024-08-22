@@ -113,4 +113,5 @@ data = {
     'Replace top bar': '替换顶部栏',
     'LIFT': '左',
     'CENTER': '中',
+    'Top bar': '顶部栏',
 }

@@ -1,10 +1,9 @@
 import bpy
 
-from . import preferences, update
+from . import update
 from .public import register_submodule_factory, PublicClass
-from .. import ops, ui
-from brush import bbrush_toolbar
-from brush.bbrush_toolbar import BrushTool
+from .. import ops, ui, preferences
+from ..adapter import bbrush_toolbar
 
 model_tuple = (
     ui,

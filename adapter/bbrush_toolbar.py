@@ -122,7 +122,6 @@ class BrushTool:
         'builtin.lasso_trim',
         'builtin.line_project',
     )
-    BrushTool.toolbar_switch('ORIGINAL_TOOLBAR')
 
     @classmethod
     def update_toolbar(cls):
@@ -131,7 +130,7 @@ class BrushTool:
 
     @classmethod
     def tool_ops(cls, tools):
-        sculpt = cls.toolbar_dit['SCULPT']
+        # sculpt = cls.toolbar_dit['SCULPT']
 
         from collections.abc import Iterable
         for tool in tools:
@@ -140,10 +139,12 @@ class BrushTool:
             elif isinstance(tool, Iterable):
                 cls.tool_ops(tool)
             elif getattr(tool, '__call__', False):
-                cls.tool_ops(tool(bpy.context))
+                if hasattr(bpy.context, "tool_settings"):
+                    cls.tool_ops(tool(bpy.context))
             else:
-                if tool != sculpt[-1]:
-                    sculpt.append(tool)
+                # if tool != sculpt[-1]:
+                #     sculpt.append(tool)
+                ...
 
     @classmethod
     def init_all_brush(cls):
@@ -153,7 +154,6 @@ class BrushTool:
             'HIDE': [],
             'ORIGINAL_TOOLBAR': toolbar.copy(),
         }
-
         mask = cls.toolbar_dit['MASK']
 
         cls.tool_ops(toolbar)
