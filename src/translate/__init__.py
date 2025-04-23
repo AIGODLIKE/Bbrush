@@ -1,6 +1,22 @@
+import ast
+import re
+
 import bpy
 
 from . import zh_CN
+
+
+def get_language_list() -> list:
+    """
+    Traceback (most recent call last):
+  File "<blender_console>", line 1, in <module>
+TypeError: bpy_struct: item.attr = val: enum "a" not found in ('DEFAULT', 'en_US', 'es', 'ja_JP', 'sk_SK', 'vi_VN', 'zh_HANS', 'ar_EG', 'de_DE', 'fr_FR', 'it_IT', 'ko_KR', 'pt_BR', 'pt_PT', 'ru_RU', 'uk_UA', 'zh_TW', 'ab', 'ca_AD', 'cs_CZ', 'eo', 'eu_EU', 'fa_IR', 'ha', 'he_IL', 'hi_IN', 'hr_HR', 'hu_HU', 'id_ID', 'ky_KG', 'nl_NL', 'pl_PL', 'sr_RS', 'sr_RS@latin', 'sv_SE', 'th_TH', 'tr_TR')
+    """
+    try:
+        bpy.context.preferences.view.language = ""
+    except TypeError as e:
+        matches = re.findall(r'\(([^()]*)\)', e.args[-1])
+        return ast.literal_eval(f"({matches[-1]})")
 
 
 class TranslationHelper:
@@ -15,30 +31,30 @@ class TranslationHelper:
             self.translations_dict.setdefault(lang, {})[key] = src_trans
 
     def register(self):
-        try:
-            bpy.app.translations.register(self.name, self.translations_dict)
-        except ValueError:
-            pass
+        bpy.app.translations.register(self.name, self.translations_dict)
 
     def unregister(self):
         bpy.app.translations.unregister(self.name)
 
 
-Bbrush_zh_CN = TranslationHelper('Bbrush_zh_CN', zh_CN.data)
-Bbrush_zh_HANS = TranslationHelper('Bbrush_zh_HANS', zh_CN.data, lang='zh_HANS')
+translate = None
 
 
 def register():
-    if bpy.app.version < (4, 0, 0):
-        Bbrush_zh_CN.register()
-    else:
-        Bbrush_zh_CN.register()
-        Bbrush_zh_HANS.register()
+    global translate
+
+    language = "zh_CN"
+    all_language = get_language_list()
+    if language not in all_language:
+        if language == "zh_CN":
+            language = "zh_HANS"
+        elif language == "zh_HANS":
+            language = "zh_CN"
+    translate = TranslationHelper(f"BBrush_{language}", zh_CN.data, lang=language)
+    print("translate", language, translate)
 
 
 def unregister():
-    if bpy.app.version < (4, 0, 0):
-        Bbrush_zh_CN.unregister()
-    else:
-        Bbrush_zh_CN.unregister()
-        Bbrush_zh_HANS.unregister()
+    global translate
+    translate.unregister()
+    translate = None

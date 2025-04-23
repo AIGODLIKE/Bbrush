@@ -2,12 +2,13 @@ import bpy
 
 from . import update
 from .public import register_submodule_factory, PublicClass
-from .. import ops, ui, preferences
+from .. import ops, ui, preferences, src
 from ..adapter import bbrush_toolbar
 
 model_tuple = (
     ui,
     ops,
+    src,
     update,
     preferences,
     bbrush_toolbar,

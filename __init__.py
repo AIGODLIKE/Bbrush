@@ -1,6 +1,4 @@
-import bpy
-
-from .utils import reg
+from . import register_module
 
 bl_info = {
     "name": "Bbrush",
@@ -13,10 +11,9 @@ bl_info = {
 }
 
 
-
 def register():
-    reg.register()
+    register_module.register()
 
 
 def unregister():
-    reg.unregister()
+    register_module.unregister()

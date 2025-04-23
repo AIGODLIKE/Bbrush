@@ -12,12 +12,12 @@ from gpu_extras.batch import batch_for_shader
 from mathutils import Vector, geometry
 
 from .log import log
-from .. import __package__ as __name__
 from ..src.shortcut_keys import SHORTCUT_KEYS
 
 
 @cache
 def get_pref():
+    from .. import __package__ as __name__
     return bpy.context.preferences.addons[__name__].preferences
 
 

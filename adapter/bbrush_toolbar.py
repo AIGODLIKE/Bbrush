@@ -200,6 +200,7 @@ class BrushTool:
 
 def register():
     BrushTool.update_toolbar()
+    ...
 
 
 def unregister():
