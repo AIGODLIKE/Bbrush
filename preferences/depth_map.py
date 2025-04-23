@@ -29,3 +29,14 @@ class DepthMap:
     depth_offset_y: bpy.props.IntProperty(
         name="Silhouette image offset Y",
         default=80, max=114514, min=0)
+
+    def draw_depth(self, layout):
+        row = layout.row(align=True)
+        row.prop(self, "depth_display_mode")
+
+        layout.label(text="Silhouette")
+        box = layout.box()
+        box.prop(self, "depth_scale")
+        row = box.row(align=True)
+        row.prop(self, "depth_offset_x")
+        row.prop(self, "depth_offset_y")
