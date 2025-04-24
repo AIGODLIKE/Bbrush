@@ -407,7 +407,7 @@ class PublicProperty:
     @property
     def is_switch_sculpt_mode(self):
         pref = PublicClass.pref_()
-        always_use = pref.always_use_sculpt_mode
+        always_use = pref.always_use_bbrush_sculpt_mode
         return self.is_sculpt_mode and always_use and (not pref.sculpt)
 
     @property

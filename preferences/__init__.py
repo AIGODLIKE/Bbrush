@@ -17,28 +17,13 @@ class Preferences(
 
     use_mouse_emulate_3_button: bpy.props.BoolProperty(name="Use mouse emulate 3 Button")
 
-    def sculpt_update(self, context):
-        from ..topbar import update_top_bar
-        update_top_bar()
-        inputs = context.preferences.inputs
-        # from .adapter import Brush
-        if self.sculpt:
-            # Brush.normal_brush()
-            self.use_mouse_emulate_3_button = inputs.use_mouse_emulate_3_button
-            inputs.use_mouse_emulate_3_button = False
-            # key.register()
-        else:
-            # Brush.restore_brush()
-            inputs.use_mouse_emulate_3_button = self.use_mouse_emulate_3_button
-            # key.unregister()
-        bpy.ops.wm.redraw_timer(type='DRAW', iterations=1)
 
     # sculpt: bpy.props.BoolProperty(name="Bbrush",
     #                                default=False,
     #                                options={"SKIP_SAVE"},
     #                                update=sculpt_update)
 
-    always_use_sculpt_mode: bpy.props.BoolProperty(
+    always_use_bbrush_sculpt_mode: bpy.props.BoolProperty(
         name="Always use Bbrush sculpting mode",
         description=
         "If entering sculpting mode, Bbrush mode will automatically activate; "
@@ -55,7 +40,7 @@ class Preferences(
 
         box = layout.box()
         box.prop(self, "depth_ray_size")
-        box.prop(self, "always_use_sculpt_mode")
+        box.prop(self, "always_use_bbrush_sculpt_mode")
         box.prop(self, "use_mouse_emulate_3_button")
         layout.separator()
 

@@ -1,30 +1,19 @@
-class Brush:
+import bpy
 
-    @staticmethod
-    def restore_brush():
-        """重置笔刷"""
-        ...
 
-    @staticmethod
-    def mask_brush():
-        """遮罩笔刷"""
-        ...
-
-    @staticmethod
-    def normal_brush():
-        """正常笔刷"""
-        ...
-
-    @staticmethod
-    def hide_brush():
-        """隐藏笔刷"""
-        ...
-
-    @staticmethod
-    def brush_hide_item():
-        """隐藏笔刷"""
-        ...
-
-    @staticmethod
-    def brush_mask_item():
-        ...
+def operator_invoke_confirm(self, event, context, title, message) -> set:
+    """4.1版本以上需要多传参数
+    更改了显示模式,新版本将显示两个按钮"""
+    if bpy.app.version >= (4, 1, 0):
+        return context.window_manager.invoke_confirm(
+            **{
+                "operator": self,
+                "event": event,
+                'title': title,
+                'message': message,
+            }
+        )
+    else:
+        return context.window_manager.invoke_confirm(
+            self, event
+        )

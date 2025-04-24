@@ -1,6 +1,6 @@
 import bpy
 
-from .utils import check_operator, get_pref
+from .utils import check_operator, get_pref, is_bbruse_mode
 
 ORIGIN_TOP_BAR = None
 
@@ -14,13 +14,14 @@ def draw_restart_button(layout):
 
 
 def top_bar_draw(self, context):
+    from .sculpt import BbrushSculpt
     pref = get_pref()
 
     layout = self.layout
     region = context.region
     screen = context.screen
 
-    fs = screen.show_fullscreen
+    full_screen = screen.show_fullscreen
     align = pref.top_bar_alignment
 
     name = self.__class__.__name__
@@ -40,17 +41,21 @@ def top_bar_draw(self, context):
         show = False
 
     if show and context.mode == "SCULPT":
+        is_bbrush_mode = is_bbruse_mode()
+
         sub_row = layout.row(align=True)
-        icon = "EVENT_ESC" if pref.sculpt else "SCULPTMODE_HLT"
-        text = "Bbrush" if pref.top_bar_show_text else ""
-        if not pref.always_use_sculpt_mode:
-            sub_row.prop(pref,
-                         "sculpt",
-                         text=text,
-                         icon=icon)
-            sub_row.separator()
-        if pref.sculpt:
-            sub_row.prop(pref, "always_use_sculpt_mode", emboss=True, icon="AUTO", text="")
+        if not pref.always_use_bbrush_sculpt_mode:
+            ss = sub_row.row()
+            if is_bbrush_mode:
+                ss.scale_x = 1.2
+                ss.alert = is_bbrush_mode
+            icon = "EVENT_ESC" if is_bbrush_mode else "SCULPTMODE_HLT"
+            text = "Bbrush" if pref.top_bar_show_text else ""
+            ss.operator(BbrushSculpt.bl_idname, text=text, icon=icon).is_exit = is_bbrush_mode
+            ss.separator()
+
+        if is_bbrush_mode:
+            sub_row.prop(pref, "always_use_bbrush_sculpt_mode", emboss=True, icon="AUTO", text="")
 
             row = layout.row(align=True)
             row.prop(pref, "depth_display_mode", emboss=True, )
@@ -58,7 +63,7 @@ def top_bar_draw(self, context):
             row.prop(pref, "show_shortcut_keys", emboss=True, icon="EVENT_K", text="")
             draw_restart_button(row)
 
-        if fs and pref.sculpt:
+        if full_screen and is_bbrush_mode:
             layout.operator(
                 "screen.back_to_previous",
                 icon="SCREEN_BACK",
@@ -77,10 +82,6 @@ def replace_top_bar(replace: bool):
         cls.draw = top_bar_draw
     else:
         cls.draw = ORIGIN_TOP_BAR
-
-
-def update_top_bar():
-    replace_top_bar(get_pref().sculpt)
 
 
 def register():

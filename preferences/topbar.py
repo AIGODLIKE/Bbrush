@@ -4,10 +4,6 @@ import bpy
 class TopBar:
     top_bar_show_text: bpy.props.BoolProperty(name="Display top text", default=False)
 
-    def __update_top__(self, _):
-        from ..topbar import update_top_bar
-        update_top_bar()
-
     top_bar_alignment: bpy.props.EnumProperty(
         items=[
             ("LEFT", "Left", ""),
