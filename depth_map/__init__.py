@@ -1,7 +1,7 @@
 import bpy
 
 from .gpu_buffer import draw_gpu_buffer
-from ..utils import get_pref, get_toolbar_width
+from ..utils import get_pref, get_toolbar_width, is_bbruse_mode
 
 handel = None
 
@@ -14,7 +14,7 @@ def check_is_draw(context):
     is_sculpt = context.mode == "SCULPT"
     always = mode == "ALWAYS_DISPLAY"
     only_sculpt = (mode == "ONLY_SCULPT") and is_sculpt
-    only_bbrush = (mode == "ONLY_BBRUSH") and is_sculpt and pref.sculpt
+    only_bbrush = (mode == "ONLY_BBRUSH") and is_sculpt and is_bbruse_mode()
     return always or only_sculpt or only_bbrush
 
 

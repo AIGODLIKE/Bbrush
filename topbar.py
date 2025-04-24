@@ -32,7 +32,7 @@ def top_bar_draw(self, context):
     is_right_region = region.alignment == "RIGHT"
 
     if align == "LEFT":
-        show = is_editor_menu or (is_upper_bar and is_top_region)
+        show = is_editor_menu
     elif align == "CENTER":
         show = is_upper_bar and is_top_region
     elif align == "RIGHT":
@@ -44,10 +44,12 @@ def top_bar_draw(self, context):
         is_bbrush_mode = is_bbruse_mode()
 
         sub_row = layout.row(align=True)
+        # sub_row.label(text=f"{name} {region.alignment}")
         if not pref.always_use_bbrush_sculpt_mode:
-            ss = sub_row.row()
+            ss = sub_row.row(align=True)
+            ss.alignment = "CENTER"
             if is_bbrush_mode:
-                ss.scale_x = 1.2
+                ss.scale_x = 1.5
                 ss.alert = is_bbrush_mode
             icon = "EVENT_ESC" if is_bbrush_mode else "SCULPTMODE_HLT"
             text = "Bbrush" if pref.top_bar_show_text else ""
