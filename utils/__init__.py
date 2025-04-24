@@ -11,8 +11,6 @@ def get_toolbar_width(region_type="TOOLS"):
     """
     enum in ["WINDOW", "HEADER", "CHANNELS", "TEMPORARY", "UI", "TOOLS", "TOOL_PROPS",
         "PREVIEW", "HUD", "NAVIGATION_BAR", "EXECUTE", "FOOTER", "TOOL_HEADER", "XR"]
-    rt = regions_type
-
     """
     for i in bpy.context.area.regions:
         if i.type == region_type:
@@ -32,3 +30,23 @@ def register_submodule_factory(submodule_tuple):
             mod.unregister()
 
     return register, unregister
+
+
+def all_operator_listen() -> list[str]:
+    """反回所有操作符列表
+    """
+    from _bpy import ops
+    submodules = set()
+    for id_name in ops.dir():
+        id_split = id_name.split("_OT_", 1)
+        if len(id_split) == 2:
+            submodules.add(id_split[0].lower() + '.' + id_split[1])
+    return list(submodules)
+
+
+def check_operator(operator: str) -> bool:
+    return operator in all_operator_listen()
+
+
+def clear_cache():
+    ...

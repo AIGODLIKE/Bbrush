@@ -1,7 +1,8 @@
-from . import depth_map, preferences
+from . import depth_map, preferences, topbar
 from .utils import register_submodule_factory
 
 model_tuple = (
+    topbar,
     depth_map,
     preferences,
 )

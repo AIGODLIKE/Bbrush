@@ -546,19 +546,6 @@ class PublicClass(PublicProperty,
         return self.active_tool_name == 'builtin_brush.Smooth'
 
 
-@cache
-def all_operator_listen() -> list[str]:
-    """反回所有操作符列表
-    """
-    from _bpy import ops as _ops_module
-    _op_dir = _ops_module.dir
-    submodules = set()
-    for id_name in _op_dir():
-        id_split = id_name.split("_OT_", 1)
-        if len(id_split) == 2:
-            submodules.add(id_split[0].lower() + '.' + id_split[1])
-    return list(submodules)
-
 
 def register_submodule_factory(submodule_tuple):
     def register():

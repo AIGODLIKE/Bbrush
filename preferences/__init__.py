@@ -2,7 +2,7 @@ import bpy
 
 from .depth_map import DepthMap
 from .shortcut_key import ShortcutKey
-from .top_bar import TopBar
+from .topbar import TopBar
 from .. import __name__ as base_name
 
 
@@ -15,28 +15,28 @@ class Preferences(
 ):
     bl_idname = base_name
 
-    use_mouse_emulate_3_button: bpy.props.BoolProperty()
+    use_mouse_emulate_3_button: bpy.props.BoolProperty(name="Use mouse emulate 3 Button")
 
     def sculpt_update(self, context):
-        from .ui.replace_ui import update_top_bar
+        from ..topbar import update_top_bar
         update_top_bar()
         inputs = context.preferences.inputs
-        from .adapter import Brush
+        # from .adapter import Brush
         if self.sculpt:
-            Brush.normal_brush()
+            # Brush.normal_brush()
             self.use_mouse_emulate_3_button = inputs.use_mouse_emulate_3_button
             inputs.use_mouse_emulate_3_button = False
-            key.register()
+            # key.register()
         else:
-            Brush.restore_brush()
+            # Brush.restore_brush()
             inputs.use_mouse_emulate_3_button = self.use_mouse_emulate_3_button
-            key.unregister()
-        self.tag_all_redraw(context)
+            # key.unregister()
+        bpy.ops.wm.redraw_timer(type='DRAW', iterations=1)
 
-    sculpt: bpy.props.BoolProperty(name="Bbrush",
-                                   default=False,
-                                   options={"SKIP_SAVE"},
-                                   update=sculpt_update)
+    # sculpt: bpy.props.BoolProperty(name="Bbrush",
+    #                                default=False,
+    #                                options={"SKIP_SAVE"},
+    #                                update=sculpt_update)
 
     always_use_sculpt_mode: bpy.props.BoolProperty(
         name="Always use Bbrush sculpting mode",
@@ -54,8 +54,9 @@ class Preferences(
         layout = self.layout
 
         box = layout.box()
-        box.prop(self, "always_use_sculpt_mode")
         box.prop(self, "depth_ray_size")
+        box.prop(self, "always_use_sculpt_mode")
+        box.prop(self, "use_mouse_emulate_3_button")
         layout.separator()
 
         self.draw_top_ber(layout)
