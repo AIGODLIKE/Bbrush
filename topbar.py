@@ -31,7 +31,7 @@ def top_bar_draw(self, context):
     is_right_region = region.alignment == "RIGHT"
 
     if align == "LEFT":
-        show = is_editor_menu or (is_upper_bar and is_top_region and pref.top_bar_replace and pref.sculpt)
+        show = is_editor_menu or (is_upper_bar and is_top_region)
     elif align == "CENTER":
         show = is_upper_bar and is_top_region
     elif align == "RIGHT":
@@ -56,10 +56,9 @@ def top_bar_draw(self, context):
             row.prop(pref, "depth_display_mode", emboss=True, )
             row.prop(pref, "depth_scale", emboss=True, )
             row.prop(pref, "show_shortcut_keys", emboss=True, icon="EVENT_K", text="")
-            if pref.top_bar_replace:
-                draw_restart_button(row)
+            draw_restart_button(row)
 
-        if fs and pref.sculpt and pref.top_bar_replace:
+        if fs and pref.sculpt:
             layout.operator(
                 "screen.back_to_previous",
                 icon="SCREEN_BACK",
@@ -81,13 +80,7 @@ def replace_top_bar(replace: bool):
 
 
 def update_top_bar():
-    pref = get_pref()
-
-    if pref.top_bar_replace:
-        show = pref.sculpt
-    else:
-        show = False
-    replace_top_bar(show)
+    replace_top_bar(get_pref().sculpt)
 
 
 def register():

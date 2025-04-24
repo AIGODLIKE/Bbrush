@@ -50,3 +50,8 @@ def check_operator(operator: str) -> bool:
 
 def clear_cache():
     ...
+
+
+def is_bbruse_mode() -> bool:
+    from ..sculpt import brush_runtime
+    return brush_runtime is not None
