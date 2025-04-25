@@ -24,6 +24,8 @@ def top_bar_draw(self, context):
     full_screen = screen.show_fullscreen
     align = pref.top_bar_alignment
 
+    is_bbrush_mode = is_bbruse_mode()
+
     name = self.__class__.__name__
     is_upper_bar = name == "TOPBAR_HT_upper_bar"
     is_editor_menu = name == "TOPBAR_MT_editor_menus"
@@ -32,7 +34,7 @@ def top_bar_draw(self, context):
     is_right_region = region.alignment == "RIGHT"
 
     if align == "LEFT":
-        show = is_editor_menu
+        show = is_editor_menu or (is_upper_bar and is_top_region and is_bbrush_mode)
     elif align == "CENTER":
         show = is_upper_bar and is_top_region
     elif align == "RIGHT":
@@ -41,7 +43,6 @@ def top_bar_draw(self, context):
         show = False
 
     if show and context.mode == "SCULPT":
-        is_bbrush_mode = is_bbruse_mode()
 
         sub_row = layout.row(align=True)
         # sub_row.label(text=f"{name} {region.alignment}")

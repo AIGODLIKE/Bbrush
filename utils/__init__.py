@@ -48,10 +48,11 @@ def check_operator(operator: str) -> bool:
     return operator in all_operator_listen()
 
 
-def clear_cache():
-    ...
-
-
 def is_bbruse_mode() -> bool:
     from ..sculpt import brush_runtime
     return brush_runtime is not None
+
+
+def clear_cache():
+    # is_bbruse_mode.cache_clear()
+    ...

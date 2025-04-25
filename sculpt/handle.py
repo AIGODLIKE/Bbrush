@@ -1,7 +1,7 @@
 import bpy
 
 from ..topbar import replace_top_bar
-from ..utils import get_pref
+from ..utils import get_pref, is_bbruse_mode
 
 
 class BrushHandle:
@@ -9,7 +9,7 @@ class BrushHandle:
     is_exit: bpy.props.BoolProperty(default=False, options={"SKIP_SAVE"}, name="用于在模态的时候手动退出")
 
     def check_exit(self, context, event) -> bool:
-        if self.is_exit:  # 这个用于顶部的退出按钮
+        if self.is_exit and is_bbruse_mode():  # 这个用于顶部的退出按钮
             return True
         elif context.mode != "SCULPT":
             return True
@@ -19,9 +19,12 @@ class BrushHandle:
     def exit(self, context):
         """退出Bbrush模式"""
         inputs = context.preferences.inputs
-        inputs.use_mouse_emulate_3_button = self.use_mouse_emulate_3_button
+        if inputs.use_mouse_emulate_3_button != self.use_mouse_emulate_3_button:
+            inputs.use_mouse_emulate_3_button = self.use_mouse_emulate_3_button
 
         replace_top_bar(False)
+        
+        self.restore_shelf(context)
 
         bpy.ops.wm.redraw_timer("EXEC_DEFAULT", False, type='DRAW', iterations=1)
 
@@ -34,9 +37,11 @@ class BrushHandle:
         replace_top_bar(True)
 
         inputs = context.preferences.inputs
-
         self.use_mouse_emulate_3_button = inputs.use_mouse_emulate_3_button
-        inputs.use_mouse_emulate_3_button = pref.use_mouse_emulate_3_button
+        if inputs.use_mouse_emulate_3_button != pref.use_mouse_emulate_3_button:
+            inputs.use_mouse_emulate_3_button = pref.use_mouse_emulate_3_button
+        # register_class(...):
+        # 信息: Registering key-config preferences class: 'Prefs', bl_idname 'Blender' 已被注册过, 注销先前的
 
         bpy.ops.wm.redraw_timer("EXEC_DEFAULT", False, type='DRAW', iterations=1)
 

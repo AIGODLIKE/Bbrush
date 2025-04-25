@@ -1,8 +1,9 @@
 import bpy
 
 from .handle import BrushHandle
+from .switch_brush_shelf import SwitchBrushShelf
 from ..adapter import operator_invoke_confirm
-from ..utils import get_pref
+from ..utils import get_pref, clear_cache
 
 """
 TOTO
@@ -17,6 +18,7 @@ brush_runtime = None
 class BbrushSculpt(
     bpy.types.Operator,
     BrushHandle,
+    SwitchBrushShelf,
 ):
     bl_idname = "bbrush.bbrush_sculpt"
     bl_label = "Bbrush sculpting"
@@ -26,6 +28,7 @@ class BbrushSculpt(
     def exit(self, context):
         global brush_runtime
         brush_runtime = None
+        clear_cache()
         return super().exit(context)
 
     def invoke(self, context, event):
@@ -35,14 +38,22 @@ class BbrushSculpt(
         if brush_runtime is not None:
             brush_runtime.is_exit = self.is_exit
             return {"CANCELLED"}
+        else:
+            if self.is_exit:  # 更新数据太快了
+                self.is_exit = False
+
         brush_runtime = self
 
         self.start(context)
+        self.update_brush_shelf(context, event)
         context.window_manager.modal_handler_add(self)
         return {"RUNNING_MODAL"}
 
     def modal(self, context, event):
         pref = get_pref()
+
+        self.update_brush_shelf(context, event)
+
         if self.check_exit(context, event):
             if pref.always_use_bbrush_sculpt_mode and self.is_exit:
                 return operator_invoke_confirm(
