@@ -152,7 +152,7 @@ class BrushTool:
             'SCULPT': [],
             'MASK': [],
             'HIDE': [],
-            'ORIGINAL_TOOLBAR': toolbar.copy(),
+            'ORIGINAL': toolbar.copy(),
         }
         mask = cls.toolbar_dit['MASK']
 
@@ -193,7 +193,7 @@ class BrushTool:
         if mode in ('SCULPT',
                     'MASK',
                     'HIDE',
-                    'ORIGINAL_TOOLBAR',
+                    'ORIGINAL',
                     ):
             set_tool(cls.toolbar_dit[mode])
 

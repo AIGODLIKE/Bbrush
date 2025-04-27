@@ -18,7 +18,7 @@ brush_shelf = {
 }
 
 mask_brush = (
-    "builtin_brush.Mask",
+    "builtin_brush.Mask", #旧版本名称
     "builtin_brush.mask",
     "builtin.box_mask",
     "builtin.lasso_mask",
@@ -126,7 +126,7 @@ class SwitchBrushShelf:
 
             self.brush_mode = mode
             self.update_ui(context)
-            
+
         (active_tool,WorkSpaceTool,index) = self.get_active_tool(context)
         if WorkSpaceTool is None:
             tool = active_brush_toolbar[mode]
