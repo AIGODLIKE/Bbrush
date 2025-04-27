@@ -3,7 +3,7 @@ import bpy
 from .handle import BrushHandle
 from .switch_brush_shelf import SwitchBrushShelf
 from ..adapter import operator_invoke_confirm
-from ..utils import get_pref, clear_cache
+from ..utils import get_pref
 
 """
 TOTO
@@ -28,7 +28,6 @@ class BbrushSculpt(
     def exit(self, context):
         global brush_runtime
         brush_runtime = None
-        clear_cache()
         return super().exit(context)
 
     def invoke(self, context, event):
@@ -52,6 +51,7 @@ class BbrushSculpt(
     def modal(self, context, event):
         pref = get_pref()
 
+        # print(event.type,event.value)
         self.update_brush_shelf(context, event)
 
         if self.check_exit(context, event):
@@ -64,7 +64,11 @@ class BbrushSculpt(
                     message="You have enabled the option to always use Brush mode in your preference settings"
                 )
             return self.exit(context)
-        return {'PASS_THROUGH'}
+        elif self.key_event(context, event):
+            print("key_event")
+            # return {"RUNNING_MODAL"}
+        
+        return {"PASS_THROUGH"}
 
     def execute(self, context):
         return {"FINISHED"}

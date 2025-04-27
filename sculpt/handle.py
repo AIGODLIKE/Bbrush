@@ -24,7 +24,7 @@ class BrushHandle:
 
         replace_top_bar(False)
         
-        self.restore_shelf(context)
+        self.restore_brush_shelf(context)
 
         bpy.ops.wm.redraw_timer("EXEC_DEFAULT", False, type='DRAW', iterations=1)
 
@@ -40,8 +40,8 @@ class BrushHandle:
         self.use_mouse_emulate_3_button = inputs.use_mouse_emulate_3_button
         if inputs.use_mouse_emulate_3_button != pref.use_mouse_emulate_3_button:
             inputs.use_mouse_emulate_3_button = pref.use_mouse_emulate_3_button
-        # register_class(...):
-        # 信息: Registering key-config preferences class: 'Prefs', bl_idname 'Blender' 已被注册过, 注销先前的
+            # register_class(...):
+            # 信息: Registering key-config preferences class: 'Prefs', bl_idname 'Blender' 已被注册过, 注销先前的
 
         bpy.ops.wm.redraw_timer("EXEC_DEFAULT", False, type='DRAW', iterations=1)
 
@@ -50,3 +50,33 @@ class BrushHandle:
         """在用户切换模式时使用此方法"""
         if bpy.context.mode == "SCULPT" and get_pref().always_use_bbrush_sculpt_mode:
             bpy.ops.bbrush.bbrush_sculpt("INVOKE_DEFAULT")
+
+    def key_event(self,context,event ) -> bool:
+        if event.value == "PRESS":
+            if event.type == 'NUMPAD_PLUS':
+                bpy.ops.sculpt.mask_filter('EXEC_DEFAULT',
+                                            True,
+                                            filter_type='GROW',
+                                            auto_iteration_count=True)
+                return True
+            elif event.type == 'NUMPAD_MINUS':
+                bpy.ops.sculpt.mask_filter('EXEC_DEFAULT',
+                                            True,
+                                            filter_type='SHRINK',
+                                            auto_iteration_count=True)
+                return True
+            elif event.type in ('UP_ARROW', 'NUMPAD_ASTERIX'):
+                bpy.ops.sculpt.mask_filter('EXEC_DEFAULT',
+                                            True,
+                                            filter_type='CONTRAST_INCREASE',
+                                            auto_iteration_count=False)
+                return True
+            elif event.type in ('DOWN_ARROW', 'NUMPAD_SLASH'):
+                bpy.ops.sculpt.mask_filter('EXEC_DEFAULT',
+                                            True,
+                                            filter_type='CONTRAST_DECREASE',
+                                            auto_iteration_count=False)
+                
+                return True
+        
+        return False
