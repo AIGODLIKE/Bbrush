@@ -64,9 +64,12 @@ class BbrushSculpt(
                     message="You have enabled the option to always use Brush mode in your preference settings"
                 )
             return self.exit(context)
+        # elif context.space_data is None:
+        #     """切换窗口的时候可能是None"""
+        #     return {"RUNNING_MODAL"}
         elif self.key_event(context, event):
-            print("key_event")
             # return {"RUNNING_MODAL"}
+            print("key_event")
         
         return {"PASS_THROUGH"}
 

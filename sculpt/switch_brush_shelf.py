@@ -1,17 +1,14 @@
 import bpy
 
-from bl_ui.space_toolsystem_common import ToolSelectPanelHelper
+from bl_ui.space_toolsystem_common import ToolSelectPanelHelper,activate_by_id,item_from_id
 from bpy.utils.toolsystem import ToolDef
 
-origin_brush_toolbar = ToolSelectPanelHelper._tool_class_from_space_type('VIEW_3D')._tools['SCULPT'].copy()
+origin_brush_toolbar = ToolSelectPanelHelper._tool_class_from_space_type("VIEW_3D")._tools["SCULPT"].copy()
 active_brush_toolbar = {  # 记录活动笔刷的名称
-            'SCULPT': 'builtin.brush',
-            'MASK': "builtin_brush.mask",
-            'HIDE': 'builtin.box_hide',
+            "SCULPT": "builtin.brush",
+            "MASK": "builtin_brush.mask",
+            "HIDE": "builtin.box_hide",
         }
-# bpy.ops.wm.tool_set_by_id(name="builtin.box_hide")
-# bpy.ops.wm.tool_set_by_id(name="builtin_brush.mask")
-# bpy.ops.wm.tool_set_by_id(name="builtin.brush")
 
 brush_shelf = {
     "ORIGINAL":origin_brush_toolbar,
@@ -21,18 +18,18 @@ brush_shelf = {
 }
 
 mask_brush = (
-    'builtin_brush.Mask',
+    "builtin_brush.Mask",
     "builtin_brush.mask",
-    'builtin.box_mask',
-    'builtin.lasso_mask',
-    'builtin.line_mask',
+    "builtin.box_mask",
+    "builtin.lasso_mask",
+    "builtin.line_mask",
     "builtin.polyline_mask",
 )
 hide_brush = (
-    'builtin.box_hide',
-    'builtin.box_trim',
-    'builtin.lasso_trim',
-    'builtin.line_project',
+    "builtin.box_hide",
+    "builtin.box_trim",
+    "builtin.lasso_trim",
+    "builtin.line_project",
     "builtin.polyline_hide",
 )
 
@@ -53,7 +50,7 @@ def tool_ops(tools):
             append_brush(tool)
         elif isinstance(tool, Iterable):
             tool_ops(tool)
-        elif getattr(tool, '__call__', False):
+        elif getattr(tool, "__call__", False):
             if hasattr(bpy.context, "tool_settings"):
                 tool_ops(tool(bpy.context))
         else:
@@ -91,50 +88,67 @@ class SwitchBrushShelf:
             context.region.tag_redraw()
         if context.screen:
             context.screen.update_tag()
-        # bpy.ops.wm.redraw_timer(type='DRAW', iterations=1)
+        
+        for area in context.screen.areas:
+            if area.type == "VIEW_3D":
+                for region in area.regions:
+                    region.tag_redraw()
+        # bpy.ops.wm.redraw_timer(type="DRAW", iterations=1)
 
     @staticmethod
-    def get_active_tool_idname(context) -> "str|None":
-        return ToolSelectPanelHelper.tool_active_from_context(context)
+    def get_active_tool(context) -> "()|None":
+        return ToolSelectPanelHelper._tool_class_from_space_type("VIEW_3D")._tool_get_active(context,"VIEW_3D","SCULPT")
     
     def update_brush_shelf(self, context, event):
         """更新笔刷资产架"""
+        if context.space_data is None:
+            # 可能在切换窗口
+            return
+        
         key = (event.ctrl, event.alt, event.shift)
         mode = BRUSH_SHELF_MODE[key] #使用组合键来确认是否需要更新笔刷工具架
-
+# (ToolDef(idname='builtin.brush', label='Brush', description=None, icon='brush.generic', cursor=None, widget_properties=None, widget=None, keymap=None, brush_type=None, data_block=None, operator=None, draw_settings=None, draw_cursor=None, options={'USE_BRUSHES'}), bpy.data.workspaces['雕刻']...WorkSpaceTool, 0)
+        (active_tool,WorkSpaceTool,index) = self.get_active_tool(context)
+        print("active_tool",type(active_tool),type(WorkSpaceTool),index)
+       
+            
         if mode != self.brush_mode:
-            active_tool = self.get_active_tool_idname(context)
-            if active_tool:
-                active_brush_toolbar[self.brush_mode] = active_tool
-            af  = ToolSelectPanelHelper._tool_class_from_space_type('VIEW_3D')._tools['SCULPT']
+            # set_tool = active_brush_toolbar[mode]
 
+            if active_tool:
+                active_brush_toolbar[self.brush_mode] = active_tool.idname
+    
             self.set_brush_shelf(mode)
-            tools  = ToolSelectPanelHelper._tool_class_from_space_type('VIEW_3D')._tools['SCULPT']
-            print("update_brush_shelf",mode,self.brush_mode,active_tool)
-            print("af",len(af))
-            print("tools",len(tools))
-            for area in context.screen.areas:
-                if area.type == "VIEW_3D":
-                    for region in area.regions:
-                        region.tag_redraw()
-                        print(area.type,region.type)
-            
-            
-            set_tool = active_brush_toolbar[mode]
-            if set_tool:
-                bpy.ops.wm.tool_set_by_id(name=set_tool)
+
+            print("update_brush_shelf",mode,self.brush_mode)
+            # if set_tool:
+                # self.update_ui(context)
 
             self.brush_mode = mode
             self.update_ui(context)
+            
+        (active_tool,WorkSpaceTool,index) = self.get_active_tool(context)
+        if WorkSpaceTool is None:
+            tool = active_brush_toolbar[mode]
+            cls = ToolSelectPanelHelper._tool_class_from_space_type("VIEW_3D")
+            (item, index) = cls._tool_get_by_id(context, tool)
+
+            # item = _tool_get_by_id_active(context,tool)
+            print("aaa",tool,type(item),index)
+            if item:
+                res = activate_by_id(context,"VIEW_3D",tool)
+                print("activate_by_id",res)
+                # bpy.ops.wm.tool_set_by_id(name=tool)
 
     def set_brush_shelf(self, shelf_mode):
         shelf = brush_shelf[shelf_mode]
-        tol = ToolSelectPanelHelper._tool_class_from_space_type('VIEW_3D')
-        if tol._tools['SCULPT'] != shelf:
-            tol._tools['SCULPT'] = shelf
+        tol = ToolSelectPanelHelper._tool_class_from_space_type("VIEW_3D")
+        if tol._tools["SCULPT"] != shelf:
+            tol._tools["SCULPT"] = shelf
             
 
 
     def restore_brush_shelf(self, context):
         """恢复笔刷工具架"""
         self.set_brush_shelf("ORIGINAL")
+        self.update_ui(context)
