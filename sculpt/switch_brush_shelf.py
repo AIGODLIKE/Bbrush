@@ -88,8 +88,16 @@ BRUSH_SHELF_MODE = {
 }
 
 
+def set_brush_shelf(shelf_mode):
+    shelf = brush_shelf[shelf_mode]
+    tol = ToolSelectPanelHelper._tool_class_from_space_type("VIEW_3D")
+    if tol._tools["SCULPT"] != shelf:
+        tol._tools["SCULPT"] = shelf
+
+
 class SwitchBrushShelf:
-    brush_mode = "NONE"  # SCULPT,SMOOTH,HIDE,MASK,ORIGINAL
+    # SCULPT,SMOOTH,HIDE,MASK,ORIGINAL
+    brush_mode = "NONE"
 
     @staticmethod
     def update_ui(context):
@@ -127,9 +135,7 @@ class SwitchBrushShelf:
             if active_tool:
                 active_brush_toolbar[self.brush_mode] = active_tool.idname
 
-            self.set_brush_shelf(mode)
-
-            print("update_brush_shelf", mode, self.brush_mode)
+            set_brush_shelf(mode)
 
             self.brush_mode = mode
             self.update_ui(context)
@@ -142,18 +148,10 @@ class SwitchBrushShelf:
 
             if item:
                 res = activate_by_id(context, "VIEW_3D", tool)
-                print("activate_by_id", res)
-                print("aaa", tool, type(item), index)
-                if res:
-                    bpy.ops.wm.tool_set_by_id(name=tool)
-
-    def set_brush_shelf(self, shelf_mode):
-        shelf = brush_shelf[shelf_mode]
-        tol = ToolSelectPanelHelper._tool_class_from_space_type("VIEW_3D")
-        if tol._tools["SCULPT"] != shelf:
-            tol._tools["SCULPT"] = shelf
+                # if res:
+                #     bpy.ops.wm.tool_set_by_id(name=tool)
 
     def restore_brush_shelf(self, context):
         """恢复笔刷工具架"""
-        self.set_brush_shelf("ORIGINAL")
+        set_brush_shelf("ORIGINAL")
         self.update_ui(context)
