@@ -31,6 +31,10 @@ class BrushHandle:
 
         return {"FINISHED"}
 
+    def cancel(self, context):
+        print("cancel")
+        self.exit(context)
+
     def start(self, context):
         """进入Bbrush模式"""
 

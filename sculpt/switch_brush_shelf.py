@@ -46,7 +46,11 @@ def append_brush(brush):
     if idname in mask_brush:
         brush_shelf["MASK"].append(brush)
     elif idname in hide_brush:
-        brush_shelf["HIDE"].append(brush)
+        if idname == "builtin.line_project":
+            brush_shelf["HIDE"].insert(4, brush)
+            brush_shelf["HIDE"].insert(5, None)
+        else:
+            brush_shelf["HIDE"].append(brush)
     else:
         brush_shelf["SCULPT"].append(brush)
 

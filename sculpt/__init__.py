@@ -30,6 +30,7 @@ class BbrushSculpt(
     def exit(self, context):
         global brush_runtime
         brush_runtime = None
+        # TODO 在直接退出Blender的时候需要切换到插件
         return super().exit(context)
 
     def invoke(self, context, event):
@@ -66,9 +67,6 @@ class BbrushSculpt(
                     message="You have enabled the option to always use Brush mode in your preference settings"
                 )
             return self.exit(context)
-        # elif context.space_data is None:
-        #     """切换窗口的时候可能是None"""
-        #     return {"RUNNING_MODAL"}
         elif self.key_event(context, event):
             print("key_event")
         
