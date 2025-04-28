@@ -115,9 +115,9 @@ class SwitchBrushShelf:
         # bpy.ops.wm.redraw_timer(type="DRAW", iterations=1)
 
     @staticmethod
-    def get_active_tool(context) -> "()|None":
-        return ToolSelectPanelHelper._tool_class_from_space_type("VIEW_3D")._tool_get_active(context, "VIEW_3D",
-                                                                                             "SCULPT")
+    def get_active_tool(context) -> "(bpy.types.Tool, bpy.types.WorkSpaceTool, int)|None":
+        return (ToolSelectPanelHelper._tool_class_from_space_type("VIEW_3D")._tool_get_active(context, "VIEW_3D",
+                                                                                             "SCULPT"))
 
     def update_brush_shelf(self, context, event):
         """更新笔刷资产架"""

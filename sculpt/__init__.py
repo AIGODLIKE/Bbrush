@@ -1,6 +1,7 @@
 import bpy
 
 from .handle import BrushHandle
+from .key import BrushKey
 from .switch_brush_shelf import SwitchBrushShelf
 from ..adapter import operator_invoke_confirm
 from ..utils import get_pref
@@ -17,6 +18,7 @@ brush_runtime = None
 
 class BbrushSculpt(
     bpy.types.Operator,
+    BrushKey,
     BrushHandle,
     SwitchBrushShelf,
 ):
@@ -68,7 +70,6 @@ class BbrushSculpt(
         #     """切换窗口的时候可能是None"""
         #     return {"RUNNING_MODAL"}
         elif self.key_event(context, event):
-            # return {"RUNNING_MODAL"}
             print("key_event")
         
         return {"PASS_THROUGH"}

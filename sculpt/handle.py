@@ -18,32 +18,34 @@ class BrushHandle:
 
     def exit(self, context):
         """退出Bbrush模式"""
-        inputs = context.preferences.inputs
-        if inputs.use_mouse_emulate_3_button != self.use_mouse_emulate_3_button:
-            inputs.use_mouse_emulate_3_button = self.use_mouse_emulate_3_button
+        # inputs = context.preferences.inputs
+        # if inputs.use_mouse_emulate_3_button != self.use_mouse_emulate_3_button:
+        #     inputs.use_mouse_emulate_3_button = self.use_mouse_emulate_3_button
 
         replace_top_bar(False)
-        
-        self.restore_brush_shelf(context)
 
-        bpy.ops.wm.redraw_timer("EXEC_DEFAULT", False, type='DRAW', iterations=1)
+        self.restore_brush_shelf(context)
+        self.restore_key(context)
+
+        self.update_ui(context)
 
         return {"FINISHED"}
 
     def start(self, context):
         """进入Bbrush模式"""
-        pref = get_pref()
 
         replace_top_bar(True)
 
-        inputs = context.preferences.inputs
-        self.use_mouse_emulate_3_button = inputs.use_mouse_emulate_3_button
-        if inputs.use_mouse_emulate_3_button != pref.use_mouse_emulate_3_button:
-            inputs.use_mouse_emulate_3_button = pref.use_mouse_emulate_3_button
-            # register_class(...):
-            # 信息: Registering key-config preferences class: 'Prefs', bl_idname 'Blender' 已被注册过, 注销先前的
+        self.start_key(context)
+        self.update_ui(context)
 
-        bpy.ops.wm.redraw_timer("EXEC_DEFAULT", False, type='DRAW', iterations=1)
+        # pref = get_pref()
+        # inputs = context.preferences.inputs
+        # self.use_mouse_emulate_3_button = inputs.use_mouse_emulate_3_button
+        # if inputs.use_mouse_emulate_3_button != pref.use_mouse_emulate_3_button:
+        #     inputs.use_mouse_emulate_3_button = pref.use_mouse_emulate_3_button
+        # register_class(...):
+        # 信息: Registering key-config preferences class: 'Prefs', bl_idname 'Blender' 已被注册过, 注销先前的
 
     @staticmethod
     def toggle_object_mode():
@@ -51,32 +53,22 @@ class BrushHandle:
         if bpy.context.mode == "SCULPT" and get_pref().always_use_bbrush_sculpt_mode:
             bpy.ops.bbrush.bbrush_sculpt("INVOKE_DEFAULT")
 
-    def key_event(self,context,event ) -> bool:
+    @staticmethod
+    def key_event(context, event) -> bool:
         if event.value == "PRESS":
             if event.type == 'NUMPAD_PLUS':
-                bpy.ops.sculpt.mask_filter('EXEC_DEFAULT',
-                                            True,
-                                            filter_type='GROW',
-                                            auto_iteration_count=True)
+                bpy.ops.sculpt.mask_filter('EXEC_DEFAULT', True, filter_type='GROW', auto_iteration_count=True)
                 return True
             elif event.type == 'NUMPAD_MINUS':
-                bpy.ops.sculpt.mask_filter('EXEC_DEFAULT',
-                                            True,
-                                            filter_type='SHRINK',
-                                            auto_iteration_count=True)
+                bpy.ops.sculpt.mask_filter('EXEC_DEFAULT', True, filter_type='SHRINK', auto_iteration_count=True)
                 return True
             elif event.type in ('UP_ARROW', 'NUMPAD_ASTERIX'):
-                bpy.ops.sculpt.mask_filter('EXEC_DEFAULT',
-                                            True,
-                                            filter_type='CONTRAST_INCREASE',
-                                            auto_iteration_count=False)
+                bpy.ops.sculpt.mask_filter('EXEC_DEFAULT', True, filter_type='CONTRAST_INCREASE',
+                                           auto_iteration_count=False)
                 return True
             elif event.type in ('DOWN_ARROW', 'NUMPAD_SLASH'):
-                bpy.ops.sculpt.mask_filter('EXEC_DEFAULT',
-                                            True,
-                                            filter_type='CONTRAST_DECREASE',
-                                            auto_iteration_count=False)
-                
+                bpy.ops.sculpt.mask_filter('EXEC_DEFAULT', True, filter_type='CONTRAST_DECREASE',
+                                           auto_iteration_count=False)
+
                 return True
-        
         return False

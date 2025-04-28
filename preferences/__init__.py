@@ -16,7 +16,7 @@ class Preferences(
 ):
     bl_idname = base_name
 
-    use_mouse_emulate_3_button: bpy.props.BoolProperty(name="Use mouse emulate 3 Button")
+    # use_mouse_emulate_3_button: bpy.props.BoolProperty(name="Use mouse emulate 3 Button")
 
     always_use_bbrush_sculpt_mode: bpy.props.BoolProperty(
         name="Always use Bbrush sculpting mode",
@@ -38,7 +38,7 @@ class Preferences(
         box = layout.box()
         box.prop(self, "depth_ray_size")
         box.prop(self, "always_use_bbrush_sculpt_mode")
-        box.prop(self, "use_mouse_emulate_3_button")
+        # box.prop(self, "use_mouse_emulate_3_button")
         layout.separator()
 
         self.draw_top_ber(layout)
