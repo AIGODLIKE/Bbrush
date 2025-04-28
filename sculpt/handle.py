@@ -32,7 +32,7 @@ class BrushHandle:
         return {"FINISHED"}
 
     def cancel(self, context):
-        print("cancel")
+        """在直接退出Blender的时候需要切换快捷键回默认"""
         self.exit(context)
 
     def start(self, context):

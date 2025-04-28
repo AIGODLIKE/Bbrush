@@ -30,7 +30,6 @@ class BbrushSculpt(
     def exit(self, context):
         global brush_runtime
         brush_runtime = None
-        # TODO 在直接退出Blender的时候需要切换到插件
         return super().exit(context)
 
     def invoke(self, context, event):
