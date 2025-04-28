@@ -1,4 +1,5 @@
 import bpy
+from mathutils import Vector
 
 from ..topbar import replace_top_bar
 from ..utils import get_pref, is_bbruse_mode
@@ -7,6 +8,8 @@ from ..utils import get_pref, is_bbruse_mode
 class BrushHandle:
     use_mouse_emulate_3_button = None
     is_exit: bpy.props.BoolProperty(default=False, options={"SKIP_SAVE"}, name="用于在模态的时候手动退出")
+
+    mouse_press = None
 
     def check_exit(self, context, event) -> bool:
         if self.is_exit and is_bbruse_mode():  # 这个用于顶部的退出按钮
@@ -57,8 +60,7 @@ class BrushHandle:
         if bpy.context.mode == "SCULPT" and get_pref().always_use_bbrush_sculpt_mode:
             bpy.ops.bbrush.bbrush_sculpt("INVOKE_DEFAULT")
 
-    @staticmethod
-    def key_event(context, event) -> bool:
+    def key_event(self, context, event) -> bool:
         if event.value == "PRESS":
             if event.type == 'NUMPAD_PLUS':
                 bpy.ops.sculpt.mask_filter('EXEC_DEFAULT', True, filter_type='GROW', auto_iteration_count=True)
@@ -75,4 +77,8 @@ class BrushHandle:
                                            auto_iteration_count=False)
 
                 return True
+
+            elif event.type == "LEFTMOUSE":
+                self.mouse_press = Vector((event.mouse_x, event.mouse_y))
+
         return False

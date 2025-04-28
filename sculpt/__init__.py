@@ -42,7 +42,6 @@ class BbrushSculpt(
         else:
             if self.is_exit:  # 更新数据太快了
                 self.is_exit = False
-
         brush_runtime = self
 
         self.start(context)
@@ -53,7 +52,8 @@ class BbrushSculpt(
     def modal(self, context, event):
         pref = get_pref()
 
-        # print(event.type,event.value)
+        print(event.type, event.value, "\t\t", event.type_prev, event.value_prev, context.area,
+              context.region)
         self.update_brush_shelf(context, event)
 
         if self.check_exit(context, event):
@@ -68,7 +68,8 @@ class BbrushSculpt(
             return self.exit(context)
         elif self.key_event(context, event):
             print("key_event")
-        
+            return {"RUNNING_MODAL"}
+
         return {"PASS_THROUGH"}
 
     def execute(self, context):

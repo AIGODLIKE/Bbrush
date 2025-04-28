@@ -1,6 +1,6 @@
 schema_version = "1.0.3"
 
-blender_version_min = "4.2.0"
+blender_version_min = "4.4.0"
 id = "Bbrush"
 license = ["UNKNOWN", ]
 maintainer = "AIGODLIKE Community：小萌新"
