@@ -24,7 +24,7 @@ class Preferences(
         "If entering sculpting mode, Bbrush mode will automatically activate; "
         "if exiting sculpting mode, Bbrush mode will deactivate",
         default=False,
-        update=lambda self, context: sculpt.BbrushSculpt.toggle_object_mode()
+        update=lambda self, context: sculpt.BBrushSculpt.toggle_object_mode()
     )
 
     depth_ray_size: bpy.props.IntProperty(

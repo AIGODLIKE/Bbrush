@@ -14,7 +14,7 @@ def draw_restart_button(layout):
 
 
 def top_bar_draw(self, context):
-    from .sculpt import BbrushSculpt
+    from .sculpt import BBrushSculpt
     pref = get_pref()
 
     layout = self.layout
@@ -54,7 +54,7 @@ def top_bar_draw(self, context):
                 ss.alert = is_bbrush_mode
             icon = "EVENT_ESC" if is_bbrush_mode else "SCULPTMODE_HLT"
             text = "Bbrush" if pref.top_bar_show_text else ""
-            ss.operator(BbrushSculpt.bl_idname, text=text, icon=icon).is_exit = is_bbrush_mode
+            ss.operator(BBrushSculpt.bl_idname, text=text, icon=icon).is_exit = is_bbrush_mode
             ss.separator()
 
         if is_bbrush_mode:

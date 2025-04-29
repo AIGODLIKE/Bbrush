@@ -1,9 +1,11 @@
 import bpy
+from mathutils import Vector
 
 from .. import __package__ as base_name
 
 
 def get_pref():
+    """获取偏好设置"""
     return bpy.context.preferences.addons[base_name].preferences
 
 
@@ -21,6 +23,7 @@ def get_toolbar_width(region_type="TOOLS"):
 
 
 def register_submodule_factory(submodule_tuple):
+    """注册子模块"""
     def register():
         for mod in submodule_tuple:
             mod.register()
@@ -44,15 +47,52 @@ def all_operator_listen() -> list[str]:
     return list(submodules)
 
 
+def find_mouse_in_area(context, event) -> "bpy.types.Area|None":
+    """查找在鼠标上的区域
+    就是鼠标活动区域
+    """
+    mouse = Vector((event.mouse_x, event.mouse_y)).freeze()
+    for area in context.screen.areas:
+        xy = Vector((area.x, area.y)).freeze()
+        aw = xy + Vector((area.width, area.height)).freeze()
+        if xy.x < mouse.x < aw.x and xy.y < mouse.y < aw.y:
+            return area
+
+
+def check_mouse_in_3d_area(context, event) -> bool:
+    """检查鼠标是否在3D Area"""
+    if area := find_mouse_in_area(context, event):
+        return area.type == "VIEW_3D"
+    return False
+
+
 def check_operator(operator: str) -> bool:
+    """检查操作符是否注册"""
     return operator in all_operator_listen()
 
 
+def check_mouse_in_modal(context, event) -> bool:
+    """检查鼠标是否在模型上
+    使用gpu深度图快速测式
+    """
+    from .gpu import get_mouse_location_ray_cast
+    return get_mouse_location_ray_cast(context, event)
+
+
+def check_brush_is_annotate(brush_name: str) -> bool:
+    """检查笔刷是否为注释"""
+    return brush_name in ('builtin.annotate',
+                          'builtin.annotate_line',
+                          'builtin.annotate_polygon',
+                          'builtin.annotate_eraser')
+
+
 def is_bbruse_mode() -> bool:
+    """检查是否在BBrush模式"""
     from ..sculpt import brush_runtime
     return brush_runtime is not None
 
 
 def clear_cache():
-    # is_bbruse_mode.cache_clear()
+    """清理缓存"""
     ...

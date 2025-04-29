@@ -7,6 +7,8 @@ import bpy
 # bpy.app.binary_path
 # bpy.ops.preferences.keyconfig_activate(filepath="C:\\Program Files\\Blender Foundation\\Blender 4.4\\4.4\\scripts\\presets\\keyconfig\\Blender.py")
 # blender_default = bpy.utils.execfile(os.path.join(DIRNAME, "keymap_data", "blender_default.py"))
+
+
 blender_version = ".".join((str(i) for i in bpy.app.version[:2]))
 blender_default_file = os.path.join(os.path.dirname(bpy.app.binary_path), blender_version,
                                     "scripts", "presets", "keyconfig", "keymap_data", "blender_default.py")
@@ -17,11 +19,7 @@ sculpt_keymap = blender_default.km_sculpt(params)
 
 keyconfig_version = (4, 4, 32)
 keyconfig_data = [
-    ("Window", {"space_type": 'EMPTY', "region_type": 'WINDOW'},
-     {"items":
-         [
-         ], },),
-
+    ("Window", {"space_type": 'EMPTY', "region_type": 'WINDOW'}, {"items": [], },),
     ("View3D Rotate Modal", {'space_type': 'EMPTY', 'region_type': 'WINDOW'}, {"items": []}),
 
     ("Sculpt", {'space_type': 'EMPTY', 'region_type': 'WINDOW'}, {
@@ -33,6 +31,7 @@ keyconfig_data = [
             ('view3d.zoom', {'type': 'RIGHTMOUSE', 'value': 'PRESS', 'ctrl': True}, None),
             ('view3d.zoom', {'type': 'RIGHTMOUSE', 'value': 'PRESS', 'alt': True}, None),
 
+            ("bbrush.click", {'type': 'LEFTMOUSE', 'value': 'CLICK', 'any': True}, None),
             ("sculpt.brush_stroke", {'type': 'LEFTMOUSE', 'value': 'CLICK_DRAG', 'alt': True},
              {"properties": [("mode", "INVERT"), ]}),
             ("sculpt.brush_stroke", {'type': 'LEFTMOUSE', 'value': 'CLICK_DRAG', 'shift': True},
@@ -45,7 +44,8 @@ keyconfig_data = [
             ("sculpt.brush_stroke", {'type': 'LEFTMOUSE', 'value': 'CLICK_DRAG', "ctrl": True, 'alt': True},
              {"properties": [("mode", "INVERT"), ]}),
 
-            *(item for item in sculpt_keymap[2]["items"] if item[0] not in ("sculpt.brush_stroke",))
+            *(item for item in sculpt_keymap[2]["items"] if
+              item[0] not in ("sculpt.brush_stroke", "paint.mask_lasso_gesture"))
         ]
      }
      ),

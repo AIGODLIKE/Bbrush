@@ -6,6 +6,12 @@ from ..utils.log import log
 from ..utils.public import PublicOperator, PublicDraw
 
 
+def normal_brush_handle():
+    bpy.ops.sculpt.brush_stroke('INVOKE_DEFAULT',
+                                True,
+                                mode='NORMAL')
+
+
 class OperatorProperty(PublicOperator, PublicDraw):
     alpha = 0.5
     start_mouse: Vector
@@ -68,25 +74,7 @@ class OperatorProperty(PublicOperator, PublicDraw):
         return Vector((1, 0, 0, 1))
 
 
-class DepthUpdate(OperatorProperty):
-
-    def depth_scale_update(self, context, event):
-        co = self.mouse_co
-        value = self.start_mouse - co
-        x = 1 / context.region.width * (-1 * value[0])
-        y = 1 / context.region.height * value[1]
-
-        value = self.pref.depth_scale = self.start_buffer_scale + max(x, y) * 2
-        context.area.header_text_set(f'Depth map zoom value {value}')
-
-    def init_depth(self):
-        from ..ui.draw_depth import DrawDepth
-        _buffer = DrawDepth.depth_buffer
-        self.draw_in_depth_up = ('wh' in _buffer) and self.mouse_in_area_in(
-            self.event, _buffer['wh'])
-
-
-class BBrushSculpt(DepthUpdate):
+class BBrushSculpt(OperatorProperty):
     bl_idname = 'bbrush.bbrush_sculpt'
     bl_label = 'Bbrush sculpting'
     bl_description = 'Sculpting in the style of Zbrush'

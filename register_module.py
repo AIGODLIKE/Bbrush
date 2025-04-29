@@ -20,7 +20,7 @@ def update_bbrush_mode():
     在切换模式的时候
     在启动Blender的时候
     """
-    sculpt.BbrushSculpt.toggle_object_mode()
+    sculpt.BBrushSculpt.toggle_object_mode()
 
 
 def register():
