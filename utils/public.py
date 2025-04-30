@@ -5,7 +5,6 @@ import bpy
 import gpu
 import numpy as np
 from bl_ui.space_toolsystem_common import ToolSelectPanelHelper
-from bpy.app.translations import pgettext as _
 from bpy.props import BoolProperty, StringProperty
 from bpy.types import Operator
 from gpu_extras.batch import batch_for_shader
@@ -483,8 +482,7 @@ class PublicClass(PublicProperty,
 
     @property
     def active_tool(self):
-        return ToolSelectPanelHelper.tool_active_from_context(
-            bpy.context)
+        return ToolSelectPanelHelper.tool_active_from_context(bpy.context)
 
     @property
     def active_tool_name(self):

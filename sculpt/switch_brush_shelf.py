@@ -1,8 +1,9 @@
 import bpy
-
 from bl_ui.space_toolsystem_common import ToolSelectPanelHelper, activate_by_id
 from bl_ui.space_toolsystem_toolbar import VIEW3D_PT_tools_active
 from bpy.utils.toolsystem import ToolDef
+
+from ..utils import refresh_ui
 
 origin_brush_toolbar = ToolSelectPanelHelper._tool_class_from_space_type("VIEW_3D")._tools["SCULPT"].copy()
 active_brush_toolbar = {  # 记录活动笔刷的名称
@@ -104,19 +105,8 @@ class SwitchBrushShelf:
     brush_mode = "NONE"
 
     @staticmethod
-    def update_ui(context):
-        if context.area:
-            context.area.tag_redraw()
-        if context.region:
-            context.region.tag_redraw()
-        if context.screen:
-            context.screen.update_tag()
-
-        for area in context.screen.areas:
-            if area.type == "VIEW_3D":
-                for region in area.regions:
-                    region.tag_redraw()
-        # bpy.ops.wm.redraw_timer(type="DRAW", iterations=1)
+    def refresh_ui(context):
+        refresh_ui(context)
 
     @staticmethod
     def get_active_tool(context) -> "(bpy.types.Tool, bpy.types.WorkSpaceTool, int)|None":
@@ -142,7 +132,7 @@ class SwitchBrushShelf:
             set_brush_shelf(mode)
 
             self.brush_mode = mode
-            self.update_ui(context)
+            self.refresh_ui(context)
 
         (active_tool, WorkSpaceTool, index) = self.get_active_tool(context)
         if WorkSpaceTool is None:
@@ -158,4 +148,4 @@ class SwitchBrushShelf:
     def restore_brush_shelf(self, context):
         """恢复笔刷工具架"""
         set_brush_shelf("ORIGINAL")
-        self.update_ui(context)
+        self.refresh_ui(context)

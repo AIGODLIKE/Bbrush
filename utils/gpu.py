@@ -1,3 +1,8 @@
+import bpy
+import gpu
+import numpy as np
+
+
 def get_gpu_buffer(xy, wh=(1, 1), centered=False):
     """ 用于获取当前视图的GPU BUFFER
     :params xy: 获取的左下角坐标,带X 和Y信息
@@ -40,8 +45,8 @@ def get_mouse_location_ray_cast(context, event):
     view3d.shading.show_xray = False
     data = {}
     space = bpy.types.SpaceView3D
-    han = space.draw_handler_add(gpu_depth_ray_cast, (x, y, data), 'WINDOW', 'POST_PIXEL')
+    handler = space.draw_handler_add(gpu_depth_ray_cast, (x, y, data), 'WINDOW', 'POST_PIXEL')
     bpy.ops.wm.redraw_timer(type='DRAW', iterations=1)
-    space.draw_handler_remove(han, 'WINDOW')
+    space.draw_handler_remove(handler, 'WINDOW')
     view3d.shading.show_xray = show_xray
     return data['is_in_model']

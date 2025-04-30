@@ -1,16 +1,15 @@
 import bpy
 
 from .click import BrushClick
-from .hide import BrushHide
-from .mask import BrushMask
-from .sculpt import BrushSculpt
+from .drag import BrushDrag
+from .smooth import BrushSmooth
 
 brush = [
-    BrushMask,
-    BrushSculpt,
+    BrushDrag,
     BrushClick,
-    BrushHide,
+    BrushSmooth,
 ]
+
 register_class, unregister_class = bpy.utils.register_classes_factory(brush)
 
 

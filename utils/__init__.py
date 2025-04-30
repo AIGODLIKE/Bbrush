@@ -93,6 +93,21 @@ def is_bbruse_mode() -> bool:
     return brush_runtime is not None
 
 
+def refresh_ui(context):
+    """刷新UI"""
+    if context.area:
+        context.area.tag_redraw()
+    if context.region:
+        context.region.tag_redraw()
+    if context.screen:
+        context.screen.update_tag()
+
+    for area in context.screen.areas:
+        if area.type == "VIEW_3D":
+            for region in area.regions:
+                region.tag_redraw()
+
+
 def clear_cache():
     """清理缓存"""
     ...

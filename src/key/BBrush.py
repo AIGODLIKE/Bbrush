@@ -31,7 +31,10 @@ keyconfig_data = [
             ('view3d.zoom', {'type': 'RIGHTMOUSE', 'value': 'PRESS', 'ctrl': True}, None),
             ('view3d.zoom', {'type': 'RIGHTMOUSE', 'value': 'PRESS', 'alt': True}, None),
 
+            ("bbrush.smooth", {'type': 'LEFTMOUSE', 'value': 'CLICK_DRAG', 'shift': True}, None),
             ("bbrush.click", {'type': 'LEFTMOUSE', 'value': 'CLICK', 'any': True}, None),
+            ("bbrush.drag", {'type': 'LEFTMOUSE', 'value': 'CLICK_DRAG', 'any': True}, None),
+
             ("sculpt.brush_stroke", {'type': 'LEFTMOUSE', 'value': 'CLICK_DRAG', 'alt': True},
              {"properties": [("mode", "INVERT"), ]}),
             ("sculpt.brush_stroke", {'type': 'LEFTMOUSE', 'value': 'CLICK_DRAG', 'shift': True},
@@ -89,6 +92,7 @@ keyconfig_data = [
     # Hide
     ("3D View Tool: Sculpt, Box Hide", {"space_type": 'VIEW_3D', "region_type": 'WINDOW'},
      {"items": [
+         ("bbrush.click", {'type': 'LEFTMOUSE', 'value': 'CLICK', 'any': True}, None),
          ("paint.hide_show", {"type": 'LEFTMOUSE', "value": 'CLICK_DRAG', "ctrl": True, "shift": True},
           {"properties": [("action", 'HIDE'), ], },),
          ("paint.hide_show", {"type": 'LEFTMOUSE', "value": 'CLICK_DRAG', "ctrl": True, "shift": True, "alt": True},
@@ -152,6 +156,8 @@ keyconfig_data = [
          ("sculpt.project_line_gesture", {"type": 'LEFTMOUSE', "value": 'CLICK_DRAG', "any": True},
           {"properties": [], },),
      ], },),
+
+    # TODO 视图切换
 ]
 
 if __name__ == "__main__":

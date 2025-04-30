@@ -30,7 +30,7 @@ class BrushHandle:
         self.restore_brush_shelf(context)
         self.restore_key(context)
 
-        self.update_ui(context)
+        self.refresh_ui(context)
 
         return {"FINISHED"}
 
@@ -44,7 +44,7 @@ class BrushHandle:
         replace_top_bar(True)
 
         self.start_key(context)
-        self.update_ui(context)
+        self.refresh_ui(context)
 
         # pref = get_pref()
         # inputs = context.preferences.inputs

@@ -15,7 +15,7 @@ TOTO
 将所有内容退出
 """
 
-brush_runtime = None
+brush_runtime: "BBrushSculpt|None" = None
 
 
 class BBrushSculpt(

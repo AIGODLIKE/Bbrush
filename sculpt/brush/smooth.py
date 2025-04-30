@@ -1,20 +1,21 @@
 import bpy
 
+from ...utils import check_mouse_in_modal
 
-class BrushDrag(bpy.types.Operator):
-    bl_idname = "bbrush.drag"
-    bl_label = "Drag"
+
+class BrushSmooth(bpy.types.Operator):
+    bl_idname = "bbrush.smooth"
+    bl_label = "Smooth"
     bl_options = {'REGISTER'}
 
     def invoke(self, context, event):
-        from .. import brush_runtime
-
         is_in_modal = check_mouse_in_modal(context, event)
         print(context, event, self.bl_label, is_in_modal)
         if not is_in_modal:
-            # 旋转视图
-            bpy.ops.view3d.rotate('INVOKE_DEFAULT')
+            # 倾斜视图
+            bpy.ops.view3d.view_roll('INVOKE_DEFAULT', type='ANGLE')
             return {"FINISHED"}
+
         return {'PASS_THROUGH'}
 
     def execute(self, context):
