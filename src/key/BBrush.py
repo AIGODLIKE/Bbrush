@@ -60,7 +60,7 @@ keyconfig_data = [
          ("paint.mask_box_gesture", {"type": 'LEFTMOUSE', "value": 'CLICK_DRAG', "ctrl": True, "alt": True},
           {"properties": [("value", 0.0), ], },),
          ("paint.mask_box_gesture", {"type": 'LEFTMOUSE', "value": 'CLICK_DRAG', "ctrl": True},
-          {"properties": [("ymin", 2), ("value", 1.0), ], },),
+          {"properties": [("value", 1.0), ], },),
      ], },),
     ("3D View Tool: Sculpt, Lasso Mask",
      {"space_type": 'VIEW_3D', "region_type": 'WINDOW'},
@@ -138,7 +138,7 @@ keyconfig_data = [
     ("3D View Tool: Sculpt, Lasso Trim", {"space_type": 'VIEW_3D', "region_type": 'WINDOW'},
      {"items": [
          ("sculpt.trim_lasso_gesture", {"type": 'LEFTMOUSE', "value": 'CLICK_DRAG', "any": True},
-          {"properties": [("smooth_stroke_factor", 0.75), ], },),
+          {"properties": [("smooth_stroke_factor", 1), ], },),
      ], },),
     ("3D View Tool: Sculpt, Line Trim", {"space_type": 'VIEW_3D', "region_type": 'WINDOW'},
      {"items": [

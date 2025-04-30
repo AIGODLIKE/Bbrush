@@ -1,7 +1,6 @@
 import bpy
 
 from . import brush
-from .depth import DepthUpdate
 from .handle import BrushHandle
 from .key import BrushKey
 from .switch_brush_shelf import SwitchBrushShelf
@@ -22,7 +21,6 @@ class BBrushSculpt(
     bpy.types.Operator,
     BrushKey,
     BrushHandle,
-    DepthUpdate,
     SwitchBrushShelf,
 ):
     bl_idname = "bbrush.bbrush_sculpt"

@@ -595,20 +595,6 @@ class PublicOperator(PublicClass, Operator):
             bpy.types.SpaceView3D.draw_handler_remove(
                 self._handle, 'WINDOW')
 
-    def mouse_in_area_in(self, event, area):
-        """输入一个event和xy的最大最小值,反回一个鼠标是否在此区域内的布尔值,如果在里面就反回True
-
-        Args:
-            event (bpy.types.Event): 输入操作符event
-            area ((x,x),(y,y)): 输入x和y的坐标
-        """
-        x = area[0]
-        y = area[1]
-        mou_x, mou_y = self.mouse_co
-        x_in = min(x) < mou_x < max(x)
-        y_in = min(y) < mou_y < max(y)
-        return x_in and y_in
-
 
 class PublicExportPropertyOperator:
     bl_options = {'REGISTER', 'UNDO'}

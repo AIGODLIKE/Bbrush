@@ -47,6 +47,21 @@ def all_operator_listen() -> list[str]:
     return list(submodules)
 
 
+def mouse_in_area_point_in(event, area_point):
+    """输入一个event和xy的最大最小值,反回一个鼠标是否在此区域内的布尔值,如果在里面就反回True
+
+    Args:
+        event (bpy.types.Event): 输入操作符event
+        area_point ((x,x),(y,y)): 输入x和y的坐标
+    """
+    x = area_point[0]
+    y = area_point[1]
+    mou_x, mou_y = event.mouse_region_x, event.mouse_region_y
+    x_in = min(x) < mou_x < max(x)
+    y_in = min(y) < mou_y < max(y)
+    return x_in and y_in
+
+
 def find_mouse_in_area(context, event) -> "bpy.types.Area|None":
     """查找在鼠标上的区域
     就是鼠标活动区域
@@ -85,6 +100,12 @@ def check_brush_is_annotate(brush_name: str) -> bool:
                           'builtin.annotate_line',
                           'builtin.annotate_polygon',
                           'builtin.annotate_eraser')
+
+
+def check_mouse_in_depth_map_area(event) -> bool:
+    """检查鼠标是否在深度图上"""
+    from ..depth_map import depth_buffer_check
+    return ("area_points" in depth_buffer_check) and mouse_in_area_point_in(event, depth_buffer_check["area_points"])
 
 
 def is_bbruse_mode() -> bool:

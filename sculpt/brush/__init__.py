@@ -1,10 +1,13 @@
 import bpy
 
 from .click import BrushClick
+from .depth import BrushDepth
 from .drag import BrushDrag
 from .smooth import BrushSmooth
 
+# 通过行为来区分手势内容
 brush = [
+    BrushDepth,
     BrushDrag,
     BrushClick,
     BrushSmooth,

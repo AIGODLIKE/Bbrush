@@ -5,7 +5,10 @@ from ..utils import get_pref, get_toolbar_width, is_bbruse_mode
 
 handel = None
 
-depth_buffer_check = {}
+depth_buffer_check = {
+    # "wh": ((x1, x2), (y1, y2)),
+    # "translate":w, -h, 0
+}
 
 
 def check_is_draw(context):
@@ -37,7 +40,7 @@ def draw_depth():
         y2 = height - int(height / 2 * depth_scale) - header_height
         # 添加坐标 存起来笔刷的操作符判断鼠标有没有放在深度图上使用
 
-        depth_buffer_check["wh"] = ((x1, x2), (y1, y2))
+        depth_buffer_check["area_points"] = ((x1, x2), (y1, y2))
 
         w = 1 / width * toolbar_width * 2
         h = 1 / height * header_height * 2
