@@ -319,16 +319,6 @@ class PublicDraw:
         blf.draw(font_id, text)
 
     @staticmethod
-    def draw_line(vertices, color, line_width=1):
-        shader = gpu.shader.from_builtin('UNIFORM_COLOR')
-        gpu.state.line_width_set(line_width)
-        batch = batch_for_shader(shader, 'LINE_STRIP', {"pos": vertices})
-        shader.bind()
-        shader.uniform_float("color", color)
-        batch.draw(shader)
-        gpu.state.line_width_set(1.0)
-
-    @staticmethod
     def draw_shader(pos,
                     indices,
                     color=None,
@@ -431,30 +421,6 @@ class PublicClass(PublicProperty,
     def pref(self):
         return self.pref_()
 
-    @staticmethod
-    def get_area_ray_cast(x, y, w, h):
-        data = {}
-
-        def get_():
-            _buffer = PublicClass.get_gpu_buffer((x, y), wh=(w, h),
-                                                 centered=False)
-            numpy_buffer = np.asarray(_buffer, dtype=np.float32).ravel()
-            min_depth = np.min(numpy_buffer)
-            data['is_in_model'] = (min_depth != (0 or 1))
-
-        context = bpy.context
-        view3d = context.space_data
-        show_xray = view3d.shading.show_xray
-        view3d.shading.show_xray = False
-        _handle = bpy.types.SpaceView3D.draw_handler_add(
-            get_, (), 'WINDOW',
-            'POST_PIXEL')
-        bpy.ops.wm.redraw_timer(type='DRAW', iterations=1)
-        bpy.types.SpaceView3D.draw_handler_remove(_handle, 'WINDOW')
-        view3d.shading.show_xray = show_xray
-        if 'is_in_model' in data:
-            return data['is_in_model']
-        return False
 
     @staticmethod
     def tag_redraw(context):

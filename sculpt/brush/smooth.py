@@ -1,6 +1,6 @@
 import bpy
 
-from ...utils import check_mouse_in_modal
+from ...utils import check_mouse_in_model
 
 
 class BrushSmooth(bpy.types.Operator):
@@ -9,7 +9,7 @@ class BrushSmooth(bpy.types.Operator):
     bl_options = {'REGISTER'}
 
     def invoke(self, context, event):
-        is_in_modal = check_mouse_in_modal(context, event)
+        is_in_modal = check_mouse_in_model(context, event)
         print(context, event, self.bl_label, is_in_modal)
         if not is_in_modal:
             # 倾斜视图

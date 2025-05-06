@@ -21,9 +21,6 @@ class BrushHandle:
 
     def exit(self, context):
         """退出Bbrush模式"""
-        # inputs = context.preferences.inputs
-        # if inputs.use_mouse_emulate_3_button != self.use_mouse_emulate_3_button:
-        #     inputs.use_mouse_emulate_3_button = self.use_mouse_emulate_3_button
 
         replace_top_bar(False)
 
@@ -45,14 +42,6 @@ class BrushHandle:
 
         self.start_key(context)
         self.refresh_ui(context)
-
-        # pref = get_pref()
-        # inputs = context.preferences.inputs
-        # self.use_mouse_emulate_3_button = inputs.use_mouse_emulate_3_button
-        # if inputs.use_mouse_emulate_3_button != pref.use_mouse_emulate_3_button:
-        #     inputs.use_mouse_emulate_3_button = pref.use_mouse_emulate_3_button
-        # register_class(...):
-        # 信息: Registering key-config preferences class: 'Prefs', bl_idname 'Blender' 已被注册过, 注销先前的
 
     @staticmethod
     def toggle_object_mode():

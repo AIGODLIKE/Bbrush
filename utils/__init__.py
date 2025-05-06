@@ -47,7 +47,32 @@ def get_active_tool(context) -> "(bpy.types.Tool, bpy.types.WorkSpaceTool, int)"
 
 
 def get_brush_shape(brush) -> str:
-    """通过笔刷id获取形状"""
+    """通过笔刷id获取形状
+    ELLIPSE,BOX,POLYLINE,LASSO,CIRCULAR
+    """
+    if brush in (
+            "builtin_brush.mask",
+            "builtin.box_mask",
+            "builtin.box_hide",
+            "builtin.box_trim",
+    ):
+        return "BOX"
+    elif brush in (
+            "builtin.polyline_mask",
+            "builtin.polyline_hide",
+            "builtin.polyline_trim",
+    ):
+        return "POLYLINE"
+    elif brush in ():
+        return "ELLIPSE"
+    elif brush in ():
+        return "CIRCULAR"
+    elif brush in (
+            "builtin.lasso_mask",
+            "builtin.lasso_hide",
+            "builtin.lasso_trim",
+    ):
+        return "LASSO"
     return "NONE"
 
 
@@ -116,12 +141,18 @@ def check_operator(operator: str) -> bool:
     return operator in all_operator_listen()
 
 
-def check_mouse_in_modal(context, event) -> bool:
+def check_mouse_in_model(context, event) -> bool:
     """检查鼠标是否在模型上
     使用gpu深度图快速测式
     """
     from .gpu import get_mouse_location_ray_cast
     return get_mouse_location_ray_cast(context, event)
+
+
+def check_area_in_model(context, x, y, w, h) -> bool:
+    """检查区域是否在模型上"""
+    from .gpu import get_area_ray_cast
+    return get_area_ray_cast(context, x, y, w, h)
 
 
 def check_brush_is_annotate(brush_name: str) -> bool:

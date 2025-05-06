@@ -245,47 +245,6 @@ class MaskDrawArea(MaskClick):
         draw_data = list(i + self.start_mouse for i in circular)
         return draw_data
 
-    def draw_lift_up_text(self):
-        x1, y1 = self.start_mouse
-        x2, y2 = self.mouse_co
-        text = 'HIDE' if self.ctrl_shift or self.ctrl_shift_alt else 'MASK'
-        self.draw_text(min(x1, x2),
-                       max(y1, y2),
-                       text=text,
-                       font_id=1,
-                       size=15,
-                       color=(1, 1, 1, 1))
-
-    def draw_box(self):
-        x1, y1 = self.start_mouse
-        x2, y2 = self.mouse_co
-
-        vertices = ((x1, y1), (x2, y1), (x1, y2), (x2, y2))
-        # draw area
-        shader = gpu.shader.from_builtin('UNIFORM_COLOR')
-        batch = batch_for_shader(shader,
-                                 'TRIS', {"pos": vertices},
-                                 indices=self.indices)
-        shader.bind()
-        shader.uniform_float("color", self.color)
-        batch.draw(shader)
-
-        # draw line
-        vertices = ((x1, y1), (x2, y1), (x2, y2), (x1, y2), (x1, y1))
-        self.draw_line(vertices, (1, 1, 1, 1), line_width=2)
-
-        # draw cross
-        line_length = 5
-        x = int((x1 + x2) / 2)
-        y = int((y1 + y2) / 2)
-        self.draw_line(((x - line_length, y), (x + line_length, y)),
-                       (1, 1, 1, 1),
-                       line_width=1)
-        self.draw_line(((x, y - line_length), (x, y + line_length)),
-                       (1, 1, 1, 1),
-                       line_width=1)
-        self.draw_lift_up_text()
-
     def draw_2d_handles(self, context, event):
         gpu.state.blend_set('ALPHA')
         if self.is_box_mode:
@@ -320,11 +279,7 @@ class MaskClickDrag(MaskDrawArea):
         w, h = self.start_mouse - self.mouse_co
         in_modal = self.get_area_ray_cast(min(x1, x2), min(y1, y2),
                                           abs(w), abs(h))
-        args = {'xmin': int(min(x1, x2)),
-                'xmax': int(max(x1, x2)),
-                'ymin': int(min(y1, y2)),
-                'ymax': int(max(y1, y2)),
-                }
+
         paint = bpy.ops.paint
         value = 0 if self.event.alt else 1
 
@@ -421,20 +376,6 @@ class MaskClickDrag(MaskDrawArea):
             elif self.event_is_release:
                 if have_tmp:
                     delattr(self, 'mouse_co_tmp')
-
-    def get_shape_in_model_up(self):
-        data = np.array(self.mouse_pos, dtype=np.float32)
-        data.reshape((data.__len__(), 2))
-        max_co = data.max(axis=0)
-        min_co = data.min(axis=0)
-        x = int(min_co[0])
-        y = int(min_co[1])
-        w = int(max_co[0] - x)
-        h = int(max_co[1] - y)
-        try:
-            return self.get_area_ray_cast(x, y, w, h)
-        except ValueError as v:
-            log.info(f'{v.args}\nError in acquiring shape projection')
 
     def polygons_mask(self):
         click_time = bpy.context.preferences.inputs.mouse_double_click_time

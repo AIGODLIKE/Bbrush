@@ -1,6 +1,8 @@
+import blf
 import bpy
 import gpu
 import numpy as np
+from gpu_extras.batch import batch_for_shader
 
 
 def get_gpu_buffer(xy, wh=(1, 1), centered=False):
@@ -50,3 +52,48 @@ def get_mouse_location_ray_cast(context, event):
     space.draw_handler_remove(handler, 'WINDOW')
     view3d.shading.show_xray = show_xray
     return data['is_in_model']
+
+
+def get_area_ray_cast(context, x, y, w, h):
+    data = {}
+
+    def get_ray_cast():
+        buffer = get_gpu_buffer((x, y), wh=(w, h), centered=False)
+        numpy_buffer = np.asarray(buffer, dtype=np.float32).ravel()
+        min_depth = np.min(numpy_buffer)
+        data['is_in_model'] = (min_depth != (0 or 1))
+
+    view3d = context.space_data
+    show_xray = view3d.shading.show_xray
+    view3d.shading.show_xray = False
+    handler = bpy.types.SpaceView3D.draw_handler_add(get_ray_cast, (), 'WINDOW', 'POST_PIXEL')
+    bpy.ops.wm.redraw_timer(type='DRAW', iterations=1)
+    bpy.types.SpaceView3D.draw_handler_remove(handler, 'WINDOW')
+    view3d.shading.show_xray = show_xray
+    if 'is_in_model' in data:
+        return data['is_in_model']
+    return False
+
+
+def draw_text(x,
+              y,
+              text="Hello Word",
+              font_id=0,
+              size=10,
+              *,
+              color=(0.5, 0.5, 0.5, 1),
+              column=0):
+    blf.position(font_id, x, y - (size * (column + 1)), 0)
+    blf.size(font_id, size)
+    blf.color(font_id, *color)
+    blf.draw(font_id, text)
+
+
+def draw_line(vertices, color, line_width=1):
+    shader = gpu.shader.from_builtin('UNIFORM_COLOR')
+    gpu.state.line_width_set(line_width)
+    batch = batch_for_shader(shader, 'LINE_STRIP', {"pos": vertices})
+    shader.bind()
+    shader.uniform_float("color", color)
+    batch.draw(shader)
+    gpu.state.line_width_set(1.0)
