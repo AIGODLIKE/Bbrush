@@ -2,7 +2,7 @@ import os
 
 import bpy
 
-# 'C:\\Program Files\\Blender Foundation\\Blender 4.4\\blender.exe'
+# "C:\\Program Files\\Blender Foundation\\Blender 4.4\\blender.exe"
 # "C:\Program Files\Blender Foundation\Blender 4.4\4.4\scripts\presets\keyconfig\keymap_data\blender_default.py"
 # bpy.app.binary_path
 # bpy.ops.preferences.keyconfig_activate(filepath="C:\\Program Files\\Blender Foundation\\Blender 4.4\\4.4\\scripts\\presets\\keyconfig\\Blender.py")
@@ -19,32 +19,33 @@ sculpt_keymap = blender_default.km_sculpt(params)
 
 keyconfig_version = (4, 4, 32)
 keyconfig_data = [
-    ("Window", {"space_type": 'EMPTY', "region_type": 'WINDOW'}, {"items": [], },),
-    ("View3D Rotate Modal", {'space_type': 'EMPTY', 'region_type': 'WINDOW'}, {"items": []}),
+    ("Window", {"space_type": "EMPTY", "region_type": "WINDOW"}, {"items": [], },),
+    ("View3D Rotate Modal", {"space_type": "EMPTY", "region_type": "WINDOW"}, {"items": []}),
 
-    ("Sculpt", {'space_type': 'EMPTY', 'region_type': 'WINDOW'}, {
+    ("Sculpt", {"space_type": "EMPTY", "region_type": "WINDOW"}, {
         "items": [
-            ('object.transfer_mode', {'type': 'LEFTMOUSE', 'value': 'CLICK', 'alt': True}, None),
-            ('view3d.rotate', {'type': 'RIGHTMOUSE', 'value': 'CLICK_DRAG'}, None),
-            ('view3d.move', {'type': 'RIGHTMOUSE', 'value': 'PRESS', 'alt': True}, None),
-            ('view3d.move', {'type': 'MIDDLEMOUSE', 'value': 'PRESS', 'alt': True}, None),
-            ('view3d.zoom', {'type': 'RIGHTMOUSE', 'value': 'PRESS', 'ctrl': True}, None),
-            ('view3d.zoom', {'type': 'RIGHTMOUSE', 'value': 'PRESS', 'alt': True}, None),
+            ("bbrush.depth_move", {"type": "RIGHTMOUSE", "value": "CLICK_DRAG"}, None),
+            ("bbrush.smooth", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "shift": True}, None),
+            ("bbrush.click", {"type": "LEFTMOUSE", "value": "CLICK", "any": True}, None),
+            ("bbrush.drag", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "any": True}, None),
 
-            ("bbrush.smooth", {'type': 'LEFTMOUSE', 'value': 'CLICK_DRAG', 'shift': True}, None),
-            ("bbrush.click", {'type': 'LEFTMOUSE', 'value': 'CLICK', 'any': True}, None),
-            ("bbrush.drag", {'type': 'LEFTMOUSE', 'value': 'CLICK_DRAG', 'any': True}, None),
+            ("object.transfer_mode", {"type": "LEFTMOUSE", "value": "CLICK", "alt": True}, None),
+            ("view3d.rotate", {"type": "RIGHTMOUSE", "value": "CLICK_DRAG"}, None),
+            ("view3d.move", {"type": "RIGHTMOUSE", "value": "PRESS", "alt": True}, None),
+            ("view3d.move", {"type": "MIDDLEMOUSE", "value": "PRESS", "alt": True}, None),
+            ("view3d.zoom", {"type": "RIGHTMOUSE", "value": "PRESS", "ctrl": True}, None),
+            ("view3d.zoom", {"type": "RIGHTMOUSE", "value": "PRESS", "alt": True}, None),
 
-            ("sculpt.brush_stroke", {'type': 'LEFTMOUSE', 'value': 'CLICK_DRAG', 'alt': True},
+            ("sculpt.brush_stroke", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "alt": True},
              {"properties": [("mode", "INVERT"), ]}),
-            ("sculpt.brush_stroke", {'type': 'LEFTMOUSE', 'value': 'CLICK_DRAG', 'shift': True},
+            ("sculpt.brush_stroke", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "shift": True},
              {"properties": [("mode", "SMOOTH"), ]}),
-            ("sculpt.brush_stroke", {'type': 'LEFTMOUSE', 'value': 'CLICK_DRAG'},
+            ("sculpt.brush_stroke", {"type": "LEFTMOUSE", "value": "CLICK_DRAG"},
              {"properties": [("mode", "NORMAL"), ]}),
 
-            ("sculpt.brush_stroke", {'type': 'LEFTMOUSE', 'value': 'CLICK_DRAG', "ctrl": True},
+            ("sculpt.brush_stroke", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "ctrl": True},
              {"properties": [("mode", "NORMAL"), ]}),
-            ("sculpt.brush_stroke", {'type': 'LEFTMOUSE', 'value': 'CLICK_DRAG', "ctrl": True, 'alt': True},
+            ("sculpt.brush_stroke", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "ctrl": True, "alt": True},
              {"properties": [("mode", "INVERT"), ]}),
 
             *(item for item in sculpt_keymap[2]["items"] if
@@ -55,105 +56,105 @@ keyconfig_data = [
 
     # Mask
     ("3D View Tool: Sculpt, Box Mask",
-     {"space_type": 'VIEW_3D', "region_type": 'WINDOW'},
+     {"space_type": "VIEW_3D", "region_type": "WINDOW"},
      {"items": [
-         ("paint.mask_box_gesture", {"type": 'LEFTMOUSE', "value": 'CLICK_DRAG', "ctrl": True, "alt": True},
+         ("paint.mask_box_gesture", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "ctrl": True, "alt": True},
           {"properties": [("value", 0.0), ], },),
-         ("paint.mask_box_gesture", {"type": 'LEFTMOUSE', "value": 'CLICK_DRAG', "ctrl": True},
+         ("paint.mask_box_gesture", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "ctrl": True},
           {"properties": [("value", 1.0), ], },),
      ], },),
     ("3D View Tool: Sculpt, Lasso Mask",
-     {"space_type": 'VIEW_3D', "region_type": 'WINDOW'},
+     {"space_type": "VIEW_3D", "region_type": "WINDOW"},
      {"items": [
          ("paint.mask_lasso_gesture",
-          {"type": 'LEFTMOUSE', "value": 'CLICK_DRAG', "ctrl": True, "alt": True},
+          {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "ctrl": True, "alt": True},
           {"properties": [("value", 0), ], },),
          ("paint.mask_lasso_gesture",
-          {"type": 'LEFTMOUSE', "value": 'CLICK_DRAG', "ctrl": True},
+          {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "ctrl": True},
           {"properties": [("value", 1), ], },),
      ], },),
     ("3D View Tool: Sculpt, Line Mask",
-     {"space_type": 'VIEW_3D', "region_type": 'WINDOW'},
+     {"space_type": "VIEW_3D", "region_type": "WINDOW"},
      {"items": [
-         ("paint.mask_line_gesture", {"type": 'LEFTMOUSE', "value": 'CLICK_DRAG', "ctrl": True, "alt": True},
+         ("paint.mask_line_gesture", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "ctrl": True, "alt": True},
           {"properties": [("value", 0), ], },),
-         ("paint.mask_line_gesture", {"type": 'LEFTMOUSE', "value": 'CLICK_DRAG', "ctrl": True},
+         ("paint.mask_line_gesture", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "ctrl": True},
           {"properties": [("value", 1), ], },),
      ], },),
     ("3D View Tool: Sculpt, Polyline Mask",
-     {"space_type": 'VIEW_3D', "region_type": 'WINDOW'},
+     {"space_type": "VIEW_3D", "region_type": "WINDOW"},
      {"items": [
-         ("paint.mask_polyline_gesture", {"type": 'LEFTMOUSE', "value": 'PRESS', "ctrl": True, "alt": True},
+         ("paint.mask_polyline_gesture", {"type": "LEFTMOUSE", "value": "PRESS", "ctrl": True, "alt": True},
           {"properties": [("value", 0), ], },),
-         ("paint.mask_polyline_gesture", {"type": 'LEFTMOUSE', "value": 'PRESS', "ctrl": True},
+         ("paint.mask_polyline_gesture", {"type": "LEFTMOUSE", "value": "PRESS", "ctrl": True},
           {"properties": [("value", 1), ], },),
      ], },),
 
     # Hide
-    ("3D View Tool: Sculpt, Box Hide", {"space_type": 'VIEW_3D', "region_type": 'WINDOW'},
+    ("3D View Tool: Sculpt, Box Hide", {"space_type": "VIEW_3D", "region_type": "WINDOW"},
      {"items": [
-         ("bbrush.click", {'type': 'LEFTMOUSE', 'value': 'CLICK', 'any': True}, None),
-         ("paint.hide_show", {"type": 'LEFTMOUSE', "value": 'CLICK_DRAG', "ctrl": True, "shift": True},
-          {"properties": [("action", 'HIDE'), ], },),
-         ("paint.hide_show", {"type": 'LEFTMOUSE', "value": 'CLICK_DRAG', "ctrl": True, "shift": True, "alt": True},
-          {"properties": [("action", 'SHOW'), ], },),
-         ("paint.hide_show_all", {"type": 'LEFTMOUSE', "value": 'CLICK', "ctrl": True, "shift": True},
-          {"properties": [("action", 'SHOW'), ], },),
+         ("bbrush.click", {"type": "LEFTMOUSE", "value": "CLICK", "any": True}, None),
+         ("paint.hide_show", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "ctrl": True, "shift": True},
+          {"properties": [("action", "HIDE"), ], },),
+         ("paint.hide_show", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "ctrl": True, "shift": True, "alt": True},
+          {"properties": [("action", "SHOW"), ], },),
+         ("paint.hide_show_all", {"type": "LEFTMOUSE", "value": "CLICK", "ctrl": True, "shift": True},
+          {"properties": [("action", "SHOW"), ], },),
      ], },),
-    ("3D View Tool: Sculpt, Lasso Hide", {"space_type": 'VIEW_3D', "region_type": 'WINDOW'},
+    ("3D View Tool: Sculpt, Lasso Hide", {"space_type": "VIEW_3D", "region_type": "WINDOW"},
      {"items": [
-         ("paint.hide_show_lasso_gesture", {"type": 'LEFTMOUSE', "value": 'CLICK_DRAG', "ctrl": True, "shift": True},
-          {"properties": [("action", 'HIDE'), ], },),
+         ("paint.hide_show_lasso_gesture", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "ctrl": True, "shift": True},
+          {"properties": [("action", "HIDE"), ], },),
          ("paint.hide_show_lasso_gesture",
-          {"type": 'LEFTMOUSE', "value": 'CLICK_DRAG', "ctrl": True, "shift": True, "alt": True},
-          {"properties": [("action", 'SHOW'), ], },),
-         ("paint.hide_show_all", {"type": 'LEFTMOUSE', "value": 'CLICK', "ctrl": True, "shift": True},
-          {"properties": [("action", 'SHOW'), ], },),
+          {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "ctrl": True, "shift": True, "alt": True},
+          {"properties": [("action", "SHOW"), ], },),
+         ("paint.hide_show_all", {"type": "LEFTMOUSE", "value": "CLICK", "ctrl": True, "shift": True},
+          {"properties": [("action", "SHOW"), ], },),
      ], },),
-    ("3D View Tool: Sculpt, Line Hide", {"space_type": 'VIEW_3D', "region_type": 'WINDOW'},
+    ("3D View Tool: Sculpt, Line Hide", {"space_type": "VIEW_3D", "region_type": "WINDOW"},
      {"items": [
-         ("paint.hide_show_line_gesture", {"type": 'LEFTMOUSE', "value": 'CLICK_DRAG', "ctrl": True, "shift": True},
-          {"properties": [("xstart", 0), ("action", 'HIDE'), ], },),
+         ("paint.hide_show_line_gesture", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "ctrl": True, "shift": True},
+          {"properties": [("xstart", 0), ("action", "HIDE"), ], },),
          ("paint.hide_show_line_gesture",
-          {"type": 'LEFTMOUSE', "value": 'CLICK_DRAG', "ctrl": True, "shift": True, "alt": True},
-          {"properties": [("xstart", 0), ("action", 'SHOW'), ], },),
-         ("paint.hide_show_all", {"type": 'LEFTMOUSE', "value": 'CLICK', "ctrl": True, "shift": True},
-          {"properties": [("action", 'SHOW'), ], },),
+          {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "ctrl": True, "shift": True, "alt": True},
+          {"properties": [("xstart", 0), ("action", "SHOW"), ], },),
+         ("paint.hide_show_all", {"type": "LEFTMOUSE", "value": "CLICK", "ctrl": True, "shift": True},
+          {"properties": [("action", "SHOW"), ], },),
      ], },),
-    ("3D View Tool: Sculpt, Polyline Hide", {"space_type": 'VIEW_3D', "region_type": 'WINDOW'},
+    ("3D View Tool: Sculpt, Polyline Hide", {"space_type": "VIEW_3D", "region_type": "WINDOW"},
      {"items": [
-         ("paint.hide_show_polyline_gesture", {"type": 'LEFTMOUSE', "value": 'PRESS', "ctrl": True, "shift": True},
-          {"properties": [("action", 'HIDE'), ("area", 'Inside'), ], },),
+         ("paint.hide_show_polyline_gesture", {"type": "LEFTMOUSE", "value": "PRESS", "ctrl": True, "shift": True},
+          {"properties": [("action", "HIDE"), ("area", "Inside"), ], },),
          ("paint.hide_show_polyline_gesture",
-          {"type": 'LEFTMOUSE', "value": 'PRESS', "ctrl": True, "shift": True, "alt": True},
-          {"properties": [("action", 'SHOW'), ("area", 'Inside'), ], },),
+          {"type": "LEFTMOUSE", "value": "PRESS", "ctrl": True, "shift": True, "alt": True},
+          {"properties": [("action", "SHOW"), ("area", "Inside"), ], },),
      ], },),
 
     # Trim
-    ("3D View Tool: Sculpt, Box Trim", {"space_type": 'VIEW_3D', "region_type": 'WINDOW'},
+    ("3D View Tool: Sculpt, Box Trim", {"space_type": "VIEW_3D", "region_type": "WINDOW"},
      {"items": [
-         ("sculpt.trim_box_gesture", {"type": 'LEFTMOUSE', "value": 'CLICK_DRAG', "any": True},
+         ("sculpt.trim_box_gesture", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "any": True},
           {"properties": [], },),
      ], },),
-    ("3D View Tool: Sculpt, Lasso Trim", {"space_type": 'VIEW_3D', "region_type": 'WINDOW'},
+    ("3D View Tool: Sculpt, Lasso Trim", {"space_type": "VIEW_3D", "region_type": "WINDOW"},
      {"items": [
-         ("sculpt.trim_lasso_gesture", {"type": 'LEFTMOUSE', "value": 'CLICK_DRAG', "any": True},
+         ("sculpt.trim_lasso_gesture", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "any": True},
           {"properties": [("smooth_stroke_factor", 1), ], },),
      ], },),
-    ("3D View Tool: Sculpt, Line Trim", {"space_type": 'VIEW_3D', "region_type": 'WINDOW'},
+    ("3D View Tool: Sculpt, Line Trim", {"space_type": "VIEW_3D", "region_type": "WINDOW"},
      {"items": [
-         ("sculpt.trim_line_gesture", {"type": 'LEFTMOUSE', "value": 'CLICK_DRAG', "any": True},
+         ("sculpt.trim_line_gesture", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "any": True},
           {"properties": [("xstart", 0), ], },),
      ], },),
-    ("3D View Tool: Sculpt, Polyline Trim", {"space_type": 'VIEW_3D', "region_type": 'WINDOW'},
+    ("3D View Tool: Sculpt, Polyline Trim", {"space_type": "VIEW_3D", "region_type": "WINDOW"},
      {"items": [
-         ("sculpt.trim_polyline_gesture", {"type": 'LEFTMOUSE', "value": 'PRESS', "any": True},
+         ("sculpt.trim_polyline_gesture", {"type": "LEFTMOUSE", "value": "PRESS", "any": True},
           {"properties": [], },),
      ], },),
 
-    ("3D View Tool: Sculpt, Line Project", {"space_type": 'VIEW_3D', "region_type": 'WINDOW'},
+    ("3D View Tool: Sculpt, Line Project", {"space_type": "VIEW_3D", "region_type": "WINDOW"},
      {"items": [
-         ("sculpt.project_line_gesture", {"type": 'LEFTMOUSE', "value": 'CLICK_DRAG', "any": True},
+         ("sculpt.project_line_gesture", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "any": True},
           {"properties": [], },),
      ], },),
 

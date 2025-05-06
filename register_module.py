@@ -1,9 +1,10 @@
 import bpy
 
-from . import depth_map, preferences, topbar, sculpt
+from . import depth_map, preferences, topbar, sculpt, src
 from .utils import register_submodule_factory
 
 model_tuple = (
+    src,
     topbar,
     sculpt,
     depth_map,

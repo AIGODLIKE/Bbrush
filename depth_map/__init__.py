@@ -32,8 +32,10 @@ def draw_depth():
         width = context.region.width
         height = context.region.height
 
-        toolbar_width = get_toolbar_width() + pref.depth_offset_x
-        header_height = get_toolbar_width("HEADER") + pref.depth_offset_y
+        offset_x, offset_y = pref.depth_offset
+
+        toolbar_width = get_toolbar_width() + offset_x
+        header_height = get_toolbar_width("HEADER") + offset_y
         x1 = toolbar_width
         y1 = height - header_height
         x2 = int(width / 2 * depth_scale) + toolbar_width

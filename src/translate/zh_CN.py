@@ -113,4 +113,5 @@ data = {
     "LIFT": "左",
     "CENTER": "中",
     "Top bar": "顶部栏",
+    "Depth map zoom value %.2f": "深度图缩放值 %.2f"
 }
