@@ -96,4 +96,26 @@ def draw_line(vertices, color, line_width=1):
     shader.bind()
     shader.uniform_float("color", color)
     batch.draw(shader)
-    gpu.state.line_width_set(1.0)
+    gpu.state.line_width_set(1)
+
+
+def draw_smooth_line(vertices, color, line_width=1):
+    colors = []
+    indices = []
+    for index, v in enumerate(vertices):
+        colors.append(color)
+        if index == len(vertices) - 1:
+            indices.append((0, len(vertices) - 1))
+        else:
+            indices.append((index, index + 1))
+
+    gpu.state.line_width_set(line_width)
+
+    poly_line = gpu.shader.from_builtin("POLYLINE_SMOOTH_COLOR")
+    poly_line.uniform_float("lineWidth", line_width)
+    poly_line.uniform_float("viewportSize", gpu.state.scissor_get()[2:])
+    poly_line.bind()
+
+    batch = batch_for_shader(poly_line, "LINES", {"pos": vertices, "color": colors}, indices=indices)
+    batch.draw(poly_line)
+    gpu.state.line_width_set(1)

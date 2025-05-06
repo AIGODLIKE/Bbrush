@@ -2,6 +2,7 @@ import bpy
 from bl_ui.space_toolsystem_common import ToolSelectPanelHelper
 from mathutils import Vector
 
+from .line_to_convex_shell import line_to_convex_shell
 from .. import __package__ as base_name
 
 

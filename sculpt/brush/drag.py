@@ -1,5 +1,7 @@
 import bpy
 import gpu
+import numpy as np
+from bl_ui.space_toolsystem_common import ToolSelectPanelHelper
 from gpu_extras.batch import batch_for_shader
 from mathutils import Vector
 
@@ -12,7 +14,38 @@ from ...utils import (
     get_active_tool,
     refresh_ui,
 )
-from ...utils.gpu import draw_text, draw_line
+from ...utils.gpu import draw_text, draw_line, draw_smooth_line
+
+
+def lasso_mask(lasso_path, value, is_use_front_faces_only):
+    path = [{
+        'name': '',
+        'loc': i,
+        'time': 0
+    } for i in lasso_path]
+    bpy.ops.paint.mask_lasso_gesture(
+        'EXEC_DEFAULT', True,
+        path=path, value=value, use_front_faces_only=is_use_front_faces_only)
+
+
+def lasso_hide(
+        lasso_path,
+        action,
+        area,
+        use_front_faces_only,
+):
+    path = [{
+        'name': '',
+        'loc': i,
+        'time': 0
+    } for i in lasso_path]
+    bpy.ops.paint.hide_show_lasso_gesture(
+        'EXEC_DEFAULT', True,
+        path=path,
+        action=action,
+        area=area,
+        use_front_faces_only=use_front_faces_only,
+    )
 
 
 class DragDraw:
@@ -83,9 +116,13 @@ class DragDraw:
         draw_text(100, 100)
         getattr(self, f"draw_{self.shape.lower()}")()
 
+    def draw_lasso(self):
+        lines = self.mouse_route + [self.mouse, self.mouse_route[0]]
+        draw_smooth_line(lines, self.color, line_width=2)
+
     def init_draw(self, context, event):
-        self.mouse_route = []
         self.mouse = self.mouse_start = Vector((event.mouse_region_x, event.mouse_region_y))
+        self.mouse_route = [self.mouse, ]
         self.mouse_move = Vector((0, 0))
         self.is_reverse = event.alt
 
@@ -116,8 +153,8 @@ class DragBase(DragDraw):
         self.unregister_draw()
         refresh_ui(context)
 
-    def get_shape_in_model_up(self):
-        data = np.array(self.mouse_pos, dtype=np.float32)
+    def get_shape_in_model_up(self, context):
+        data = np.array(self.mouse_route, dtype=np.float32)
         data.reshape((data.__len__(), 2))
         max_co = data.max(axis=0)
         min_co = data.min(axis=0)
@@ -126,7 +163,7 @@ class DragBase(DragDraw):
         w = int(max_co[0] - x)
         h = int(max_co[1] - y)
 
-        return get_area_ray_cast(x, y, w, h)
+        return check_area_in_model(context, x, y, w, h)
 
     def check_brush_in_model(self, context) -> bool:
         """检查绘制的笔刷是否画在了模型上"""
@@ -138,11 +175,15 @@ class DragBase(DragDraw):
             in_modal = check_area_in_model(context, min(x1, x2), min(y1, y2), abs(w), abs(h))
             return in_modal
         else:
-            return self.get_shape_in_model_up()
+            return self.get_shape_in_model_up(context)
 
     def execute(self, context):
         in_model = self.check_brush_in_model(context)
+        is_move_mouse = len(self.mouse_route) > 3
+        value = -1 if self.is_reverse else 1
+
         print("execute,", in_model, self.shape, self.brush_mode)
+
         if self.shape == "BOX":
             x1, y1 = self.mouse_start
             x2, y2 = self.mouse
@@ -170,10 +211,26 @@ class DragBase(DragDraw):
                         bpy.ops.paint.hide_show('EXEC_DEFAULT', True, action='HIDE', area='OUTSIDE', **box_args)
                 else:
                     sculpt_invert_hide_face()
+        elif self.shape == "LASSO":
+            if self.brush_mode == "MASK":
+                if in_model:
+                    if is_move_mouse:
+                        lasso_mask(self.mouse_route, value, False)
+                else:
+                    bpy.ops.paint.mask_flood_fill('EXEC_DEFAULT', True, mode='VALUE', value=0)
+            elif self.brush_mode == "HIDE":
+                if in_model:
+                    if is_move_mouse:
+                        lasso_hide(self.mouse_route, value,
+                                   "HIDE",
+                                   "Inside",
+                                   False,
+                                   )
+                else:
+                    sculpt_invert_hide_face()
         else:
             ...
             # get_shape_in_model_up
-
         return {"FINISHED"}
 
 
@@ -185,6 +242,12 @@ class BrushDrag(bpy.types.Operator, DragBase):
     def update_box_shape(self, context, event):
         self.mouse = Vector((event.mouse_region_x, event.mouse_region_y))
 
+    def update_lasso_shape(self, context, event):
+        mouse = Vector((event.mouse_region_x, event.mouse_region_y))
+        last_mouse = self.mouse_route[-1]
+        if last_mouse != mouse and (last_mouse - mouse).length > 5:
+            self.mouse_route.append(mouse)
+
     def start_modal(self, context, event):
         self.init_drag_event(context, event)
         context.window_manager.modal_handler_add(self)
@@ -192,18 +255,25 @@ class BrushDrag(bpy.types.Operator, DragBase):
 
     def invoke(self, context, event):
         is_in_modal = check_mouse_in_model(context, event)
-        print(context, event, self.bl_label, is_in_modal)
+        active_tool = ToolSelectPanelHelper.tool_active_from_context(bpy.context)
 
+        print(self.bl_label, is_in_modal, self.brush_mode, active_tool.idname)
         if self.__class__.draw_handle is not None:
             return {"FINISHED"}
 
         if check_mouse_in_depth_map_area(event):
             bpy.ops.bbrush.depth_scale("INVOKE_DEFAULT")  # 缩放深度图
             return {"FINISHED"}
+        elif active_tool and active_tool.idname in (
+                "builtin.box_mask",
+                "builtin.box_hide",
+                "builtin.lasso_mask",
+        ):
+            return self.start_modal(context, event)
         elif not is_in_modal:
             from .. import brush_runtime
             if brush_runtime and brush_runtime.brush_mode != "SCULPT":  # 不是雕刻并且不在模型上
-                self.start_modal(context, event)
+                return self.start_modal(context, event)
             else:
                 bpy.ops.view3d.rotate("INVOKE_DEFAULT")  # 旋转视图
                 return {"FINISHED"}
@@ -211,7 +281,7 @@ class BrushDrag(bpy.types.Operator, DragBase):
 
     def modal(self, context, event):
         """        拖动的时候不在模型上拖,执行其它操作        """
-        print("drag_event", self.shape, self.is_reverse, event.value, event.type)
+        print("drag_event", self.shape, self.is_reverse, event.value, event.type, len(self.mouse_route))
 
         self.is_reverse = event.alt
         if event.value == "PRESS" and event.type == "LEFT_CTRL":
@@ -222,6 +292,8 @@ class BrushDrag(bpy.types.Operator, DragBase):
             return self.execute(context)
         elif self.shape == "BOX":
             self.update_box_shape(context, event)
+        elif self.shape == "LASSO":
+            self.update_lasso_shape(context, event)
 
         refresh_ui(context)
         return {"RUNNING_MODAL"}
