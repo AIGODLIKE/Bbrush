@@ -1,7 +1,7 @@
 import bpy
 
 from .gpu_buffer import draw_gpu_buffer
-from ..utils import get_pref, get_toolbar_width, is_bbruse_mode
+from ..utils import get_pref, is_bbruse_mode, get_region_height, get_region_width
 
 handel = None
 
@@ -34,8 +34,12 @@ def draw_depth():
 
         offset_x, offset_y = pref.depth_offset
 
-        toolbar_width = get_toolbar_width() + offset_x
-        header_height = get_toolbar_width("HEADER") + offset_y
+        header = get_region_height(context, "HEADER")
+        tool_header = get_region_height(context, "TOOL_HEADER")
+
+        toolbar_width = get_region_width(context) + offset_x
+        header_height = header + tool_header + offset_y
+
         x1 = toolbar_width
         y1 = height - header_height
         x2 = int(width / 2 * depth_scale) + toolbar_width

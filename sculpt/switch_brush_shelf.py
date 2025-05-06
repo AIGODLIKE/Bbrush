@@ -3,7 +3,7 @@ from bl_ui.space_toolsystem_common import ToolSelectPanelHelper, activate_by_id
 from bl_ui.space_toolsystem_toolbar import VIEW3D_PT_tools_active
 from bpy.utils.toolsystem import ToolDef
 
-from ..utils import refresh_ui
+from ..utils import refresh_ui, get_active_tool
 
 origin_brush_toolbar = ToolSelectPanelHelper._tool_class_from_space_type("VIEW_3D")._tools["SCULPT"].copy()
 active_brush_toolbar = {  # 记录活动笔刷的名称
@@ -108,11 +108,6 @@ class SwitchBrushShelf:
     def refresh_ui(context):
         refresh_ui(context)
 
-    @staticmethod
-    def get_active_tool(context) -> "(bpy.types.Tool, bpy.types.WorkSpaceTool, int)|None":
-        return (ToolSelectPanelHelper._tool_class_from_space_type("VIEW_3D")._tool_get_active(context, "VIEW_3D",
-                                                                                             "SCULPT"))
-
     def update_brush_shelf(self, context, event):
         """更新笔刷资产架"""
         if context.space_data is None:
@@ -122,7 +117,7 @@ class SwitchBrushShelf:
         key = (event.ctrl, event.alt, event.shift)
         mode = BRUSH_SHELF_MODE[key]  # 使用组合键来确认是否需要更新笔刷工具架
 
-        (active_tool, WorkSpaceTool, index) = self.get_active_tool(context)
+        (active_tool, WorkSpaceTool, index) = get_active_tool(context)
 
         if mode != self.brush_mode:
 
@@ -134,7 +129,7 @@ class SwitchBrushShelf:
             self.brush_mode = mode
             self.refresh_ui(context)
 
-        (active_tool, WorkSpaceTool, index) = self.get_active_tool(context)
+        (active_tool, WorkSpaceTool, index) = get_active_tool(context)
         if WorkSpaceTool is None:
             tool = active_brush_toolbar[mode]
             cls = ToolSelectPanelHelper._tool_class_from_space_type("VIEW_3D")

@@ -54,17 +54,6 @@ class BBrushSculpt(
         if check_mouse_in_3d_area(context, event):
             self.update_brush_shelf(context, event)
 
-            # print(
-            #     area.type if area else "",
-            #     area,
-            #     # check_mouse_in_3d_area(context, event),
-            #     event.type, event.value, "\t\t",
-            #     # event.type_prev,
-            #     # event.value_prev,
-            #     # context.area,
-            #     # context.region,
-            #     "\n"
-            # )
             if self.check_exit(context, event):
                 pref = get_pref()
                 if pref.always_use_bbrush_sculpt_mode and self.is_exit:
@@ -77,7 +66,7 @@ class BBrushSculpt(
                     )
                 return self.exit(context)
             elif self.key_event(context, event):
-                print("key_event")
+                print("key_event", event.value, event.type)
                 return {"RUNNING_MODAL"}
 
         return {"PASS_THROUGH"}

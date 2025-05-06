@@ -1,4 +1,5 @@
 import bpy
+from bl_ui.space_toolsystem_common import ToolSelectPanelHelper
 from mathutils import Vector
 
 from .. import __package__ as base_name
@@ -9,21 +10,50 @@ def get_pref():
     return bpy.context.preferences.addons[base_name].preferences
 
 
-def get_toolbar_width(region_type="TOOLS"):
+def get_region(region_type, context=None) -> "None|bpy.types.Region":
     """
     enum in ["WINDOW", "HEADER", "CHANNELS", "TEMPORARY", "UI", "TOOLS", "TOOL_PROPS",
         "PREVIEW", "HUD", "NAVIGATION_BAR", "EXECUTE", "FOOTER", "TOOL_HEADER", "XR"]
     """
+    area = bpy.context.area if context is None else context.area
+    for region in area.regions:
+        if region.type == region_type:
+            return region
+
+
+def get_toolbar_width(region_type="TOOLS"):
     for i in bpy.context.area.regions:
         if i.type == region_type:
             if region_type == "TOOLS":
                 return i.width
-            elif region_type == "HEADER":
+            elif region_type in ("HEADER", "TOOL_HEADER"):
                 return i.height
+
+
+def get_region_height(context, region_type="TOOLS") -> int:
+    if area := get_region(region_type, context):
+        return area.height
+    return 0
+
+
+def get_region_width(context, region_type="TOOLS") -> int:
+    if area := get_region(region_type, context):
+        return area.width
+    return 0
+
+
+def get_active_tool(context) -> "(bpy.types.Tool, bpy.types.WorkSpaceTool, int)":
+    return ToolSelectPanelHelper._tool_class_from_space_type("VIEW_3D")._tool_get_active(context, "VIEW_3D", "SCULPT")
+
+
+def get_brush_shape(brush) -> str:
+    """通过笔刷id获取形状"""
+    return "NONE"
 
 
 def register_submodule_factory(submodule_tuple):
     """注册子模块"""
+
     def register():
         for mod in submodule_tuple:
             mod.register()
