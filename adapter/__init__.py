@@ -30,6 +30,4 @@ def operator_invoke_confirm(self, event, context, title, message) -> set:
             }
         )
     else:
-        return context.window_manager.invoke_confirm(
-            self, event
-        )
+        return context.window_manager.invoke_confirm(self, event)

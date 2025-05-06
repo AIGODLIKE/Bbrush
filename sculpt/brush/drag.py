@@ -3,6 +3,7 @@ import gpu
 from gpu_extras.batch import batch_for_shader
 from mathutils import Vector
 
+from ...adapter import sculpt_invert_hide_face
 from ...utils import (
     check_mouse_in_model,
     check_mouse_in_depth_map_area,
@@ -160,6 +161,14 @@ class DragBase(DragDraw):
                     )
                 else:
                     bpy.ops.paint.mask_flood_fill('EXEC_DEFAULT', True, mode='VALUE', value=0)
+            elif self.brush_mode == "HIDE":
+                if in_model:
+                    if self.is_reverse:
+                        bpy.ops.paint.hide_show('EXEC_DEFAULT', True, action='HIDE', area="Inside", **box_args)
+                    else:
+                        bpy.ops.paint.hide_show('EXEC_DEFAULT', True, action='HIDE', area='OUTSIDE', **box_args)
+                else:
+                    sculpt_invert_hide_face()
         else:
             ...
             # get_shape_in_model_up
@@ -175,6 +184,11 @@ class BrushDrag(bpy.types.Operator, DragBase):
     def update_box_shape(self, context, event):
         self.mouse = Vector((event.mouse_region_x, event.mouse_region_y))
 
+    def start_modal(self, context, event):
+        self.init_drag_event(context, event)
+        context.window_manager.modal_handler_add(self)
+        return {'RUNNING_MODAL'}
+
     def invoke(self, context, event):
         is_in_modal = check_mouse_in_model(context, event)
         print(context, event, self.bl_label, is_in_modal)
@@ -184,10 +198,8 @@ class BrushDrag(bpy.types.Operator, DragBase):
             return {"FINISHED"}
         elif not is_in_modal:
             from .. import brush_runtime
-            if brush_runtime and brush_runtime.brush_mode != "SCULPT":
-                self.init_drag_event(context, event)  # 不是雕刻并且不在模型上
-                context.window_manager.modal_handler_add(self)
-                return {'RUNNING_MODAL'}
+            if brush_runtime and brush_runtime.brush_mode != "SCULPT":  # 不是雕刻并且不在模型上
+                self.start_modal(context, event)
             else:
                 bpy.ops.view3d.rotate("INVOKE_DEFAULT")  # 旋转视图
                 return {"FINISHED"}

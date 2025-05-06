@@ -94,6 +94,7 @@ keyconfig_data = [
     ("3D View Tool: Sculpt, Box Hide", {"space_type": "VIEW_3D", "region_type": "WINDOW"},
      {"items": [
          ("bbrush.click", {"type": "LEFTMOUSE", "value": "CLICK", "any": True}, None),
+         ("bbrush.drag", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "any": True}, None),
          ("paint.hide_show", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "ctrl": True, "shift": True},
           {"properties": [("action", "HIDE"), ], },),
          ("paint.hide_show", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "ctrl": True, "shift": True, "alt": True},
@@ -103,6 +104,7 @@ keyconfig_data = [
      ], },),
     ("3D View Tool: Sculpt, Lasso Hide", {"space_type": "VIEW_3D", "region_type": "WINDOW"},
      {"items": [
+         ("bbrush.drag", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "any": True}, None),
          ("paint.hide_show_lasso_gesture", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "ctrl": True, "shift": True},
           {"properties": [("action", "HIDE"), ], },),
          ("paint.hide_show_lasso_gesture",
@@ -123,6 +125,7 @@ keyconfig_data = [
      ], },),
     ("3D View Tool: Sculpt, Polyline Hide", {"space_type": "VIEW_3D", "region_type": "WINDOW"},
      {"items": [
+         ("bbrush.drag", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "any": True}, None),
          ("paint.hide_show_polyline_gesture", {"type": "LEFTMOUSE", "value": "PRESS", "ctrl": True, "shift": True},
           {"properties": [("action", "HIDE"), ("area", "Inside"), ], },),
          ("paint.hide_show_polyline_gesture",
@@ -133,21 +136,25 @@ keyconfig_data = [
     # Trim
     ("3D View Tool: Sculpt, Box Trim", {"space_type": "VIEW_3D", "region_type": "WINDOW"},
      {"items": [
+         ("bbrush.drag", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "any": True}, None),
          ("sculpt.trim_box_gesture", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "any": True},
           {"properties": [], },),
      ], },),
     ("3D View Tool: Sculpt, Lasso Trim", {"space_type": "VIEW_3D", "region_type": "WINDOW"},
      {"items": [
+         ("bbrush.drag", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "any": True}, None),
          ("sculpt.trim_lasso_gesture", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "any": True},
           {"properties": [("smooth_stroke_factor", 1), ], },),
      ], },),
     ("3D View Tool: Sculpt, Line Trim", {"space_type": "VIEW_3D", "region_type": "WINDOW"},
      {"items": [
+         ("bbrush.drag", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "any": True}, None),
          ("sculpt.trim_line_gesture", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "any": True},
           {"properties": [("xstart", 0), ], },),
      ], },),
     ("3D View Tool: Sculpt, Polyline Trim", {"space_type": "VIEW_3D", "region_type": "WINDOW"},
      {"items": [
+         ("bbrush.drag", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "any": True}, None),
          ("sculpt.trim_polyline_gesture", {"type": "LEFTMOUSE", "value": "PRESS", "any": True},
           {"properties": [], },),
      ], },),
