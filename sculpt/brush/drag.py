@@ -16,7 +16,7 @@ from ...utils.gpu import draw_text, draw_line
 
 
 class DragDraw:
-    drag_handle = None
+    draw_handle = None
 
     mouse_start = None
     mouse_move = None
@@ -90,11 +90,12 @@ class DragDraw:
         self.is_reverse = event.alt
 
     def register_draw(self):
-        self.draw_handle = bpy.types.SpaceView3D.draw_handler_add(self.draw_drag, (), 'WINDOW', 'POST_PIXEL')
+        self.__class__.draw_handle = bpy.types.SpaceView3D.draw_handler_add(self.__class__.draw_drag, (self,), 'WINDOW',
+                                                                            'POST_PIXEL')
 
     def unregister_draw(self):
-        if getattr(self, "draw_handle"):
-            bpy.types.SpaceView3D.draw_handler_remove(self.draw_handle, 'WINDOW')
+        bpy.types.SpaceView3D.draw_handler_remove(self.__class__.draw_handle, 'WINDOW')
+        self.__class__.draw_handle = None
 
 
 class DragBase(DragDraw):
@@ -192,6 +193,9 @@ class BrushDrag(bpy.types.Operator, DragBase):
     def invoke(self, context, event):
         is_in_modal = check_mouse_in_model(context, event)
         print(context, event, self.bl_label, is_in_modal)
+
+        if self.__class__.draw_handle is not None:
+            return {"FINISHED"}
 
         if check_mouse_in_depth_map_area(event):
             bpy.ops.bbrush.depth_scale("INVOKE_DEFAULT")  # 缩放深度图
