@@ -1,3 +1,4 @@
+import bmesh
 import bpy
 import gpu
 import numpy as np
@@ -13,6 +14,7 @@ from ...utils import (
     get_brush_shape,
     get_active_tool,
     refresh_ui,
+    line_to_convex_shell,
 )
 from ...utils.gpu import draw_text, draw_line, draw_smooth_line
 
@@ -50,11 +52,13 @@ def lasso_hide(
 
 class DragDraw:
     draw_handle = None
+    shaders = {}
 
     mouse_start = None
     mouse_move = None
     mouse = None
     mouse_route = None  # 鼠标路径
+    mouse_route_convex_shell = None
 
     is_reverse = None
 
@@ -75,6 +79,13 @@ class DragDraw:
             else:
                 return Vector((0, 0, 0, self.alpha))
         return Vector((0, 0, 0, self.alpha))
+
+    def draw_drag(self):
+        draw_text(100, 100)
+        for batch, shader in self.shaders.items():
+            shader.uniform_float("color", self.color)
+            batch.draw(shader)
+        getattr(self, f"draw_{self.shape.lower()}")()
 
     def draw_box(self):
         x1, y1 = self.mouse_start
@@ -112,19 +123,17 @@ class DragDraw:
                   size=15,
                   color=(1, 1, 1, 1))
 
-    def draw_drag(self):
-        draw_text(100, 100)
-        getattr(self, f"draw_{self.shape.lower()}")()
 
     def draw_lasso(self):
         lines = self.mouse_route + [self.mouse, self.mouse_route[0]]
-        draw_smooth_line(lines, self.color, line_width=2)
+        draw_smooth_line(lines, Vector((1, 1, 1, self.alpha)), line_width=1)
 
     def init_draw(self, context, event):
         self.mouse = self.mouse_start = Vector((event.mouse_region_x, event.mouse_region_y))
         self.mouse_route = [self.mouse, ]
         self.mouse_move = Vector((0, 0))
         self.is_reverse = event.alt
+        self.shaders = {}
 
     def register_draw(self):
         self.__class__.draw_handle = bpy.types.SpaceView3D.draw_handler_add(self.__class__.draw_drag, (self,), 'WINDOW',
@@ -133,6 +142,7 @@ class DragDraw:
     def unregister_draw(self):
         bpy.types.SpaceView3D.draw_handler_remove(self.__class__.draw_handle, 'WINDOW')
         self.__class__.draw_handle = None
+        self.shaders.clear()
 
 
 class DragBase(DragDraw):
@@ -175,7 +185,10 @@ class DragBase(DragDraw):
             in_modal = check_area_in_model(context, min(x1, x2), min(y1, y2), abs(w), abs(h))
             return in_modal
         else:
-            return self.get_shape_in_model_up(context)
+            if len(self.mouse_route) > 2:
+                return self.get_shape_in_model_up(context)
+            else:
+                return True
 
     def execute(self, context):
         in_model = self.check_brush_in_model(context)
@@ -215,13 +228,13 @@ class DragBase(DragDraw):
             if self.brush_mode == "MASK":
                 if in_model:
                     if is_move_mouse:
-                        lasso_mask(self.mouse_route, value, False)
+                        lasso_mask(self.mouse_route_convex_shell, value, False)
                 else:
                     bpy.ops.paint.mask_flood_fill('EXEC_DEFAULT', True, mode='VALUE', value=0)
             elif self.brush_mode == "HIDE":
                 if in_model:
                     if is_move_mouse:
-                        lasso_hide(self.mouse_route, value,
+                        lasso_hide(self.mouse_route_convex_shell, value,
                                    "HIDE",
                                    "Inside",
                                    False,
@@ -246,7 +259,41 @@ class BrushDrag(bpy.types.Operator, DragBase):
         mouse = Vector((event.mouse_region_x, event.mouse_region_y))
         last_mouse = self.mouse_route[-1]
         if last_mouse != mouse and (last_mouse - mouse).length > 5:
-            self.mouse_route.append(mouse)
+            try:
+                preview_mouse_route = [*self.mouse_route, mouse]
+                self.mouse_route_convex_shell = lines = line_to_convex_shell(preview_mouse_route)
+
+                start_v = None
+                last_v = None
+                bm = bmesh.new()
+                for index, co in enumerate(lines):
+                    co = [*co[:], 0]
+                    if last_v is not None:
+                        last_v = bm.verts.new(co, last_v)
+                    else:
+                        last_v = bm.verts.new(co)
+                    last_v.index = index
+                    if start_v is None:
+                        start_v = last_v
+                bm.edges.new((last_v, start_v))
+                bm.faces.new(bm.verts)
+
+                bmesh.ops.triangulate(bm, faces=bm.faces)
+
+                shader = gpu.shader.from_builtin("UNIFORM_COLOR")
+                shader.bind()
+                pos = [v.co[:2] for v in bm.verts]
+                indices = [list(i.index for i in face.verts) for face in bm.faces]
+
+                batch = batch_for_shader(shader, "TRIS", {"pos": pos}, indices=indices)
+                self.shaders.clear()
+                self.shaders[batch] = shader
+
+                self.mouse_route.append(mouse)
+
+            except (ValueError, KeyError) as e:
+                print(e.__repr__())
+                ...
 
     def start_modal(self, context, event):
         self.init_drag_event(context, event)

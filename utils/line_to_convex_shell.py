@@ -1,3 +1,4 @@
+import bpy
 from mathutils import Vector
 from mathutils import geometry
 
@@ -144,7 +145,6 @@ def line_to_convex_shell(pos, link=False):
                 from_idx = pos.index(find_point)
             except IndexError as e:
                 from_idx = -9999
-                log.debug(e.args)
         #   退出条件
         if to_point == origin_point:
             circle.append(from_point)
