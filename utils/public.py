@@ -266,7 +266,6 @@ class PublicClass(PublicProperty,
         return self.active_tool_name == 'builtin_brush.Smooth'
 
 
-
 def register_submodule_factory(submodule_tuple):
     def register():
         for mod in submodule_tuple:

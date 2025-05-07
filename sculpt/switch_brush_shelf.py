@@ -3,6 +3,7 @@ from bl_ui.space_toolsystem_common import ToolSelectPanelHelper, activate_by_id
 from bl_ui.space_toolsystem_toolbar import VIEW3D_PT_tools_active
 from bpy.utils.toolsystem import ToolDef
 
+from .brush import other
 from ..utils import refresh_ui, get_active_tool
 
 origin_brush_toolbar = ToolSelectPanelHelper._tool_class_from_space_type("VIEW_3D")._tools["SCULPT"].copy()
@@ -73,7 +74,15 @@ def tool_ops(tools):
 
 
 tool_ops(origin_brush_toolbar)
-# brush_shelf["HIDE"] = brush_shelf["HIDE"].sort()
+brush_shelf["MASK"].extend((
+    other.circular_mask,
+    other.ellipse_mask,
+))
+
+brush_shelf["HIDE"].extend((
+    other.circular_hide,
+    other.ellipse_hide,
+))
 
 BRUSH_SHELF_MODE = {
     # list(itertools.product(a,a,a))

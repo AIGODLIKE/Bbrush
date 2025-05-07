@@ -10,95 +10,34 @@ def get_dat_icon(name):
     return os.path.normpath(os.path.join(ICON_PATH, name))
 
 
-def bbrush_mask_draw_settings(_context, layout, tool):
-    props = tool.operator_properties("bbrush.mask")
+def mask_draw_settings(context, layout, tool):
+    props = tool.operator_properties("paint.mask_lasso_gesture")
     layout.prop(props, "use_front_faces_only", expand=False)
 
 
 @ToolDef.from_fn
-def bbrush_translate():
-    def draw_settings(context, layout, _tool):
-        if context.region.type not in {'UI', 'WINDOW'}:
-            row = layout.row(align=True)
-            row.prop(context.region, 'type')
-            row.prop(context.region, 'type')
-            row.prop(context.region, 'type')
-            row.prop(context.region, 'type')
-            row.prop(context.region, 'type')
-
+def circular_mask():
     return dict(
-        idname="bbrush.translate",
-        label="BBrush Move BrushTool",
-        description='Control handle for moving the sculpting origin',
-        icon="ops.transform.translate",
-        cursor='EYEDROPPER',
-        widget=None,
-        draw_settings=draw_settings,
-        keymap="3D View BrushTool: Sculpt, BBrush Move BrushTool",
-    )
-
-
-@ToolDef.from_fn
-def bbrush_polygon_mask():
-    return dict(
-        idname='bbrush.polygon_mask',
-        label='Polygon mask',
-        description='Draw polygonal mask',
-        icon=get_dat_icon('brush.sculpt.polygons_mask'),
-        cursor='EYEDROPPER',
-        widget=None,
-        draw_settings=bbrush_mask_draw_settings,
-    )
-
-
-@ToolDef.from_fn
-def bbrush_square_mask():
-    return dict(
-        idname='bbrush.square_mask',
-        label='Square mask',
-        description='Draw square mask',
-        icon=get_dat_icon('brush.sculpt.square_mask'),
-        cursor='EYEDROPPER',
-        widget=None,
-        draw_settings=bbrush_mask_draw_settings,
-    )
-
-
-@ToolDef.from_fn
-def bbrush_circular_mask():
-    return dict(
-        idname='bbrush.circular_mask',
+        idname='builtin.circular_mask',
         label='Circular mask',
         description='Draw circular mask',
         icon=get_dat_icon('brush.sculpt.circular_mask'),
         cursor='EYEDROPPER',
         widget=None,
-        draw_settings=bbrush_mask_draw_settings,
+        draw_settings=mask_draw_settings,
     )
 
 
 @ToolDef.from_fn
-def bbrush_ellipse_mask():
+def ellipse_mask():
     return dict(
-        idname='bbrush.ellipse_mask',
+        idname='builtin.ellipse_mask',
         label='Ellipse mask',
         description='Draw elliptical mask',
         icon=get_dat_icon('brush.sculpt.ellipse_mask'),
         cursor='EYEDROPPER',
         widget=None,
-        draw_settings=bbrush_mask_draw_settings,
-    )
-
-
-@ToolDef.from_fn
-def bbrush_mask_border():
-    return dict(
-        idname="builtin.box_mask",
-        label="Box Mask",
-        icon="ops.sculpt.border_mask",
-        cursor='EYEDROPPER',
-        widget=None,
-        draw_settings=bbrush_mask_draw_settings,
+        draw_settings=mask_draw_settings,
     )
 
 

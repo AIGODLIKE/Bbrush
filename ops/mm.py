@@ -13,15 +13,6 @@ from ..utils.log import log
 from ..utils.public import PublicOperator, PublicDraw
 
 
-def get_circular(x, y, segments=64):
-    from math import sin, cos, pi
-    if segments <= 0:
-        raise ValueError('Amount of segments must be greater than 0.')
-    mul = (1.0 / (segments - 1)) * (pi * 2)
-    vert = [Vector((sin(i * mul) * x, cos(i * mul) * y)) for i in
-            range(segments)]
-    return vert
-
 
 class MaskProperty(PublicOperator, PublicDraw):
     use_front_faces_only: BoolProperty(name='Only the front faces')
@@ -199,8 +190,6 @@ class MaskClick(MaskProperty):
 
 
 class MaskDrawArea(MaskClick):
-    indices = ((0, 1, 2), (2, 1, 3))
-    segments = 64
 
     mouse_pos = list()
     start_mouse: Vector
@@ -230,20 +219,6 @@ class MaskDrawArea(MaskClick):
             log.error(v.args)
             print(v.args)
             return self.mouse_pos
-
-    @property
-    def ellipse_data(self):
-        circular = get_circular(abs(self._x), abs(self._y), self.segments)
-        draw_data = list((np.add(i, self.start_mouse))
-                         for i in circular)
-        return draw_data
-
-    @property
-    def _circular_data(self):
-        axis = max(abs(self._x), abs(self._y))
-        circular = get_circular(axis, axis, self.segments)
-        draw_data = list(i + self.start_mouse for i in circular)
-        return draw_data
 
     def draw_2d_handles(self, context, event):
         gpu.state.blend_set('ALPHA')

@@ -64,9 +64,15 @@ def get_brush_shape(brush) -> str:
             "builtin.polyline_trim",
     ):
         return "POLYLINE"
-    elif brush in ():
+    elif brush in (
+            "builtin.ellipse_hide",
+            "builtin.ellipse_mask",
+    ):
         return "ELLIPSE"
-    elif brush in ():
+    elif brush in (
+            "builtin.circular_mask",
+            "builtin.circular_hide",
+    ):
         return "CIRCULAR"
     elif brush in (
             "builtin.lasso_mask",

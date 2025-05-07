@@ -51,6 +51,34 @@ def lasso_hide(
     )
 
 
+last_use_front_faces_only = False
+
+
+def get_use_front_faces_only(context) -> bool:
+    global last_use_front_faces_only
+    active_tool = ToolSelectPanelHelper.tool_active_from_context(context)
+
+    if value := {
+        "builtin.box_mask": "paint.mask_box_gesture",
+        "builtin.lasso_mask": "paint.mask_lasso_gesture",
+        "builtin.polyline_mask": "paint.mask_polyline_gesture",
+    }.get(active_tool.idname):
+        props = active_tool.operator_properties(value)
+        last_use_front_faces_only = props.use_front_faces_only
+        return last_use_front_faces_only
+    return last_use_front_faces_only
+
+
+def get_circular(x, y, segments=64):
+    from math import sin, cos, pi
+    if segments <= 0:
+        raise ValueError('Amount of segments must be greater than 0.')
+    mul = (1.0 / (segments - 1)) * (pi * 2)
+    vert = [Vector((sin(i * mul) * x, cos(i * mul) * y)) for i in
+            range(segments)]
+    return vert
+
+
 class DragDraw:
     draw_handle = None
     shaders = {}
@@ -132,6 +160,12 @@ class DragDraw:
         lines = self.mouse_route + [self.mouse, ]
         draw_smooth_line(lines, Vector((1, 1, 1, self.alpha)), line_width=1)
 
+    def draw_circular(self):
+        draw_smooth_line(self.mouse_route, Vector((1, 1, 1, self.alpha)), line_width=1)
+
+    def draw_ellipse(self):
+        draw_smooth_line(self.mouse_route, Vector((1, 1, 1, self.alpha)), line_width=1)
+
     def init_draw(self, context, event):
         self.mouse = self.mouse_start = Vector((event.mouse_region_x, event.mouse_region_y))
         self.mouse_route = [self.mouse, ]
@@ -174,24 +208,6 @@ class DragDraw:
         batch = batch_for_shader(shader, "TRIS", {"pos": pos}, indices=indices)
         self.shaders.clear()
         self.shaders[batch] = shader
-
-
-last_use_front_faces_only = False
-
-
-def get_use_front_faces_only(context) -> bool:
-    global last_use_front_faces_only
-    active_tool = ToolSelectPanelHelper.tool_active_from_context(context)
-
-    if value := {
-        "builtin.box_mask": "paint.mask_box_gesture",
-        "builtin.lasso_mask": "paint.mask_lasso_gesture",
-        "builtin.polyline_mask": "paint.mask_polyline_gesture",
-    }.get(active_tool.idname):
-        props = active_tool.operator_properties(value)
-        last_use_front_faces_only = props.use_front_faces_only
-        return last_use_front_faces_only
-    return last_use_front_faces_only
 
 
 class DragBase(DragDraw):
@@ -273,7 +289,7 @@ class DragBase(DragDraw):
                         bpy.ops.paint.hide_show('EXEC_DEFAULT', True, action='HIDE', area='OUTSIDE', **box_args)
                 else:
                     sculpt_invert_hide_face()
-        elif self.shape in ("LASSO", "POLYLINE"):
+        elif self.shape in ("LASSO", "POLYLINE", "CIRCULAR", "ELLIPSE"):
             if self.brush_mode == "MASK":
                 if in_model:
                     if is_move_mouse:
@@ -327,6 +343,28 @@ class BrushDrag(bpy.types.Operator, DragBase):
             print(e.__repr__())
             ...
 
+    def update_circular_shape(self, context, event):
+        self.mouse = Vector((event.mouse_region_x, event.mouse_region_y))
+
+        x, y = self.mouse - self.mouse_start
+        axis = max(abs(x), abs(y))
+        circular = get_circular(axis, axis, self.segments)
+        draw_data = list(i + self.mouse_start for i in circular)
+
+        self.mouse_route_convex_shell = self.mouse_route = draw_data
+        self.preview_area(draw_data)
+
+    def update_ellipse_shape(self, context, event):
+        self.mouse = Vector((event.mouse_region_x, event.mouse_region_y))
+
+        x, y = self.mouse - self.mouse_start
+        circular = get_circular(abs(x), abs(y), self.segments)
+        draw_data = list((np.add(i, self.mouse_start))
+                         for i in circular)
+
+        self.mouse_route_convex_shell = self.mouse_route = draw_data
+        self.preview_area(draw_data)
+
     def start_modal(self, context, event):
         self.click_time = time.time()
         self.init_drag_event(context, event)
@@ -337,8 +375,7 @@ class BrushDrag(bpy.types.Operator, DragBase):
         is_in_modal = check_mouse_in_model(context, event)
         active_tool = ToolSelectPanelHelper.tool_active_from_context(bpy.context)
 
-        print(self.bl_label, is_in_modal, self.brush_mode, active_tool.idname, active_tool)
-        print(dir(active_tool))
+        print(self.bl_label, is_in_modal, self.brush_mode, active_tool.idname)
         if self.__class__.draw_handle is not None:
             return {"FINISHED"}
 
@@ -352,6 +389,12 @@ class BrushDrag(bpy.types.Operator, DragBase):
                 "builtin.lasso_hide",
                 "builtin.polyline_mask",
                 "builtin.polyline_hide",
+
+                # 自定义笔刷
+                "builtin.circular_mask",
+                "builtin.ellipse_mask",
+                "builtin.circular_hide",
+                "builtin.ellipse_hide",
         ):
             return self.start_modal(context, event)
         elif not is_in_modal:
@@ -383,13 +426,14 @@ class BrushDrag(bpy.types.Operator, DragBase):
             self.exit(context)
             return {'CANCELLED'}
         elif self.shape == "POLYLINE":
+            self.update_polyline_shape(context, event)
             if res := self.polyline_update(context, event):
                 return res
         elif is_release and is_left:
             self.exit(context)
             return self.execute(context)
-
-        getattr(self, f"update_{self.shape.lower()}_shape")(context, event)
+        else:
+            getattr(self, f"update_{self.shape.lower()}_shape")(context, event)
 
         refresh_ui(context)
         return {"RUNNING_MODAL"}
