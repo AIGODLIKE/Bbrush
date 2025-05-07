@@ -1,3 +1,5 @@
+import time
+
 import bmesh
 import bpy
 import gpu
@@ -123,9 +125,12 @@ class DragDraw:
                   size=15,
                   color=(1, 1, 1, 1))
 
-
     def draw_lasso(self):
         lines = self.mouse_route + [self.mouse, self.mouse_route[0]]
+        draw_smooth_line(lines, Vector((1, 1, 1, self.alpha)), line_width=1)
+
+    def draw_polyline(self):
+        lines = self.mouse_route + [self.mouse, ]
         draw_smooth_line(lines, Vector((1, 1, 1, self.alpha)), line_width=1)
 
     def init_draw(self, context, event):
@@ -143,6 +148,33 @@ class DragDraw:
         bpy.types.SpaceView3D.draw_handler_remove(self.__class__.draw_handle, 'WINDOW')
         self.__class__.draw_handle = None
         self.shaders.clear()
+
+    def preview_area(self, lines):
+        start_v = None
+        last_v = None
+        bm = bmesh.new()
+        for index, co in enumerate(lines):
+            co = [*co[:], 0]
+            if last_v is not None:
+                last_v = bm.verts.new(co, last_v)
+            else:
+                last_v = bm.verts.new(co)
+            last_v.index = index
+            if start_v is None:
+                start_v = last_v
+        bm.edges.new((last_v, start_v))
+        bm.faces.new(bm.verts)
+
+        bmesh.ops.triangulate(bm, faces=bm.faces)
+
+        shader = gpu.shader.from_builtin("UNIFORM_COLOR")
+        shader.bind()
+        pos = [v.co[:2] for v in bm.verts]
+        indices = [list(i.index for i in face.verts) for face in bm.faces]
+
+        batch = batch_for_shader(shader, "TRIS", {"pos": pos}, indices=indices)
+        self.shaders.clear()
+        self.shaders[batch] = shader
 
 
 class DragBase(DragDraw):
@@ -224,7 +256,7 @@ class DragBase(DragDraw):
                         bpy.ops.paint.hide_show('EXEC_DEFAULT', True, action='HIDE', area='OUTSIDE', **box_args)
                 else:
                     sculpt_invert_hide_face()
-        elif self.shape == "LASSO":
+        elif self.shape in ("LASSO", "POLYLINE"):
             if self.brush_mode == "MASK":
                 if in_model:
                     if is_move_mouse:
@@ -252,6 +284,8 @@ class BrushDrag(bpy.types.Operator, DragBase):
     bl_label = "Drag"
     bl_options = {"REGISTER"}
 
+    click_time = None
+
     def update_box_shape(self, context, event):
         self.mouse = Vector((event.mouse_region_x, event.mouse_region_y))
 
@@ -263,39 +297,26 @@ class BrushDrag(bpy.types.Operator, DragBase):
                 preview_mouse_route = [*self.mouse_route, mouse]
                 self.mouse_route_convex_shell = lines = line_to_convex_shell(preview_mouse_route)
 
-                start_v = None
-                last_v = None
-                bm = bmesh.new()
-                for index, co in enumerate(lines):
-                    co = [*co[:], 0]
-                    if last_v is not None:
-                        last_v = bm.verts.new(co, last_v)
-                    else:
-                        last_v = bm.verts.new(co)
-                    last_v.index = index
-                    if start_v is None:
-                        start_v = last_v
-                bm.edges.new((last_v, start_v))
-                bm.faces.new(bm.verts)
-
-                bmesh.ops.triangulate(bm, faces=bm.faces)
-
-                shader = gpu.shader.from_builtin("UNIFORM_COLOR")
-                shader.bind()
-                pos = [v.co[:2] for v in bm.verts]
-                indices = [list(i.index for i in face.verts) for face in bm.faces]
-
-                batch = batch_for_shader(shader, "TRIS", {"pos": pos}, indices=indices)
-                self.shaders.clear()
-                self.shaders[batch] = shader
+                self.preview_area(lines)
 
                 self.mouse_route.append(mouse)
-
             except (ValueError, KeyError) as e:
                 print(e.__repr__())
                 ...
 
+    def update_polyline_shape(self, context, event):
+        self.mouse = mouse = Vector((event.mouse_region_x, event.mouse_region_y))
+        try:
+
+            preview_mouse_route = [*self.mouse_route, mouse]
+            self.mouse_route_convex_shell = lines = line_to_convex_shell(preview_mouse_route)
+            self.preview_area(lines)
+        except (ValueError, KeyError) as e:
+            print(e.__repr__())
+            ...
+
     def start_modal(self, context, event):
+        self.click_time = time.time()
         self.init_drag_event(context, event)
         context.window_manager.modal_handler_add(self)
         return {'RUNNING_MODAL'}
@@ -315,6 +336,7 @@ class BrushDrag(bpy.types.Operator, DragBase):
                 "builtin.box_mask",
                 "builtin.box_hide",
                 "builtin.lasso_mask",
+                "builtin.polyline_mask",
         ):
             return self.start_modal(context, event)
         elif not is_in_modal:
@@ -331,16 +353,56 @@ class BrushDrag(bpy.types.Operator, DragBase):
         print("drag_event", self.shape, self.is_reverse, event.value, event.type, len(self.mouse_route))
 
         self.is_reverse = event.alt
-        if event.value == "PRESS" and event.type == "LEFT_CTRL":
+
+        is_press = event.value == "PRESS"
+        is_release = event.value == "RELEASE"
+
+        is_left = event.type == "LEFTMOUSE"
+        is_right = event.type == "RIGHTMOUSE"
+        is_esc = event.type == "ESC"
+        is_ctrl = event.type == "LEFT_CTRL"
+
+        if is_press and is_ctrl:
             self.brush_mode = "MASK" if self.brush_mode == "HIDE" else "HIDE"
 
-        if event.value == "RELEASE" and event.type == "LEFTMOUSE":
+        if is_press and is_esc:
+            self.exit(context)
+            return {'CANCELLED'}
+        elif self.shape == "POLYLINE":
+            if res := self.polyline_update(context, event):
+                return res
+        elif is_release and is_left:
             self.exit(context)
             return self.execute(context)
-        elif self.shape == "BOX":
-            self.update_box_shape(context, event)
-        elif self.shape == "LASSO":
-            self.update_lasso_shape(context, event)
+
+        getattr(self, f"update_{self.shape.lower()}_shape")(context, event)
 
         refresh_ui(context)
         return {"RUNNING_MODAL"}
+
+    def polyline_update(self, context, event):
+        is_press = event.value == "PRESS"
+        is_release = event.value == "RELEASE"
+
+        is_left = event.type == "LEFTMOUSE"
+        is_right = event.type == "RIGHTMOUSE"
+        is_esc = event.type == "ESC"
+        is_ctrl = event.type == "LEFT_CTRL"
+
+        click_time = bpy.context.preferences.inputs.mouse_double_click_time
+        if is_press and is_left:
+            mouse = Vector((event.mouse_region_x, event.mouse_region_y))
+            last_mouse = self.mouse_route[-1]
+            if (click_time / 1000) > (time.time() - self.click_time) and mouse == last_mouse:  # 双击确定
+                self.exit(context)
+                return self.execute(context)
+
+            if mouse not in self.mouse_route:
+                self.mouse_route.append(mouse)
+            self.click_time = time.time()
+        elif is_press and is_right:
+            if len(self.mouse_route) > 1:
+                self.mouse_route.pop()
+            else:
+                self.exit(context)
+                return {'CANCELLED'}

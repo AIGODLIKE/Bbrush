@@ -64,12 +64,13 @@ keyconfig_data = [
      {"space_type": "VIEW_3D", "region_type": "WINDOW"},
      {"items": [
          ("bbrush.drag", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "any": True}, None),
-         # ("paint.mask_lasso_gesture",
-         #  {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "ctrl": True, "alt": True},
-         #  {"properties": [("value", 0), ], },),
-         # ("paint.mask_lasso_gesture",
-         #  {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "ctrl": True},
-         #  {"properties": [("value", 1), ], },),
+
+         ("paint.mask_lasso_gesture",
+          {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "ctrl": True, "alt": True},
+          {"properties": [("value", 0), ], },),
+         ("paint.mask_lasso_gesture",
+          {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "ctrl": True},
+          {"properties": [("value", 1), ], },),
      ], },),
     ("3D View Tool: Sculpt, Line Mask",
      {"space_type": "VIEW_3D", "region_type": "WINDOW"},
@@ -82,10 +83,11 @@ keyconfig_data = [
     ("3D View Tool: Sculpt, Polyline Mask",
      {"space_type": "VIEW_3D", "region_type": "WINDOW"},
      {"items": [
-         ("paint.mask_polyline_gesture", {"type": "LEFTMOUSE", "value": "PRESS", "ctrl": True, "alt": True},
-          {"properties": [("value", 0), ], },),
-         ("paint.mask_polyline_gesture", {"type": "LEFTMOUSE", "value": "PRESS", "ctrl": True},
-          {"properties": [("value", 1), ], },),
+         ("bbrush.drag", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "any": True}, None),
+         # ("paint.mask_polyline_gesture", {"type": "LEFTMOUSE", "value": "PRESS", "ctrl": True, "alt": True},
+         #  {"properties": [("value", 0), ], },),
+         # ("paint.mask_polyline_gesture", {"type": "LEFTMOUSE", "value": "PRESS", "ctrl": True},
+         #  {"properties": [("value", 1), ], },),
      ], },),
 
     # Hide
