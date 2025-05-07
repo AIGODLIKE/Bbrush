@@ -57,8 +57,7 @@ class OperatorProperty(PublicOperator, PublicDraw):
 
     @property
     def use_front_faces_only(self):
-        return self.active_tool.operator_properties(
-            "bbrush.mask").use_front_faces_only
+        return self.active_tool.operator_properties("bbrush.mask").use_front_faces_only
 
     @property
     def color(self) -> Vector:

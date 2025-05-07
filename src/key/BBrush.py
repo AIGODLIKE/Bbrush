@@ -102,13 +102,15 @@ keyconfig_data = [
     ("3D View Tool: Sculpt, Lasso Hide", {"space_type": "VIEW_3D", "region_type": "WINDOW"},
      {"items": [
          ("bbrush.drag", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "any": True}, None),
-         ("paint.hide_show_lasso_gesture", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "ctrl": True, "shift": True},
-          {"properties": [("action", "HIDE"), ], },),
-         ("paint.hide_show_lasso_gesture",
-          {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "ctrl": True, "shift": True, "alt": True},
-          {"properties": [("action", "SHOW"), ], },),
-         ("paint.hide_show_all", {"type": "LEFTMOUSE", "value": "CLICK", "ctrl": True, "shift": True},
-          {"properties": [("action", "SHOW"), ], },),
+
+         # ("paint.hide_show_lasso_gesture", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "ctrl": True, "shift": True},
+         #  {"properties": [("action", "HIDE"), ], },),
+         # ("paint.hide_show_lasso_gesture",
+         #  {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "ctrl": True, "shift": True, "alt": True},
+         #  {"properties": [("action", "SHOW"), ], },),
+         #
+         # ("paint.hide_show_all", {"type": "LEFTMOUSE", "value": "CLICK", "ctrl": True, "shift": True},
+         #  {"properties": [("action", "SHOW"), ], },),
      ], },),
     ("3D View Tool: Sculpt, Line Hide", {"space_type": "VIEW_3D", "region_type": "WINDOW"},
      {"items": [
@@ -123,11 +125,12 @@ keyconfig_data = [
     ("3D View Tool: Sculpt, Polyline Hide", {"space_type": "VIEW_3D", "region_type": "WINDOW"},
      {"items": [
          ("bbrush.drag", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "any": True}, None),
-         ("paint.hide_show_polyline_gesture", {"type": "LEFTMOUSE", "value": "PRESS", "ctrl": True, "shift": True},
-          {"properties": [("action", "HIDE"), ("area", "Inside"), ], },),
-         ("paint.hide_show_polyline_gesture",
-          {"type": "LEFTMOUSE", "value": "PRESS", "ctrl": True, "shift": True, "alt": True},
-          {"properties": [("action", "SHOW"), ("area", "Inside"), ], },),
+
+         # ("paint.hide_show_polyline_gesture", {"type": "LEFTMOUSE", "value": "PRESS", "ctrl": True, "shift": True},
+         #  {"properties": [("action", "HIDE"), ("area", "Inside"), ], },),
+         # ("paint.hide_show_polyline_gesture",
+         #  {"type": "LEFTMOUSE", "value": "PRESS", "ctrl": True, "shift": True, "alt": True},
+         #  {"properties": [("action", "SHOW"), ("area", "Inside"), ], },),
      ], },),
 
     # Trim

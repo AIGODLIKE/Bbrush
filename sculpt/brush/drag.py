@@ -21,7 +21,7 @@ from ...utils import (
 from ...utils.gpu import draw_text, draw_line, draw_smooth_line
 
 
-def lasso_mask(lasso_path, value, is_use_front_faces_only):
+def lasso_mask(lasso_path, value, use_front_faces_only):
     path = [{
         'name': '',
         'loc': i,
@@ -29,13 +29,12 @@ def lasso_mask(lasso_path, value, is_use_front_faces_only):
     } for i in lasso_path]
     bpy.ops.paint.mask_lasso_gesture(
         'EXEC_DEFAULT', True,
-        path=path, value=value, use_front_faces_only=is_use_front_faces_only)
+        path=path, value=value, use_front_faces_only=use_front_faces_only)
 
 
 def lasso_hide(
         lasso_path,
-        action,
-        area,
+        is_reverse,
         use_front_faces_only,
 ):
     path = [{
@@ -46,8 +45,8 @@ def lasso_hide(
     bpy.ops.paint.hide_show_lasso_gesture(
         'EXEC_DEFAULT', True,
         path=path,
-        action=action,
-        area=area,
+        action="HIDE",
+        area="OUTSIDE" if is_reverse else "Inside",
         use_front_faces_only=use_front_faces_only,
     )
 
@@ -177,6 +176,24 @@ class DragDraw:
         self.shaders[batch] = shader
 
 
+last_use_front_faces_only = False
+
+
+def get_use_front_faces_only(context) -> bool:
+    global last_use_front_faces_only
+    active_tool = ToolSelectPanelHelper.tool_active_from_context(context)
+
+    if value := {
+        "builtin.box_mask": "paint.mask_box_gesture",
+        "builtin.lasso_mask": "paint.mask_lasso_gesture",
+        "builtin.polyline_mask": "paint.mask_polyline_gesture",
+    }.get(active_tool.idname):
+        props = active_tool.operator_properties(value)
+        last_use_front_faces_only = props.use_front_faces_only
+        return last_use_front_faces_only
+    return last_use_front_faces_only
+
+
 class DragBase(DragDraw):
     brush_mode = None
     active_tool = None
@@ -185,7 +202,7 @@ class DragBase(DragDraw):
     def init_drag_event(self, context, event):
         from .. import brush_runtime
         (active_tool, WorkSpaceTool, index) = get_active_tool(context)
-        self.active_tool = active_tool.idname
+        self.active_tool = active_tool
         self.shape = get_brush_shape(active_tool.idname)
         self.brush_mode = brush_runtime.brush_mode
         self.register_draw()
@@ -226,9 +243,9 @@ class DragBase(DragDraw):
         in_model = self.check_brush_in_model(context)
         is_move_mouse = len(self.mouse_route) > 3
         value = -1 if self.is_reverse else 1
+        use_front_faces_only = get_use_front_faces_only(context)
 
-        print("execute,", in_model, self.shape, self.brush_mode)
-
+        print("execute,", in_model, self.shape, self.brush_mode, use_front_faces_only)
         if self.shape == "BOX":
             x1, y1 = self.mouse_start
             x2, y2 = self.mouse
@@ -244,7 +261,7 @@ class DragBase(DragDraw):
                         True,
                         **box_args,
                         value=-1 if self.is_reverse else 1,
-                        use_front_faces_only=True,  # TODO
+                        use_front_faces_only=use_front_faces_only,
                     )
                 else:
                     bpy.ops.paint.mask_flood_fill('EXEC_DEFAULT', True, mode='VALUE', value=0)
@@ -260,22 +277,17 @@ class DragBase(DragDraw):
             if self.brush_mode == "MASK":
                 if in_model:
                     if is_move_mouse:
-                        lasso_mask(self.mouse_route_convex_shell, value, False)
+                        lasso_mask(self.mouse_route_convex_shell, value, use_front_faces_only)
                 else:
                     bpy.ops.paint.mask_flood_fill('EXEC_DEFAULT', True, mode='VALUE', value=0)
             elif self.brush_mode == "HIDE":
                 if in_model:
                     if is_move_mouse:
-                        lasso_hide(self.mouse_route_convex_shell, value,
-                                   "HIDE",
-                                   "Inside",
-                                   False,
-                                   )
+                        lasso_hide(self.mouse_route_convex_shell, self.is_reverse, False)
                 else:
                     sculpt_invert_hide_face()
         else:
             ...
-            # get_shape_in_model_up
         return {"FINISHED"}
 
 
@@ -325,7 +337,8 @@ class BrushDrag(bpy.types.Operator, DragBase):
         is_in_modal = check_mouse_in_model(context, event)
         active_tool = ToolSelectPanelHelper.tool_active_from_context(bpy.context)
 
-        print(self.bl_label, is_in_modal, self.brush_mode, active_tool.idname)
+        print(self.bl_label, is_in_modal, self.brush_mode, active_tool.idname, active_tool)
+        print(dir(active_tool))
         if self.__class__.draw_handle is not None:
             return {"FINISHED"}
 
@@ -336,7 +349,9 @@ class BrushDrag(bpy.types.Operator, DragBase):
                 "builtin.box_mask",
                 "builtin.box_hide",
                 "builtin.lasso_mask",
+                "builtin.lasso_hide",
                 "builtin.polyline_mask",
+                "builtin.polyline_hide",
         ):
             return self.start_modal(context, event)
         elif not is_in_modal:
@@ -358,7 +373,6 @@ class BrushDrag(bpy.types.Operator, DragBase):
         is_release = event.value == "RELEASE"
 
         is_left = event.type == "LEFTMOUSE"
-        is_right = event.type == "RIGHTMOUSE"
         is_esc = event.type == "ESC"
         is_ctrl = event.type == "LEFT_CTRL"
 
@@ -382,12 +396,9 @@ class BrushDrag(bpy.types.Operator, DragBase):
 
     def polyline_update(self, context, event):
         is_press = event.value == "PRESS"
-        is_release = event.value == "RELEASE"
 
         is_left = event.type == "LEFTMOUSE"
         is_right = event.type == "RIGHTMOUSE"
-        is_esc = event.type == "ESC"
-        is_ctrl = event.type == "LEFT_CTRL"
 
         click_time = bpy.context.preferences.inputs.mouse_double_click_time
         if is_press and is_left:
