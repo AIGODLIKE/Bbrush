@@ -62,6 +62,9 @@ def get_use_front_faces_only(context) -> bool:
         "builtin.box_mask": "paint.mask_box_gesture",
         "builtin.lasso_mask": "paint.mask_lasso_gesture",
         "builtin.polyline_mask": "paint.mask_polyline_gesture",
+
+        "builtin.circular_mask": "paint.mask_lasso_gesture",
+        "builtin.ellipse_mask": "paint.mask_lasso_gesture",
     }.get(active_tool.idname):
         props = active_tool.operator_properties(value)
         last_use_front_faces_only = props.use_front_faces_only
@@ -96,18 +99,18 @@ class DragDraw:
     alpha = 0.5
 
     @property
-    def color(self):
+    def color(self) -> list[float]:
         if self.brush_mode == "HIDE":
             if self.is_reverse:
-                return Vector((.6, 0, 0, self.alpha))
+                return [.6, 0, 0, self.alpha]
             else:
-                return Vector((0, .6, 0, self.alpha))
+                return [0, .6, 0, self.alpha]
         elif self.brush_mode == "MASK":
             if self.is_reverse:
-                return Vector((.5, .5, .5, self.alpha))
+                return [.5, .5, .5, self.alpha]
             else:
-                return Vector((0, 0, 0, self.alpha))
-        return Vector((0, 0, 0, self.alpha))
+                return [0, 0, 0, self.alpha]
+        return [0, 0, 0, self.alpha]
 
     def draw_drag(self):
         draw_text(100, 100)
@@ -169,6 +172,7 @@ class DragDraw:
     def init_draw(self, context, event):
         self.mouse = self.mouse_start = Vector((event.mouse_region_x, event.mouse_region_y))
         self.mouse_route = [self.mouse, ]
+        self.mouse_route_convex_shell = []
         self.mouse_move = Vector((0, 0))
         self.is_reverse = event.alt
         self.shaders = {}
@@ -183,6 +187,7 @@ class DragDraw:
         self.shaders.clear()
 
     def preview_area(self, lines):
+        """旧版本使用算法来找边线"""
         start_v = None
         last_v = None
         bm = bmesh.new()
@@ -261,7 +266,8 @@ class DragBase(DragDraw):
         value = -1 if self.is_reverse else 1
         use_front_faces_only = get_use_front_faces_only(context)
 
-        print("execute,", in_model, self.shape, self.brush_mode, use_front_faces_only)
+        print("execute,", in_model, self.shape, self.brush_mode, use_front_faces_only,
+              len(self.mouse_route_convex_shell))
         if self.shape == "BOX":
             x1, y1 = self.mouse_start
             x2, y2 = self.mouse
@@ -322,26 +328,32 @@ class BrushDrag(bpy.types.Operator, DragBase):
         last_mouse = self.mouse_route[-1]
         if last_mouse != mouse and (last_mouse - mouse).length > 5:
             try:
-                preview_mouse_route = [*self.mouse_route, mouse]
+                preview_mouse_route = self.mouse_route.copy()
+                if preview_mouse_route[-1] != mouse:
+                    preview_mouse_route.append(mouse)
                 self.mouse_route_convex_shell = lines = line_to_convex_shell(preview_mouse_route)
 
                 self.preview_area(lines)
 
                 self.mouse_route.append(mouse)
+                return True
             except (ValueError, KeyError) as e:
                 print(e.__repr__())
                 ...
+                return False
 
     def update_polyline_shape(self, context, event):
         self.mouse = mouse = Vector((event.mouse_region_x, event.mouse_region_y))
         try:
-
-            preview_mouse_route = [*self.mouse_route, mouse]
+            preview_mouse_route = self.mouse_route.copy()
+            if preview_mouse_route[-1] != mouse:
+                preview_mouse_route.append(mouse)
             self.mouse_route_convex_shell = lines = line_to_convex_shell(preview_mouse_route)
             self.preview_area(lines)
+            return True
         except (ValueError, KeyError) as e:
             print(e.__repr__())
-            ...
+            return False
 
     def update_circular_shape(self, context, event):
         self.mouse = Vector((event.mouse_region_x, event.mouse_region_y))
@@ -408,7 +420,8 @@ class BrushDrag(bpy.types.Operator, DragBase):
 
     def modal(self, context, event):
         """        拖动的时候不在模型上拖,执行其它操作        """
-        print("drag_event", self.shape, self.is_reverse, event.value, event.type, len(self.mouse_route))
+        print("drag_event", self.shape, self.is_reverse, len(self.mouse_route), len(self.mouse_route_convex_shell),
+              event.value, event.type)
 
         self.is_reverse = event.alt
 

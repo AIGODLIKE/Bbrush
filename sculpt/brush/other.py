@@ -48,7 +48,7 @@ def circular_hide():
         icon=get_dat_icon('brush.sculpt.circular_hide'),
         cursor='EYEDROPPER',
         widget=None,
-        draw_settings=mask_draw_settings,
+        draw_settings=None,
     )
 
 
@@ -61,5 +61,5 @@ def ellipse_hide():
         icon=get_dat_icon('brush.sculpt.ellipse_hide'),
         cursor='EYEDROPPER',
         widget=None,
-        draw_settings=mask_draw_settings,
+        draw_settings=None,
     )
