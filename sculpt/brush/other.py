@@ -20,7 +20,7 @@ def circular_mask():
         label='Circular mask',
         description='Draw circular mask',
         icon=get_dat_icon('brush.sculpt.circular_mask'),
-        cursor='EYEDROPPER',
+        cursor='CROSSHAIR',
         widget=None,
         draw_settings=mask_draw_settings,
     )
@@ -33,7 +33,7 @@ def ellipse_mask():
         label='Ellipse mask',
         description='Draw elliptical mask',
         icon=get_dat_icon('brush.sculpt.ellipse_mask'),
-        cursor='EYEDROPPER',
+        cursor='CROSSHAIR',
         widget=None,
         draw_settings=mask_draw_settings,
     )
@@ -46,7 +46,7 @@ def circular_hide():
         label='Circular mask',
         description='Draw circular mask',
         icon=get_dat_icon('brush.sculpt.circular_hide'),
-        cursor='EYEDROPPER',
+        cursor='CROSSHAIR',
         widget=None,
         draw_settings=None,
     )
@@ -59,7 +59,7 @@ def ellipse_hide():
         label='Ellipse mask',
         description='Draw elliptical mask',
         icon=get_dat_icon('brush.sculpt.ellipse_hide'),
-        cursor='EYEDROPPER',
+        cursor='CROSSHAIR',
         widget=None,
         draw_settings=None,
     )
