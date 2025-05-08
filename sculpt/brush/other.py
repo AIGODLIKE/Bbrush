@@ -38,13 +38,14 @@ def ellipse_mask():
         draw_settings=mask_draw_settings,
     )
 
+
 @ToolDef.from_fn
 def circular_hide():
     return dict(
         idname='builtin.circular_hide',
         label='Circular mask',
         description='Draw circular mask',
-        icon=get_dat_icon('brush.sculpt.circular_mask'),
+        icon=get_dat_icon('brush.sculpt.circular_hide'),
         cursor='EYEDROPPER',
         widget=None,
         draw_settings=mask_draw_settings,
@@ -57,7 +58,7 @@ def ellipse_hide():
         idname='builtin.ellipse_hide',
         label='Ellipse mask',
         description='Draw elliptical mask',
-        icon=get_dat_icon('brush.sculpt.ellipse_mask'),
+        icon=get_dat_icon('brush.sculpt.ellipse_hide'),
         cursor='EYEDROPPER',
         widget=None,
         draw_settings=mask_draw_settings,
