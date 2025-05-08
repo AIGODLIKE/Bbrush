@@ -262,12 +262,13 @@ class DragBase(DragDraw):
 
     def execute(self, context):
         in_model = self.check_brush_in_model(context)
-        is_move_mouse = len(self.mouse_route) > 3
+        is_move_mouse = len(self.mouse_route) >= 3
         value = -1 if self.is_reverse else 1
         use_front_faces_only = get_use_front_faces_only(context)
 
         print("execute,", in_model, self.shape, self.brush_mode, use_front_faces_only,
               len(self.mouse_route_convex_shell))
+        print("self.mouse_route_convex_shell", self.mouse_route_convex_shell)
         if self.shape == "BOX":
             x1, y1 = self.mouse_start
             x2, y2 = self.mouse
@@ -327,10 +328,10 @@ class BrushDrag(bpy.types.Operator, DragBase):
         mouse = Vector((event.mouse_region_x, event.mouse_region_y))
         last_mouse = self.mouse_route[-1]
         if last_mouse != mouse and (last_mouse - mouse).length > 5:
+            preview_mouse_route = self.mouse_route.copy()
+            if preview_mouse_route[-1] != mouse:
+                preview_mouse_route.append(mouse)
             try:
-                preview_mouse_route = self.mouse_route.copy()
-                if preview_mouse_route[-1] != mouse:
-                    preview_mouse_route.append(mouse)
                 self.mouse_route_convex_shell = lines = line_to_convex_shell(preview_mouse_route)
 
                 self.preview_area(lines)
@@ -339,15 +340,14 @@ class BrushDrag(bpy.types.Operator, DragBase):
                 return True
             except (ValueError, KeyError) as e:
                 print(e.__repr__())
-                ...
                 return False
 
     def update_polyline_shape(self, context, event):
         self.mouse = mouse = Vector((event.mouse_region_x, event.mouse_region_y))
+        preview_mouse_route = self.mouse_route.copy()
+        if preview_mouse_route[-1] != mouse:
+            preview_mouse_route.append(mouse)
         try:
-            preview_mouse_route = self.mouse_route.copy()
-            if preview_mouse_route[-1] != mouse:
-                preview_mouse_route.append(mouse)
             self.mouse_route_convex_shell = lines = line_to_convex_shell(preview_mouse_route)
             self.preview_area(lines)
             return True
