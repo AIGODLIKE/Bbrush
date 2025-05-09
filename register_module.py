@@ -34,7 +34,7 @@ def register():
         notify=update_bbrush_mode,
     )
 
-    bpy.app.timers.register(update_bbrush_mode, first_interval=0.1, persistent=True)
+    bpy.app.timers.register(update_bbrush_mode, first_interval=1, persistent=True)
 
 
 def unregister():

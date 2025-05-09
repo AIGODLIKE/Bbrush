@@ -70,10 +70,11 @@ data = {
     "ctrl+Numpad- Click": "ctrl+数字- 左键单击",
     "ctrl+Up arrow or ctrl+Numpad* Click": "ctrl+方向上 或 数字* 左键单击",
     "ctrl+Down arrow or ctrl+Numpad/ Click": "ctrl+方向下 或 数字/ 左键单击",
-    "ctrl+shift+left Paint on the model": "ctrl+shift+左键在模型上绘制",
-    "ctrl+shift+alt+left Paint on the model": "ctrl+shift+alt+左键在模型上绘制",
-    "ctrl+shift+left Click in blank area": "在空白处ctrl+shift+左键单击",
-    "ctrl+shift+left or ctrl+shift+alt+left Drag in blank area": "在空白处ctrl+shift 或 ctrl+shift+alt+左键拖拽",
+    "Paint on the model": "在模型上绘制",
+    "+alt Paint on the model": "+alt 在模型上绘制",
+    "Drag in blank area": "在空白处单击",
+    "Click in blank area": "在空白处单击",
+    "Click in model": "在模型上单击",
 
     "mouse_right": "右键",
     "middle": "中键",
@@ -123,4 +124,6 @@ data = {
     "You are using BBrush mode": "您正在使用Bbrush模式",
     "Encountering a problem?": "遇到问题?",
     "Silhouette image offset": "剪影图偏移",
+    "Tips:Automatically enter Bbrush mode when entering carving mode": "Tips:进入雕刻模式时自动进入Bbrush模式",
+    "Depth map offset x:%i y:%i": "深度图偏移 x:%i y:%i",
 }

@@ -6,19 +6,12 @@ from bpy.utils.toolsystem import ToolDef
 from .brush import other
 from ..utils import refresh_ui, get_active_tool
 
-origin_brush_toolbar = ToolSelectPanelHelper._tool_class_from_space_type("VIEW_3D")._tools["SCULPT"].copy()
 active_brush_toolbar = {  # 记录活动笔刷的名称
     "SCULPT": "builtin.brush",
     "MASK": "builtin_brush.mask",
     "HIDE": "builtin.box_hide",
 }
-
-brush_shelf = {
-    "ORIGINAL": origin_brush_toolbar,
-    "SCULPT": [],
-    "HIDE": [],
-    "MASK": [],
-}
+brush_shelf = {}
 
 mask_brush = (
     "builtin_brush.Mask",  # 旧版本名称
@@ -73,16 +66,6 @@ def tool_ops(tools):
             brush_shelf["SCULPT"].append(tool)
 
 
-tool_ops(origin_brush_toolbar)
-brush_shelf["MASK"].extend((
-    other.circular_mask,
-    other.ellipse_mask,
-))
-
-brush_shelf["HIDE"].extend((
-    other.circular_hide,
-    other.ellipse_hide,
-))
 
 BRUSH_SHELF_MODE = {
     # list(itertools.product(a,a,a))
@@ -153,3 +136,27 @@ class SwitchBrushShelf:
         """恢复笔刷工具架"""
         set_brush_shelf("ORIGINAL")
         self.refresh_ui(context)
+        brush_shelf.clear()
+
+    def start_brush_shelf(self, context):
+        """初始化工具架"""
+        global brush_shelf
+
+        origin_brush_toolbar = ToolSelectPanelHelper._tool_class_from_space_type("VIEW_3D")._tools["SCULPT"].copy()
+        brush_shelf.update({
+            "ORIGINAL": origin_brush_toolbar,
+            "SCULPT": [],
+            "HIDE": [],
+            "MASK": [],
+        })
+
+        tool_ops(origin_brush_toolbar)
+        brush_shelf["MASK"].extend((
+            other.circular_mask,
+            other.ellipse_mask,
+        ))
+
+        brush_shelf["HIDE"].extend((
+            other.circular_hide,
+            other.ellipse_hide,
+        ))

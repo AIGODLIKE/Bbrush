@@ -170,7 +170,8 @@ class DragDraw(MoveEvent):
             for batch, shader in self.shaders.items():
                 shader.uniform_float("color", self.color)
                 batch.draw(shader)
-            getattr(self, f"draw_{self.shape.lower()}")()
+            if draw_func := getattr(self, f"draw_{self.shape.lower()}"):
+                draw_func()
 
     def draw_box(self):
         x1, y1 = self.mouse_start
@@ -342,7 +343,8 @@ class DragBase(DragDraw):
                         use_front_faces_only=use_front_faces_only,
                     )
                 else:
-                    bpy.ops.paint.mask_flood_fill('EXEC_DEFAULT', True, mode='VALUE', value=0)
+                    value = 1 if self.is_reverse else 0
+                    bpy.ops.paint.mask_flood_fill('EXEC_DEFAULT', True, mode='VALUE', value=value)
             elif self.brush_mode == "HIDE":
                 if in_model:
                     if self.is_reverse:
@@ -474,7 +476,10 @@ class BrushDrag(bpy.types.Operator, DragBase):
             if brush_runtime and brush_runtime.brush_mode != "SCULPT":  # 不是雕刻并且不在模型上
                 return self.start_modal(context, event)
             else:
-                bpy.ops.view3d.rotate("INVOKE_DEFAULT")  # 旋转视图
+                if event.alt:
+                    bpy.ops.view3d.move("INVOKE_DEFAULT")  # 平移视图
+                else:
+                    bpy.ops.view3d.rotate("INVOKE_DEFAULT")  # 旋转视图
                 return {"FINISHED"}
         return {"PASS_THROUGH"}
 

@@ -33,17 +33,14 @@ class Preferences(
     def draw(self, context):
         layout = self.layout
 
-        col = layout.column()
-        col.prop(self, "depth_ray_size")
+        col = layout.box()
+        col.label(text="Sculpt")
         col.prop(self, "always_use_bbrush_sculpt_mode")
-        layout.separator()
+        col.label(text="Tips:Automatically enter Bbrush mode when entering carving mode")
+        col.prop(self, "depth_ray_size")
 
         self.draw_top_ber(layout)
-        layout.separator()
-
-        self.draw_depth(col)
-        layout.separator()
-
+        self.draw_depth(layout)
         self.draw_shortcut(layout)
 
 

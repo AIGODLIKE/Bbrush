@@ -71,6 +71,7 @@ def top_bar_draw(self, context):
             row.separator_spacer()
             row.operator("wm.window_fullscreen_toggle", emboss=False, icon="FULLSCREEN_ENTER",
                          text="")  # "FULLSCREEN_EXIT"
+            row.separator(factor=1)
             row.label(text="You are using BBrush mode")
             row.operator("wm.url_open",
                          text="Encountering a problem?",

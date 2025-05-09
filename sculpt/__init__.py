@@ -3,6 +3,7 @@ import bpy
 from . import brush
 from .handle import BrushHandle
 from .key import BrushKey
+from .shortcut_key import ShortcutKey
 from .switch_brush_shelf import SwitchBrushShelf
 from ..adapter import operator_invoke_confirm
 from ..utils import get_pref, check_mouse_in_3d_area
@@ -22,6 +23,7 @@ class BBrushSculpt(
     BrushKey,
     BrushHandle,
     SwitchBrushShelf,
+    ShortcutKey,
 ):
     bl_idname = "bbrush.bbrush_sculpt"
     bl_label = "BBrush sculpting"
@@ -31,6 +33,7 @@ class BBrushSculpt(
     def exit(self, context):
         global brush_runtime
         brush_runtime = None
+        self.stop_shortcut_key()
         return super().exit(context)
 
     def invoke(self, context, event):

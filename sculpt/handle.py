@@ -41,6 +41,8 @@ class BrushHandle:
         replace_top_bar(True)
 
         self.start_key(context)
+        self.start_shortcut_key()
+        self.start_brush_shelf(context)
         self.refresh_ui(context)
 
     @staticmethod
