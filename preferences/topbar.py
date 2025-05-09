@@ -14,7 +14,8 @@ class TopBar:
     )
 
     def draw_top_ber(self, layout):
-        layout.label(text="Top bar")
-        row = layout.box().row(align=True)
+        box = layout.box()
+        box.label(text="Top bar")
+        row = box.row(align=True)
         row.prop(self, "top_bar_show_text")
         row.prop(self, "top_bar_alignment", expand=True)

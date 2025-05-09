@@ -7,10 +7,9 @@ ORIGIN_TOP_BAR = None
 
 def draw_restart_button(layout):
     if check_operator("wm.restart_blender"):
-        ops = layout.row()
+        ops = layout.row(align=True)
         ops.alert = True
-        ops.operator(operator="wm.restart_blender",
-                     text="", emboss=False, icon="QUIT")
+        ops.operator(operator="wm.restart_blender", text="", emboss=False, icon="QUIT")
 
 
 def top_bar_draw(self, context):
@@ -45,7 +44,6 @@ def top_bar_draw(self, context):
     if show and context.mode == "SCULPT":
 
         sub_row = layout.row(align=True)
-        # sub_row.label(text=f"{name} {region.alignment}")
         if not pref.always_use_bbrush_sculpt_mode:
             ss = sub_row.row(align=True)
             ss.alignment = "CENTER"
@@ -55,16 +53,29 @@ def top_bar_draw(self, context):
             icon = "EVENT_ESC" if is_bbrush_mode else "SCULPTMODE_HLT"
             text = "Bbrush" if pref.top_bar_show_text else ""
             ss.operator(BBrushSculpt.bl_idname, text=text, icon=icon).is_exit = is_bbrush_mode
-            ss.separator()
+            if not is_bbrush_mode:
+                ss.separator()
 
         if is_bbrush_mode:
             sub_row.prop(pref, "always_use_bbrush_sculpt_mode", emboss=True, icon="AUTO", text="")
 
             row = layout.row(align=True)
-            row.prop(pref, "depth_display_mode", emboss=True, )
-            row.prop(pref, "depth_scale", emboss=True, )
+            # row.prop(pref, "depth_scale", emboss=True, )
             row.prop(pref, "show_shortcut_keys", emboss=True, icon="EVENT_K", text="")
             draw_restart_button(row)
+
+            row.separator(factor=5)
+            text = "Silhouette Mode" if pref.top_bar_show_text else ""
+            row.prop(pref, "depth_display_mode", emboss=True, text=text)
+
+            row.separator_spacer()
+            row.operator("wm.window_fullscreen_toggle", emboss=False, icon="FULLSCREEN_ENTER",
+                         text="")  # "FULLSCREEN_EXIT"
+            row.label(text="You are using BBrush mode")
+            row.operator("wm.url_open",
+                         text="Encountering a problem?",
+                         emboss=False, icon="INTERNET"
+                         ).url = "https://github.com/AIGODLIKE/Bbrush/issues/new"
 
         if full_screen and is_bbrush_mode:
             layout.operator(

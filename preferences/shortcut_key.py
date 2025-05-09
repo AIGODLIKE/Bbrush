@@ -15,10 +15,12 @@ class ShortcutKey:
     shortcut_show_size: bpy.props.FloatProperty(name="Shortcut key display size", min=0.1, default=1, max=114)
 
     def draw_shortcut(self, layout):
-        layout.label(text="Shortcut")
         box = layout.box()
+        box.label(text="Shortcut")
+
         box.prop(self, "show_shortcut_keys")
         box.prop(self, "shortcut_show_size")
+
         row = box.row(align=True)
         row.prop(self, "shortcut_offset_x")
         row.prop(self, "shortcut_offset_y")

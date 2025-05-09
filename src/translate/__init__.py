@@ -51,7 +51,7 @@ def register():
         elif language == "zh_HANS":
             language = "zh_CN"
     translate = TranslationHelper(f"BBrush_{language}", zh_CN.data, lang=language)
-    print("translate", language, translate)
+    translate.register()
 
 
 def unregister():
