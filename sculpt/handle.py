@@ -64,10 +64,7 @@ class BrushHandle:
             elif event.type in ('DOWN_ARROW', 'NUMPAD_SLASH'):
                 bpy.ops.sculpt.mask_filter('EXEC_DEFAULT', True, filter_type='CONTRAST_DECREASE',
                                            auto_iteration_count=False)
-
                 return True
-
             elif event.type == "LEFTMOUSE":
                 self.mouse_press = Vector((event.mouse_x, event.mouse_y))
-
         return False

@@ -43,14 +43,13 @@ class BrushDepthScale(bpy.types.Operator):
 
 class BrushDepthMove(bpy.types.Operator):
     bl_idname = "bbrush.depth_move"
-    bl_label = "Depth Move"
+    bl_label = "Rotate View"
     bl_options = {'REGISTER'}
 
     start_mouse = None
     start_offset = None
 
     def invoke(self, context, event):
-        print(context, event, self.bl_label)
         if check_mouse_in_depth_map_area(event):
             self.start_mouse = Vector((event.mouse_region_x, event.mouse_region_y))
             self.start_offset = Vector(get_pref().depth_offset)

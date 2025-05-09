@@ -82,6 +82,9 @@ def get_circular(x, y, segments=64):
     return vert
 
 
+drag_runtime: "BrushDrag|None" = None
+
+
 class DragDraw:
     draw_handle = None
     shaders = {}
@@ -230,6 +233,9 @@ class DragBase(DragDraw):
         self.init_draw(context, event)
 
     def exit(self, context):
+        global drag_runtime
+        drag_runtime = None
+
         self.unregister_draw()
         refresh_ui(context)
 
@@ -247,7 +253,6 @@ class DragBase(DragDraw):
 
     def check_brush_in_model(self, context) -> bool:
         """检查绘制的笔刷是否画在了模型上"""
-
         if self.shape == "BOX":
             x1, y1 = self.mouse_start
             x2, y2 = self.mouse
@@ -266,9 +271,6 @@ class DragBase(DragDraw):
         value = -1 if self.is_reverse else 1
         use_front_faces_only = get_use_front_faces_only(context)
 
-        print("execute,", in_model, self.shape, self.brush_mode, use_front_faces_only,
-              len(self.mouse_route_convex_shell))
-        print("self.mouse_route_convex_shell", self.mouse_route_convex_shell)
         if self.shape == "BOX":
             x1, y1 = self.mouse_start
             x2, y2 = self.mouse
@@ -378,16 +380,21 @@ class BrushDrag(bpy.types.Operator, DragBase):
         self.preview_area(draw_data)
 
     def start_modal(self, context, event):
+        global drag_runtime
+        if drag_runtime is not None:
+            return {"CANCELLED"}
+        drag_runtime = self
         self.click_time = time.time()
         self.init_drag_event(context, event)
         context.window_manager.modal_handler_add(self)
+
         return {'RUNNING_MODAL'}
 
     def invoke(self, context, event):
         is_in_modal = check_mouse_in_model(context, event)
         active_tool = ToolSelectPanelHelper.tool_active_from_context(bpy.context)
 
-        print(self.bl_label, is_in_modal, self.brush_mode, active_tool.idname)
+        # print(self.bl_label, is_in_modal, self.brush_mode, active_tool.idname)
         if self.__class__.draw_handle is not None:
             return {"FINISHED"}
 
@@ -404,8 +411,8 @@ class BrushDrag(bpy.types.Operator, DragBase):
 
                 # 自定义笔刷
                 "builtin.circular_mask",
-                "builtin.ellipse_mask",
                 "builtin.circular_hide",
+                "builtin.ellipse_mask",
                 "builtin.ellipse_hide",
         ):
             return self.start_modal(context, event)
@@ -420,8 +427,8 @@ class BrushDrag(bpy.types.Operator, DragBase):
 
     def modal(self, context, event):
         """        拖动的时候不在模型上拖,执行其它操作        """
-        print("drag_event", self.shape, self.is_reverse, len(self.mouse_route), len(self.mouse_route_convex_shell),
-              event.value, event.type)
+        # print("drag_event", self.shape, self.is_reverse, len(self.mouse_route), len(self.mouse_route_convex_shell),
+        #       event.value, event.type)
 
         self.is_reverse = event.alt
 
