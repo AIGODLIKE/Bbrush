@@ -16,11 +16,11 @@ def mask_draw_settings(context, layout, tool):
 @ToolDef.from_fn
 def circular_mask():
     return dict(
-        idname='builtin.circular_mask',
-        label='Circular mask',
-        description='Draw circular mask',
-        icon=get_dat_icon('brush.sculpt.circular_mask'),
-        cursor='CROSSHAIR',
+        idname="builtin.circular_mask",
+        label="Circular mask",
+        description="Draw circular mask",
+        icon=get_dat_icon("brush.sculpt.circular_mask"),
+        cursor="PAINT_CROSS",
         widget=None,
         draw_settings=mask_draw_settings,
     )
@@ -29,11 +29,11 @@ def circular_mask():
 @ToolDef.from_fn
 def ellipse_mask():
     return dict(
-        idname='builtin.ellipse_mask',
-        label='Ellipse mask',
-        description='Draw elliptical mask',
-        icon=get_dat_icon('brush.sculpt.ellipse_mask'),
-        cursor='CROSSHAIR',
+        idname="builtin.ellipse_mask",
+        label="Ellipse mask",
+        description="Draw elliptical mask",
+        icon=get_dat_icon("brush.sculpt.ellipse_mask"),
+        cursor="PAINT_CROSS",
         widget=None,
         draw_settings=mask_draw_settings,
     )
@@ -42,11 +42,11 @@ def ellipse_mask():
 @ToolDef.from_fn
 def circular_hide():
     return dict(
-        idname='builtin.circular_hide',
-        label='Circular mask',
-        description='Draw circular mask',
-        icon=get_dat_icon('brush.sculpt.circular_hide'),
-        cursor='CROSSHAIR',
+        idname="builtin.circular_hide",
+        label="Circular mask",
+        description="Draw circular mask",
+        icon=get_dat_icon("brush.sculpt.circular_hide"),
+        cursor="PAINT_CROSS",
         widget=None,
         draw_settings=None,
     )
@@ -55,11 +55,11 @@ def circular_hide():
 @ToolDef.from_fn
 def ellipse_hide():
     return dict(
-        idname='builtin.ellipse_hide',
-        label='Ellipse mask',
-        description='Draw elliptical mask',
-        icon=get_dat_icon('brush.sculpt.ellipse_hide'),
-        cursor='CROSSHAIR',
+        idname="builtin.ellipse_hide",
+        label="Ellipse mask",
+        description="Draw elliptical mask",
+        icon=get_dat_icon("brush.sculpt.ellipse_hide"),
+        cursor="PAINT_CROSS",
         widget=None,
         draw_settings=None,
     )

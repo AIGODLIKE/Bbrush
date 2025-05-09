@@ -164,7 +164,9 @@ class DragDraw(MoveEvent):
         with gpu.matrix.push_pop():
             if self.is_move:
                 gpu.matrix.translate(self.move)
-            draw_text(100, 100)
+            mouse = self.mouse
+
+            draw_text(mouse.x, mouse.y, text=f"{self.brush_mode} {self.shape} {'-' if self.is_reverse else '+'}")
             for batch, shader in self.shaders.items():
                 shader.uniform_float("color", self.color)
                 batch.draw(shader)
