@@ -85,17 +85,62 @@ def get_circular(x, y, segments=64):
 drag_runtime: "BrushDrag|None" = None
 
 
-class DragDraw:
+class MoveEvent:
+    is_move = None  # 移动笔刷
+    mouse_move_start = None
+    mouse_move = None
+
+    @property
+    def move(self) -> Vector:
+        move = self.mouse_move - self.mouse_move_start
+        return Vector((move.x, move.y))
+
+    def start_move(self):
+        self.mouse_move_start = Vector((0, 0))
+        self.mouse_move = Vector((0, 0))
+
+    def move_confirm(self, context, event):
+        if self.is_move:
+            print("move_confirm")
+            move = self.move
+
+            self.mouse_route = [i + move for i in self.mouse_route]
+            self.mouse_route_convex_shell = [i + move for i in self.mouse_route_convex_shell]
+            self.mouse_start += move
+            self.mouse += move
+            self.mouse_move = self.mouse_move_start = Vector((0, 0))
+            self.is_move = False
+
+            getattr(self, f"update_{self.shape.lower()}_shape")(context, event)
+
+    def move_event(self, context, event):
+        is_space = event.type == "SPACE"
+
+        is_press = event.value == "PRESS"
+        is_release = event.value == "RELEASE"
+
+        if is_press and is_space and not self.is_move:
+            self.mouse = self.mouse_move_start = self.mouse_move = Vector((event.mouse_region_x, event.mouse_region_y))
+            self.is_move = True
+            return True
+        elif is_release and is_space:
+            self.move_confirm(context, event)
+            return True
+        elif self.is_move:
+            self.mouse_move = Vector((event.mouse_region_x, event.mouse_region_y))
+            return True
+
+
+class DragDraw(MoveEvent):
     draw_handle = None
     shaders = {}
 
     mouse_start = None
-    mouse_move = None
     mouse = None
     mouse_route = None  # 鼠标路径
     mouse_route_convex_shell = None
 
-    is_reverse = None
+    is_reverse = None  # alt 反向
 
     indices = ((0, 1, 2), (2, 1, 3))
     segments = 64
@@ -116,11 +161,14 @@ class DragDraw:
         return [0, 0, 0, self.alpha]
 
     def draw_drag(self):
-        draw_text(100, 100)
-        for batch, shader in self.shaders.items():
-            shader.uniform_float("color", self.color)
-            batch.draw(shader)
-        getattr(self, f"draw_{self.shape.lower()}")()
+        with gpu.matrix.push_pop():
+            if self.is_move:
+                gpu.matrix.translate(self.move)
+            draw_text(100, 100)
+            for batch, shader in self.shaders.items():
+                shader.uniform_float("color", self.color)
+                batch.draw(shader)
+            getattr(self, f"draw_{self.shape.lower()}")()
 
     def draw_box(self):
         x1, y1 = self.mouse_start
@@ -172,11 +220,10 @@ class DragDraw:
     def draw_ellipse(self):
         draw_smooth_line(self.mouse_route, Vector((1, 1, 1, self.alpha)), line_width=1)
 
-    def init_draw(self, context, event):
+    def start_draw(self, context, event):
         self.mouse = self.mouse_start = Vector((event.mouse_region_x, event.mouse_region_y))
         self.mouse_route = [self.mouse, ]
         self.mouse_route_convex_shell = []
-        self.mouse_move = Vector((0, 0))
         self.is_reverse = event.alt
         self.shaders = {}
 
@@ -223,20 +270,22 @@ class DragBase(DragDraw):
     active_tool = None
     shape = None  # ELLIPSE,BOX,POLYLINE,LASSO,CIRCULAR
 
-    def init_drag_event(self, context, event):
+    def start_drag_event(self, context, event):
         from .. import brush_runtime
         (active_tool, WorkSpaceTool, index) = get_active_tool(context)
         self.active_tool = active_tool
         self.shape = get_brush_shape(active_tool.idname)
         self.brush_mode = brush_runtime.brush_mode
         self.register_draw()
-        self.init_draw(context, event)
+        self.start_draw(context, event)
+        self.start_move()
 
-    def exit(self, context):
+    def exit(self, context, event):
         global drag_runtime
         drag_runtime = None
 
         self.unregister_draw()
+        self.move_confirm(context, event)
         refresh_ui(context)
 
     def get_shape_in_model_up(self, context):
@@ -270,6 +319,8 @@ class DragBase(DragDraw):
         is_move_mouse = len(self.mouse_route) >= 3
         value = -1 if self.is_reverse else 1
         use_front_faces_only = get_use_front_faces_only(context)
+
+        print("execute", self.shape, in_model, is_move_mouse, value, use_front_faces_only)
 
         if self.shape == "BOX":
             x1, y1 = self.mouse_start
@@ -385,7 +436,7 @@ class BrushDrag(bpy.types.Operator, DragBase):
             return {"CANCELLED"}
         drag_runtime = self
         self.click_time = time.time()
-        self.init_drag_event(context, event)
+        self.start_drag_event(context, event)
         context.window_manager.modal_handler_add(self)
 
         return {'RUNNING_MODAL'}
@@ -394,7 +445,7 @@ class BrushDrag(bpy.types.Operator, DragBase):
         is_in_modal = check_mouse_in_model(context, event)
         active_tool = ToolSelectPanelHelper.tool_active_from_context(bpy.context)
 
-        # print(self.bl_label, is_in_modal, self.brush_mode, active_tool.idname)
+        print(self.bl_label, is_in_modal, self.brush_mode, active_tool.idname)
         if self.__class__.draw_handle is not None:
             return {"FINISHED"}
 
@@ -427,8 +478,8 @@ class BrushDrag(bpy.types.Operator, DragBase):
 
     def modal(self, context, event):
         """        拖动的时候不在模型上拖,执行其它操作        """
-        # print("drag_event", self.shape, self.is_reverse, len(self.mouse_route), len(self.mouse_route_convex_shell),
-        #       event.value, event.type)
+        print("drag_event", self.shape, self.is_reverse, len(self.mouse_route), len(self.mouse_route_convex_shell),
+              event.value, event.type)
 
         self.is_reverse = event.alt
 
@@ -443,15 +494,21 @@ class BrushDrag(bpy.types.Operator, DragBase):
             self.brush_mode = "MASK" if self.brush_mode == "HIDE" else "HIDE"
 
         if is_press and is_esc:
-            self.exit(context)
+            self.exit(context, event)
             return {'CANCELLED'}
         elif self.shape == "POLYLINE":
-            self.update_polyline_shape(context, event)
-            if res := self.polyline_update(context, event):
-                return res
+
+            if self.move_event(context, event):
+                refresh_ui(context)
+            else:
+                self.update_polyline_shape(context, event)
+                if res := self.polyline_update(context, event):
+                    return res
         elif is_release and is_left:
-            self.exit(context)
+            self.exit(context, event)
             return self.execute(context)
+        elif self.move_event(context, event):
+            refresh_ui(context)
         else:
             getattr(self, f"update_{self.shape.lower()}_shape")(context, event)
 
@@ -469,7 +526,7 @@ class BrushDrag(bpy.types.Operator, DragBase):
             mouse = Vector((event.mouse_region_x, event.mouse_region_y))
             last_mouse = self.mouse_route[-1]
             if (click_time / 1000) > (time.time() - self.click_time) and mouse == last_mouse:  # 双击确定
-                self.exit(context)
+                self.exit(context, event)
                 return self.execute(context)
 
             if mouse not in self.mouse_route:
@@ -479,5 +536,5 @@ class BrushDrag(bpy.types.Operator, DragBase):
             if len(self.mouse_route) > 1:
                 self.mouse_route.pop()
             else:
-                self.exit(context)
+                self.exit(context, event)
                 return {'CANCELLED'}
