@@ -26,7 +26,7 @@ keyconfig_data = [
         "items": [
             ("bbrush.depth_move", {"type": "RIGHTMOUSE", "value": "CLICK_DRAG"}, None),
             ("bbrush.shortcut_key_move", {"type": "RIGHTMOUSE", "value": "CLICK_DRAG"}, None),
-            
+
             ("bbrush.smooth", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "shift": True}, None),
             ("bbrush.click", {"type": "LEFTMOUSE", "value": "CLICK", "any": True}, None),
             ("bbrush.drag", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "any": True}, None),
@@ -163,8 +163,39 @@ keyconfig_data = [
           {"properties": [], },),
      ], },),
 
-    # TODO 视图切换
 ]
+
+
+def view_switch():
+    rotate = blender_default.km_view3d_rotate_modal(params)
+    move = blender_default.km_view3d_move_modal(params)
+    zoom = blender_default.km_view3d_zoom_modal(params)
+    dolly = blender_default.km_view3d_dolly_modal(params)
+
+    rotate[2]["items"].extend([
+        ('CONFIRM', {'type': 'RIGHTMOUSE', 'value': 'ANY'}, None),
+        ('CONFIRM', {'type': 'LEFTMOUSE', 'value': 'ANY'}, None),
+        ('SWITCH_TO_ZOOM', {'type': 'LEFT_CTRL', 'value': 'ANY'}, None),
+        ('AXIS_SNAP_ENABLE', {'type': 'LEFT_SHIFT', 'value': 'PRESS'}, None),
+        ('AXIS_SNAP_DISABLE', {'type': 'LEFT_SHIFT', 'value': 'RELEASE'}, None), ])
+    move[2]["items"].extend([
+        ('CONFIRM', {'type': 'RIGHTMOUSE', 'value': 'ANY'}, None),
+        ('CONFIRM', {'type': 'LEFTMOUSE', 'value': 'ANY'}, None),
+        ('SWITCH_TO_ZOOM', {'type': 'LEFT_ALT', 'value': 'ANY'}, None),
+        ('SWITCH_TO_ZOOM', {'type': 'LEFT_CTRL', 'value': 'ANY'}, None), ])
+    zoom[2]["items"].extend([
+        ('CONFIRM', {'type': 'RIGHTMOUSE', 'value': 'ANY'}, None),
+        ('CONFIRM', {'type': 'LEFTMOUSE', 'value': 'ANY'}, None),
+        ('SWITCH_TO_ROTATE', {'type': 'LEFT_CTRL', 'value': 'RELEASE'}, None),
+        ('SWITCH_TO_MOVE', {'type': 'LEFT_CTRL', 'value': 'PRESS'}, None),
+        ('SWITCH_TO_MOVE', {'type': 'LEFT_ALT', 'value': 'ANY'}, None), ])
+
+    keyconfig_data.append(rotate)
+    keyconfig_data.append(move)
+    keyconfig_data.append(zoom)
+
+
+view_switch()  # 视图切换
 
 if __name__ == "__main__":
     # Only add keywords that are supported.
