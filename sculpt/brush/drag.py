@@ -102,7 +102,7 @@ class MoveEvent:
 
     def move_confirm(self, context, event):
         if self.is_move:
-            print("move_confirm")
+            # print("move_confirm")
             move = self.move
 
             self.mouse_route = [i + move for i in self.mouse_route]
@@ -452,6 +452,7 @@ class BrushDrag(bpy.types.Operator, DragBase):
         active_tool = ToolSelectPanelHelper.tool_active_from_context(bpy.context)
 
         print(self.bl_label, is_in_modal, self.brush_mode, active_tool.idname)
+
         if self.__class__.draw_handle is not None:
             return {"FINISHED"}
 
@@ -490,8 +491,8 @@ class BrushDrag(bpy.types.Operator, DragBase):
 
     def modal(self, context, event):
         """        拖动的时候不在模型上拖,执行其它操作        """
-        print("drag_event", self.shape, self.is_reverse, len(self.mouse_route), len(self.mouse_route_convex_shell),
-              event.value, event.type)
+        # print("drag_event", self.shape, self.is_reverse, len(self.mouse_route), len(self.mouse_route_convex_shell),
+        #       event.value, event.type)
 
         self.is_reverse = event.alt
 
