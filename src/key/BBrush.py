@@ -25,6 +25,8 @@ keyconfig_data = [
     ("Sculpt", {"space_type": "EMPTY", "region_type": "WINDOW"}, {
         "items": [
             ("bbrush.depth_move", {"type": "RIGHTMOUSE", "value": "CLICK_DRAG"}, None),
+            ("bbrush.shortcut_key_move", {"type": "RIGHTMOUSE", "value": "CLICK_DRAG"}, None),
+            
             ("bbrush.smooth", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "shift": True}, None),
             ("bbrush.click", {"type": "LEFTMOUSE", "value": "CLICK", "any": True}, None),
             ("bbrush.drag", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "any": True}, None),

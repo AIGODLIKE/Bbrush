@@ -12,6 +12,7 @@ from ...adapter import sculpt_invert_hide_face
 from ...utils import (
     check_mouse_in_model,
     check_mouse_in_depth_map_area,
+    check_mouse_in_shortcut_key_area,
     check_area_in_model,
     get_brush_shape,
     get_active_tool,
@@ -446,6 +447,7 @@ class BrushDrag(bpy.types.Operator, DragBase):
         return {'RUNNING_MODAL'}
 
     def invoke(self, context, event):
+        from .shortcut_key import BrushShortcutKeyScale
         is_in_modal = check_mouse_in_model(context, event)
         active_tool = ToolSelectPanelHelper.tool_active_from_context(bpy.context)
 
@@ -455,6 +457,9 @@ class BrushDrag(bpy.types.Operator, DragBase):
 
         if check_mouse_in_depth_map_area(event):
             bpy.ops.bbrush.depth_scale("INVOKE_DEFAULT")  # 缩放深度图
+            return {"FINISHED"}
+        elif check_mouse_in_shortcut_key_area(event) and BrushShortcutKeyScale.poll(context):
+            bpy.ops.bbrush.shortcut_key_scale("INVOKE_DEFAULT")  # 缩放快捷键
             return {"FINISHED"}
         elif active_tool and active_tool.idname in (
                 "builtin.box_mask",

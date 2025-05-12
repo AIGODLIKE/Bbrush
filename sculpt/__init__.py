@@ -54,6 +54,8 @@ class BBrushSculpt(
         return {"RUNNING_MODAL"}
 
     def modal(self, context, event):
+        # print("modal", self.bl_idname, event.value, event.type)
+
         if check_mouse_in_3d_area(context, event):
             self.update_brush_shelf(context, event)
 

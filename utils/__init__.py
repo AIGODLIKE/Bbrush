@@ -178,6 +178,16 @@ def check_mouse_in_depth_map_area(event) -> bool:
     return ("area_points" in depth_buffer_check) and mouse_in_area_point_in(event, depth_buffer_check["area_points"])
 
 
+def check_mouse_in_shortcut_key_area(event) -> bool:
+    """检查鼠标是否在快捷键上"""
+    from ..sculpt import brush_runtime
+    return (
+            brush_runtime and
+            brush_runtime.shortcut_key_points and
+            mouse_in_area_point_in(event, brush_runtime.shortcut_key_points)
+    )
+
+
 def is_bbruse_mode() -> bool:
     """检查是否在BBrush模式"""
     from ..sculpt import brush_runtime

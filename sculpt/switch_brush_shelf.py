@@ -104,7 +104,10 @@ class SwitchBrushShelf:
         """更新笔刷资产架"""
         if context.space_data is None:
             # 可能在切换窗口
-            return
+            # return
+            ...
+
+        # print("update_brush_shelf", self.bl_idname, event.value, event.type)
 
         key = (event.ctrl, event.alt, event.shift)
         mode = BRUSH_SHELF_MODE[key]  # 使用组合键来确认是否需要更新笔刷工具架

@@ -76,7 +76,7 @@ class ShortcutKey:
     def start_shortcut_key(self):
         space = bpy.types.SpaceView3D
         self.shortcut_key_handle = space.draw_handler_add(self.draw_shortcut_key, (), 'WINDOW', 'POST_PIXEL')
-        self.shortcut_key_points = []
+        self.shortcut_key_points = ((0, 0), (0, 0))
 
     def stop_shortcut_key(self, ):
         self.shortcut_key_points = None
@@ -90,21 +90,18 @@ class ShortcutKey:
         if pref.show_shortcut_keys:
             font_id = self.font_info['font_id']
             font_size = pref.shortcut_show_size
-            column_space_size = 10
-            key_row_space = 160
+            column_space_size = 10 * font_size
+            key_row_space = 160 * font_size
 
             blf.size(font_id, 18 * font_size)
             blf.color(font_id, 1, 1, 1, 1)
 
             offset_x, offset_y = pref.shortcut_offset
 
-            header = get_region_height(context, "HEADER")
-            tool_header = get_region_height(context, "TOOL_HEADER")
             asset_shelf = get_region_height(context, "ASSET_SHELF")
             asset_shelf_header = get_region_height(context, "ASSET_SHELF_HEADER")
 
             toolbar_width = get_region_width(context)
-            header_height = header + tool_header
 
             x1 = toolbar_width + offset_x
             y1 = offset_y + asset_shelf + asset_shelf_header
@@ -150,4 +147,4 @@ class ShortcutKey:
 
             x2 += max_width
 
-            self.shortcut_key_points = (x1, x2, y1, y2)
+            self.shortcut_key_points = ((x1, x2), (y1, y2))
