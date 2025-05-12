@@ -1,11 +1,14 @@
-schema_version = "1.0.3"
+schema_version = "1.0.0"
 
 blender_version_min = "4.4.0"
 id = "Bbrush"
-license = ["UNKNOWN", ]
-maintainer = "AIGODLIKE Community：小萌新"
+license = ["SPDX:GPL-3.0-or-later", ]
+maintainer = "AIGODLIKE Community(小萌新)"
 name = "Bbrush"
 tagline = "Entering the sculpt mode will be displayed in the top bar"
 type = "add-on"
 version = "1.3.0"
-tags = ["幻之境", "AIGODLIKE Community"]
+tags = ["Sculpt", ]
+
+[permissions]
+files = "Keymap File Load"
