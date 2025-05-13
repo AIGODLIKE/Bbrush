@@ -42,10 +42,10 @@ SHORTCUT_KEYS = {
 
         {'doc': ' '},
         {'doc': 'Other'},
-        {'tool': 'Grow mask', 'key': 'ctrl+Numpad+ Click'},
-        {'tool': 'Shrink mask', 'key': 'ctrl+Numpad- Click'},
-        {'tool': 'Increase contrast', 'key': 'ctrl+Up arrow or ctrl+Numpad* Click'},
-        {'tool': 'Decrease contrast', 'key': 'ctrl+Down arrow or ctrl+Numpad/ Click'}
+        {'tool': 'Grow mask', 'key': 'ctrl + Num+'},
+        {'tool': 'Shrink mask', 'key': 'ctrl + Num-'},
+        {'tool': 'Increase contrast', 'key': 'ctrl + Up arrow or ctrl + Num*'},
+        {'tool': 'Decrease contrast', 'key': 'ctrl + Down arrow or ctrl + Num/'}
     ],
     'HIDE': [
         {'doc': 'Hide'},
