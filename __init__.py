@@ -5,8 +5,8 @@ bl_info = {
     "author": "AIGODLIKE Community：小萌新",
     "version": (1, 3, 0),
     "blender": (4, 0, 0),
-    "location": "Entering the sculpt mode will be displayed in the top bar",
-    "description": "",
+    "location": "Sculpt mode",
+    "description": "Sculpting using only a pen and keyboard",
     "category": "AIGODLIKE"
 }
 
