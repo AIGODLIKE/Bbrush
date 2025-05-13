@@ -21,6 +21,11 @@ Also can display silhouette, much convenient for tablets.
 
 ![image](https://github.com/user-attachments/assets/9ae969f5-ca73-44f2-afff-8f63cf16d3df)
 
+3.Display shortcut keys
+![image](https://github.com/user-attachments/assets/50ed0789-c865-4fad-a463-a6956534d0eb)
+
+
+
 ## Features
 
 ### Silhouette
