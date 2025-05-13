@@ -15,7 +15,7 @@ Also can display silhouette, much convenient for tablets.
 
 ## Start
 
-1. Select the grid to enter sculpt mode
+1. Select a mesh object to enter sculpt mode
 
 2. Enter BBrush Sculpting mode（It can be automatically turned on with the sculpt mode in the preference settings）
 
