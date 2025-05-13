@@ -1,10 +1,29 @@
 # Bbrush
 
+"No More Compromises—Built for Tablet Artists"
+
 This is an addon for Blender that simulates the way ZBrush sculpts.
 
 Also can display silhouette, much convenient for tablets.
 
+
 ![981b5107_9588511](https://github.com/user-attachments/assets/f02b0b50-e4ad-4e7b-9817-fec10ade2e6a)
+
+
+
+
+
+## Start
+
+1. Select a mesh object to enter sculpt mode
+
+2. Enter BBrush Sculpting mode（It can be automatically turned on with the sculpt mode in the preference settings）
+
+![image](https://github.com/user-attachments/assets/9ae969f5-ca73-44f2-afff-8f63cf16d3df)
+
+3.Display shortcut keys
+![image](https://github.com/user-attachments/assets/50ed0789-c865-4fad-a463-a6956534d0eb)
+
 
 
 ## Features
