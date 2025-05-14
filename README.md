@@ -32,11 +32,11 @@ Also can display silhouette, much convenient for tablets.
 
 When enable the silhouette, you can modify it in preferences or at the tool settings.
 
-#### Disaply mode
+#### Display mode
 
 - **Always**: Keep silhouette on toop even not in sculpt mode
-- **Only Sculpt**: Disaply in sculpt mode
-- **Only Bbrush**: Disply in Bbrush mode
+- **Only Sculpt**: Display in sculpt mode
+- **Only Bbrush**: Display in Bbrush mode
 - **Disable**: Don't display
 
 #### Scale
