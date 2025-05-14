@@ -1,4 +1,5 @@
 import bpy
+from bpy.app.handlers import persistent
 
 from . import depth_map, preferences, topbar, sculpt, src
 from .utils import register_submodule_factory
@@ -24,15 +25,20 @@ def update_bbrush_mode():
     sculpt.BBrushSculpt.toggle_object_mode()
 
 
-def register():
-    register_module()
-
+@persistent
+def subscribe(a, b):
     bpy.msgbus.subscribe_rna(
         key=(bpy.types.Object, 'mode'),
         owner=owner,
         args=(),
         notify=update_bbrush_mode,
     )
+
+
+def register():
+    register_module()
+    subscribe(None, None)
+    bpy.app.handlers.load_post.append(subscribe)
 
     bpy.app.timers.register(update_bbrush_mode, first_interval=1, persistent=True)
 
