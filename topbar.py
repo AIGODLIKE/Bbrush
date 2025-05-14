@@ -88,6 +88,7 @@ def top_bar_draw(self, context):
 
 def replace_top_bar(replace: bool):
     global ORIGIN_TOP_BAR
+    from .utils import refresh_ui
     cls = bpy.types.TOPBAR_HT_upper_bar
 
     if ORIGIN_TOP_BAR is None:
@@ -97,6 +98,7 @@ def replace_top_bar(replace: bool):
         cls.draw = top_bar_draw
     else:
         cls.draw = ORIGIN_TOP_BAR
+    refresh_ui(bpy.context)
 
 
 def register():
