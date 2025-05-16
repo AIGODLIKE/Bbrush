@@ -8,7 +8,7 @@ def get_top_bar_text(pref, is_bbrush_mode):
     if is_bbrush_mode:
         return "ESC"
     if pref.top_bar_show_text:
-        text = "Brush"
+        text = "BBrush"
     return text
 
 
