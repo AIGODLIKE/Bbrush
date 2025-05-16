@@ -25,7 +25,6 @@ Also can display silhouette, much convenient for tablets.
 ![image](https://github.com/user-attachments/assets/50ed0789-c865-4fad-a463-a6956534d0eb)
 
 
-
 ## Features
 
 ### Silhouette
@@ -68,6 +67,8 @@ Shows frequently used brushes
 
 #### Mask mode (Ctrl or Ctrl Alt).
 When in mask mode, the brush will be switched to a mask brush.
+
+![screenshot-20250516-134302](https://github.com/user-attachments/assets/393043a5-64d0-47e0-a5f8-8ed8d15463e0)
 
     Draw Mask CTRL+Left click to draw on the model.
     Erase Mask CTRL+ALT+Left to draw on the model.
