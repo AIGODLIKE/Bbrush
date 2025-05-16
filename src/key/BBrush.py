@@ -29,6 +29,8 @@ keyconfig_data = [
             ("sculpt.bbrush_drag", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "any": True}, None),
 
             ("object.transfer_mode", {"type": "LEFTMOUSE", "value": "CLICK", "alt": True}, None),
+            ("wm.call_panel", {"type": "RIGHTMOUSE", "value": "CLICK"},
+             {"properties": [("name", "VIEW3D_PT_sculpt_context_menu"), ]}),
             ("view3d.rotate", {"type": "RIGHTMOUSE", "value": "CLICK_DRAG"}, None),
             ("view3d.move", {"type": "RIGHTMOUSE", "value": "PRESS", "alt": True}, None),
             ("view3d.move", {"type": "MIDDLEMOUSE", "value": "PRESS", "alt": True}, None),
