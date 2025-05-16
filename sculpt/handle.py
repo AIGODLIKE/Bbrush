@@ -1,7 +1,6 @@
 import bpy
 from mathutils import Vector
 
-from ..topbar import replace_top_bar
 from ..utils import get_pref, is_bbruse_mode
 
 
@@ -22,8 +21,6 @@ class BrushHandle:
     def exit(self, context):
         """退出Bbrush模式"""
 
-        replace_top_bar(False)
-
         self.restore_brush_shelf(context)
         self.restore_key(context)
 
@@ -37,8 +34,6 @@ class BrushHandle:
 
     def start(self, context):
         """进入Bbrush模式"""
-
-        replace_top_bar(True)
 
         self.start_key(context)
         self.start_shortcut_key()
