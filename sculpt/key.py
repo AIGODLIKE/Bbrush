@@ -31,6 +31,9 @@ class BrushKey:
             print("未找到 last_key path")
 
     def get_key_preset_path(self, name: str) -> "str|None":
+        """
+        scripts\modules\bpy_types.py
+        """
         ext_valid = getattr(self, "preset_extensions", {".py", ".xml"})
 
         filter_ext = lambda ext: ext.lower() in ext_valid
