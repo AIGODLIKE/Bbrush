@@ -19,9 +19,6 @@ sculpt_keymap = blender_default.km_sculpt(params)
 
 keyconfig_version = (4, 4, 32)
 keyconfig_data = [
-    ("Window", {"space_type": "EMPTY", "region_type": "WINDOW"}, {"items": [], },),
-    ("View3D Rotate Modal", {"space_type": "EMPTY", "region_type": "WINDOW"}, {"items": []}),
-
     ("Sculpt", {"space_type": "EMPTY", "region_type": "WINDOW"}, {
         "items": [
             ("sculpt.bbrush_depth_move", {"type": "RIGHTMOUSE", "value": "CLICK_DRAG"}, None),
@@ -170,7 +167,6 @@ def view_switch():
     rotate = blender_default.km_view3d_rotate_modal(params)
     move = blender_default.km_view3d_move_modal(params)
     zoom = blender_default.km_view3d_zoom_modal(params)
-    dolly = blender_default.km_view3d_dolly_modal(params)
 
     rotate[2]["items"].extend([
         ('CONFIRM', {'type': 'RIGHTMOUSE', 'value': 'ANY'}, None),
