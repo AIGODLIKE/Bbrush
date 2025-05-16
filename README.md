@@ -10,7 +10,8 @@ Also can display silhouette, much convenient for tablets.
 ![981b5107_9588511](https://github.com/user-attachments/assets/f02b0b50-e4ad-4e7b-9817-fec10ade2e6a)
 
 
-![Uploading screenshot-20250516-154529.png…]()
+![screenshot-20250516-154529](https://github.com/user-attachments/assets/cd966ef1-4884-42ee-949d-745725566a3f)
+
 
 
 
