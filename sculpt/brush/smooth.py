@@ -4,7 +4,7 @@ from ...utils import check_mouse_in_model
 
 
 class BrushSmooth(bpy.types.Operator):
-    bl_idname = "bbrush.smooth"
+    bl_idname = "sculpt.bbrush_smooth"
     bl_label = "Smooth"
     bl_options = {'REGISTER'}
 

@@ -4,7 +4,7 @@ from ...utils import check_mouse_in_model
 
 
 class BrushClick(bpy.types.Operator):
-    bl_idname = "bbrush.click"
+    bl_idname = "sculpt.bbrush_click"
     bl_label = "Sculpt"
     bl_options = {"REGISTER"}
 

@@ -24,12 +24,12 @@ keyconfig_data = [
 
     ("Sculpt", {"space_type": "EMPTY", "region_type": "WINDOW"}, {
         "items": [
-            ("bbrush.depth_move", {"type": "RIGHTMOUSE", "value": "CLICK_DRAG"}, None),
-            ("bbrush.shortcut_key_move", {"type": "RIGHTMOUSE", "value": "CLICK_DRAG"}, None),
+            ("sculpt.bbrush_depth_move", {"type": "RIGHTMOUSE", "value": "CLICK_DRAG"}, None),
+            ("sculpt.bbrush_shortcut_key_move", {"type": "RIGHTMOUSE", "value": "CLICK_DRAG"}, None),
 
-            ("bbrush.smooth", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "shift": True}, None),
-            ("bbrush.click", {"type": "LEFTMOUSE", "value": "CLICK", "any": True}, None),
-            ("bbrush.drag", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "any": True}, None),
+            ("sculpt.bbrush_smooth", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "shift": True}, None),
+            ("sculpt.bbrush_click", {"type": "LEFTMOUSE", "value": "CLICK", "any": True}, None),
+            ("sculpt.bbrush_drag", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "any": True}, None),
 
             ("object.transfer_mode", {"type": "LEFTMOUSE", "value": "CLICK", "alt": True}, None),
             ("view3d.rotate", {"type": "RIGHTMOUSE", "value": "CLICK_DRAG"}, None),
@@ -60,12 +60,12 @@ keyconfig_data = [
     ("3D View Tool: Sculpt, Box Mask",
      {"space_type": "VIEW_3D", "region_type": "WINDOW"},
      {"items": [
-         ("bbrush.drag", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "any": True}, None),
+         ("sculpt.bbrush_drag", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "any": True}, None),
      ], },),
     ("3D View Tool: Sculpt, Lasso Mask",
      {"space_type": "VIEW_3D", "region_type": "WINDOW"},
      {"items": [
-         ("bbrush.drag", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "any": True}, None),
+         ("sculpt.bbrush_drag", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "any": True}, None),
 
          ("paint.mask_lasso_gesture",
           {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "ctrl": True, "alt": True},
@@ -85,7 +85,7 @@ keyconfig_data = [
     ("3D View Tool: Sculpt, Polyline Mask",
      {"space_type": "VIEW_3D", "region_type": "WINDOW"},
      {"items": [
-         ("bbrush.drag", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "any": True}, None),
+         ("sculpt.bbrush_drag", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "any": True}, None),
          # ("paint.mask_polyline_gesture", {"type": "LEFTMOUSE", "value": "PRESS", "ctrl": True, "alt": True},
          #  {"properties": [("value", 0), ], },),
          # ("paint.mask_polyline_gesture", {"type": "LEFTMOUSE", "value": "PRESS", "ctrl": True},
@@ -95,15 +95,15 @@ keyconfig_data = [
     # Hide
     ("3D View Tool: Sculpt, Box Hide", {"space_type": "VIEW_3D", "region_type": "WINDOW"},
      {"items": [
-         ("bbrush.click", {"type": "LEFTMOUSE", "value": "CLICK", "any": True}, None),
-         ("bbrush.drag", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "any": True}, None),
+         ("sculpt.bbrush_click", {"type": "LEFTMOUSE", "value": "CLICK", "any": True}, None),
+         ("sculpt.bbrush_drag", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "any": True}, None),
 
          ("paint.hide_show_all", {"type": "LEFTMOUSE", "value": "CLICK", "ctrl": True, "shift": True},
           {"properties": [("action", "SHOW"), ], },),
      ], },),
     ("3D View Tool: Sculpt, Lasso Hide", {"space_type": "VIEW_3D", "region_type": "WINDOW"},
      {"items": [
-         ("bbrush.drag", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "any": True}, None),
+         ("sculpt.bbrush_drag", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "any": True}, None),
 
          # ("paint.hide_show_lasso_gesture", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "ctrl": True, "shift": True},
          #  {"properties": [("action", "HIDE"), ], },),
@@ -126,7 +126,7 @@ keyconfig_data = [
      ], },),
     ("3D View Tool: Sculpt, Polyline Hide", {"space_type": "VIEW_3D", "region_type": "WINDOW"},
      {"items": [
-         ("bbrush.drag", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "any": True}, None),
+         ("sculpt.bbrush_drag", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "any": True}, None),
 
          # ("paint.hide_show_polyline_gesture", {"type": "LEFTMOUSE", "value": "PRESS", "ctrl": True, "shift": True},
          #  {"properties": [("action", "HIDE"), ("area", "Inside"), ], },),

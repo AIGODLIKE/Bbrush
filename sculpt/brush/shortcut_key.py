@@ -4,11 +4,9 @@ from mathutils import Vector
 from ...utils import get_pref, check_mouse_in_shortcut_key_area
 from ...utils.class_template import ScaleOperator, MoveOperator
 
-"""修改快捷键"""
-
 
 class BrushShortcutKeyScale(bpy.types.Operator, ScaleOperator):
-    bl_idname = "bbrush.shortcut_key_scale"
+    bl_idname = "sculpt.bbrush_shortcut_key_scale"
     bl_label = "Shortcut Key Scale"
 
     @classmethod
@@ -31,7 +29,7 @@ class BrushShortcutKeyScale(bpy.types.Operator, ScaleOperator):
 
 
 class BrushShortcutKeyMove(bpy.types.Operator, MoveOperator):
-    bl_idname = "bbrush.shortcut_key_move"
+    bl_idname = "sculpt.bbrush_shortcut_key_move"
     bl_label = "Shortcut Key Move"
 
     @classmethod

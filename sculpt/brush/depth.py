@@ -6,7 +6,7 @@ from ...utils.class_template import ScaleOperator, MoveOperator
 
 
 class BrushDepthScale(bpy.types.Operator, ScaleOperator):
-    bl_idname = "bbrush.depth_scale"
+    bl_idname = "sculpt.bbrush_depth_scale"
     bl_label = "Depth Scale"
 
     def get_start_scale(self) -> float:
@@ -17,7 +17,7 @@ class BrushDepthScale(bpy.types.Operator, ScaleOperator):
 
 
 class BrushDepthMove(bpy.types.Operator, MoveOperator):
-    bl_idname = "bbrush.depth_move"
+    bl_idname = "sculpt.bbrush_depth_move"
     bl_label = "Rotate View/Depth Move"
     text = "Depth map"
 

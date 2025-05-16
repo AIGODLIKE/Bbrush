@@ -44,7 +44,7 @@ class BrushHandle:
     def toggle_object_mode():
         """在用户切换模式时使用此方法"""
         if bpy.context.mode == "SCULPT" and get_pref().always_use_bbrush_sculpt_mode:
-            bpy.ops.bbrush.bbrush_sculpt("INVOKE_DEFAULT")
+            bpy.ops.sculpt.bbrush_sculpt("INVOKE_DEFAULT")
 
     def key_event(self, context, event) -> bool:
         if event.value == "PRESS":

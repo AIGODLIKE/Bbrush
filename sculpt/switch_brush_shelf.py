@@ -141,7 +141,8 @@ class SwitchBrushShelf:
         self.refresh_ui(context)
         brush_shelf.clear()
 
-    def start_brush_shelf(self, context):
+    @staticmethod
+    def start_brush_shelf(context):
         """初始化工具架"""
         global brush_shelf
 

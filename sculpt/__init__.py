@@ -9,7 +9,6 @@ from ..adapter import operator_invoke_confirm
 from ..utils import get_pref, check_mouse_in_3d_area
 
 """
-TOTO
 将整个模态作为一个操作符
 进入BBrush模式即进入操作符模态
 将所有内容退出
@@ -25,7 +24,7 @@ class BBrushSculpt(
     SwitchBrushShelf,
     ShortcutKey,
 ):
-    bl_idname = "bbrush.bbrush_sculpt"
+    bl_idname = "sculpt.bbrush_sculpt"
     bl_label = "BBrush sculpting"
     bl_description = "Sculpting in the style of Zbrush"
     bl_options = {"REGISTER"}

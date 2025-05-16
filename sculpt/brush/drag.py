@@ -373,7 +373,7 @@ class DragBase(DragDraw):
 
 
 class BrushDrag(bpy.types.Operator, DragBase):
-    bl_idname = "bbrush.drag"
+    bl_idname = "sculpt.bbrush_drag"
     bl_label = "Drag"
     bl_options = {"REGISTER"}
 
@@ -457,10 +457,10 @@ class BrushDrag(bpy.types.Operator, DragBase):
             return {"FINISHED"}
 
         if check_mouse_in_depth_map_area(event):
-            bpy.ops.bbrush.depth_scale("INVOKE_DEFAULT")  # 缩放深度图
+            bpy.ops.sculpt.bbrush_depth_scale("INVOKE_DEFAULT")  # 缩放深度图
             return {"FINISHED"}
         elif check_mouse_in_shortcut_key_area(event) and BrushShortcutKeyScale.poll(context):
-            bpy.ops.bbrush.shortcut_key_scale("INVOKE_DEFAULT")  # 缩放快捷键
+            bpy.ops.sculpt.bbrush_shortcut_key_scale("INVOKE_DEFAULT")  # 缩放快捷键
             return {"FINISHED"}
         elif active_tool and active_tool.idname in (
                 "builtin.box_mask",
