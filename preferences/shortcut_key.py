@@ -12,7 +12,7 @@ class ShortcutKey:
 
     shortcut_offset: bpy.props.IntVectorProperty(
         name="Shortcut key offset",
-        default=(0, 10),
+        default=(10, 30),
         size=2,
         max=114514,
         min=0)
