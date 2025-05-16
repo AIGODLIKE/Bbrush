@@ -20,8 +20,6 @@ def top_bar_draw(self, context):
 
     is_bbrush_mode = is_bbruse_mode()
 
-    # layout.label(text=region.alignment)
-    # layout.label(text=layout.alignment)
     if context.mode == "SCULPT":
 
         sub_row = layout.row(align=True)
@@ -46,22 +44,12 @@ def top_bar_draw(self, context):
             row.prop(pref, "show_shortcut_keys", emboss=True, icon="EVENT_K", text="")
             text = "Silhouette Mode" if pref.top_bar_show_text else ""
             row.prop(pref, "depth_display_mode", emboss=True, text=text)
-
-            row.separator()
-            row.operator("wm.window_fullscreen_toggle", emboss=False, icon="FULLSCREEN_ENTER",
-                         text="")  # "FULLSCREEN_EXIT"
-            row.separator(factor=1)
-            row.label(text="You are using BBrush mode")
-            row.operator("wm.url_open",
-                         text="Encountering a problem?",
-                         emboss=False, icon="INTERNET"
-                         ).url = "https://github.com/AIGODLIKE/Bbrush/issues/new"
             row.separator(factor=5)
 
 
 def register():
-    bpy.types.TOPBAR_MT_editor_menus.append(top_bar_draw)
+    bpy.types.VIEW3D_MT_editor_menus.append(top_bar_draw)
 
 
 def unregister():
-    bpy.types.TOPBAR_MT_editor_menus.remove(top_bar_draw)
+    bpy.types.VIEW3D_MT_editor_menus.remove(top_bar_draw)
