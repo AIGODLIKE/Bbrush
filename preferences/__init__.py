@@ -3,7 +3,7 @@ import bpy
 from .depth_map import DepthMap
 from .shortcut_key import ShortcutKey
 from .topbar import TopBar
-from .. import __name__ as base_name
+from .. import __package__ as base_name
 from .. import sculpt
 
 
