@@ -1,6 +1,7 @@
 schema_version = "1.0.0"
 
 blender_version_min = "4.4.0"
+blender_version_max = "4.4.10"
 id = "Bbrush"
 license = ["SPDX:GPL-3.0-or-later", ]
 maintainer = "AIGODLIKE Community(小萌新)"
