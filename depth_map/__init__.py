@@ -1,4 +1,5 @@
 import bpy
+from mathutils import Vector
 
 from .gpu_buffer import draw_gpu_buffer
 from ..utils import get_pref, is_bbruse_mode, get_region_height, get_region_width
@@ -24,33 +25,10 @@ def check_is_draw(context):
 def draw_depth():
     global depth_buffer_check
 
-    pref = get_pref()
     context = bpy.context
 
     if check_is_draw(context):
-        depth_scale = pref.depth_scale
-        width = context.region.width
-        height = context.region.height
-
-        offset_x, offset_y = pref.depth_offset
-
-        header = get_region_height(context, "HEADER")
-        tool_header = get_region_height(context, "TOOL_HEADER")
-
-        toolbar_width = get_region_width(context) + offset_x
-        header_height = header + tool_header + offset_y
-
-        x1 = toolbar_width
-        y1 = height - header_height
-        x2 = int(width / 2 * depth_scale) + toolbar_width
-        y2 = height - int(height / 2 * depth_scale) - header_height
-        # 添加坐标 存起来笔刷的操作符判断鼠标有没有放在深度图上使用
-
-        depth_buffer_check["area_points"] = ((x1, x2), (y1, y2))
-
-        w = 1 / width * toolbar_width * 2
-        h = 1 / height * header_height * 2
-        depth_buffer_check["translate"] = (w, -h, 0)
+        filling_data(context)
         draw_gpu_buffer(context, depth_buffer_check)
 
         """
@@ -58,6 +36,46 @@ def draw_depth():
         """
     elif depth_buffer_check:
         depth_buffer_check = {}
+
+
+def filling_data(context):
+    global depth_buffer_check
+    pref = get_pref()
+    depth_scale = pref.depth_scale
+
+    width = context.region.width
+    height = context.region.height
+    draw_width = int(width * depth_scale)
+    draw_height = int(height * depth_scale)
+    draw_size = Vector((draw_width, draw_height))
+
+    depth_offset = Vector(pref.depth_offset)
+
+    header_height = get_region_height(context, "HEADER") + get_region_height(context, "TOOL_HEADER")
+    tools_width = get_region_width(context, "TOOLS")
+
+    area_offset = Vector((tools_width, -header_height))
+
+    location = depth_offset + area_offset + Vector((0, height - draw_height))
+
+    # 限制位置
+    ui_width = get_region_width(context, "UI")
+    asset_shelf_height = get_region_height(context, "ASSET_SHELF") + get_region_height(context, "ASSET_SHELF_HEADER")
+    limit_x = max(tools_width, min(width - ui_width - draw_width, location.x))
+    limit_y = max(asset_shelf_height, min(height - header_height - draw_height, location.y))
+    limitation = Vector((limit_x, limit_y))
+
+    x1, y1 = limitation
+    x2, y2 = limitation + draw_size
+
+    # 添加坐标 存起来笔刷的操作符判断鼠标有没有放在深度图上使用
+    depth_buffer_check["area_points"] = ((x1, x2), (y1, y2))
+    depth_buffer_check["draw_box"] = (x1, x2, y1, y2)
+
+    # 修改为符合gpu绘制的坐标
+    w = 1 / width * x1
+    h = 1 / height * (y1 + draw_height)
+    depth_buffer_check["translate"] = (w, h, 0)
 
 
 def register():

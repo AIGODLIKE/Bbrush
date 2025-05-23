@@ -15,8 +15,20 @@ def get_region(region_type, context=None) -> "None|bpy.types.Region":
     """
     enum in ["WINDOW", "HEADER", "CHANNELS", "TEMPORARY", "UI", "TOOLS", "TOOL_PROPS",
         "PREVIEW", "HUD", "NAVIGATION_BAR", "EXECUTE", "FOOTER", "TOOL_HEADER", "XR"]]
-{'WINDOW', 'ASSET_SHELF', 'TOOL_HEADER', 'ASSET_SHELF_HEADER', 'HUD', 'UI', 'NAVIGATION_BAR', 'TOOLS', 'EXECUTE', 'HEADER', 'CHANNELS'}
     region_types = set(region.type for area in bpy.context.screen.areas for region in area.regions)
+    {
+    'WINDOW',
+     'ASSET_SHELF',
+     'TOOL_HEADER',
+     'ASSET_SHELF_HEADER',
+     'HUD',
+     'UI',
+     'NAVIGATION_BAR',
+     'TOOLS',
+     'EXECUTE',
+     'HEADER',
+     'CHANNELS'
+     }
     """
     area = bpy.context.area if context is None else context.area
     for region in area.regions:

@@ -20,11 +20,10 @@ class DepthMap:
         name="Silhouette image scaling",
         default=0.3,
         max=2,
-        min=0.1,
-        step=0.1
+        min=0.01,
     )
-    depth_offset: bpy.props.IntVectorProperty(name="Silhouette image offset", default=(0, 80), size=2,
-                                              max=114514, min=0)
+    depth_offset: bpy.props.IntVectorProperty(name="Silhouette image offset", default=(0, -80), size=2,
+                                              max=114514, min=-114514)
 
     def draw_depth(self, layout):
         row = layout.row(align=True)

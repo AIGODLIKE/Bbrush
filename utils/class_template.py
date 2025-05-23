@@ -65,8 +65,8 @@ class MoveOperator:
 
     def get_offset(self, context, event):
         mouse = Vector((event.mouse_region_x, event.mouse_region_y))
-        diff_mouse = self.start_mouse - mouse
-        diff_mouse[0] = diff_mouse[0] * -1
+        diff_mouse = mouse - self.start_mouse
+        diff_mouse[0] = diff_mouse[0]
         return [int(i) for i in (self.start_offset + diff_mouse)]
 
     def invoke(self, context, event):
