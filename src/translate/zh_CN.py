@@ -131,4 +131,5 @@ data = {
     "Shortcut Key Move offset x:%i y:%i": "快捷键偏移 x:%i y:%i",
     "Shortcut Key Portability": "快捷键可移动",
     "Rotate View/Depth Move": "旋转视图/移动深度图",
+    "Refresh interval": "刷新间隔"
 }
