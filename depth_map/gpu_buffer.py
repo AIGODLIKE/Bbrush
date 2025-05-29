@@ -71,18 +71,22 @@ def depth_shader():
     return shader, batch
 
 
+gpu_cache = {}  # 优化性能
+
+
 def draw_shader_old(width, height):
     shader, batch = depth_shader()
-    depth_buffer = gpu.state.active_framebuffer_get().read_depth(0,
-                                                                 0,
-                                                                 width,
-                                                                 height,
-                                                                 )
-    texture = gpu.types.GPUTexture(
-        (width, height),
-        format="DEPTH_COMPONENT32F",
-        data=depth_buffer
-    )
+    key = width, height in gpu_cache
+
+    if key in gpu_cache:
+        texture = gpu_cache[key]
+    else:
+        depth_buffer = gpu.state.active_framebuffer_get().read_depth(0, 0, width, height)
+        texture = gpu.types.GPUTexture((width, height), format="DEPTH_COMPONENT32F", data=depth_buffer)
+
+        gpu_cache.clear()
+        gpu_cache[key] = texture
+        # print("refresh depth map")
 
     mv = gpu.matrix.get_model_view_matrix()
     shader.uniform_float("ModelViewProjectionMatrix", mv)
@@ -117,3 +121,8 @@ def draw_gpu_buffer(context, depth_buffer):
         gpu.matrix.scale([depth_scale, depth_scale])
 
         draw_shader_old(context.region.width, context.region.height)  # 使用自定义着色器绘制,将会快很多
+
+
+def clear_cache():
+    global gpu_cache
+    gpu_cache.clear()

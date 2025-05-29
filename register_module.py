@@ -2,7 +2,7 @@ import bpy
 from bpy.app.handlers import persistent
 
 from . import depth_map, preferences, topbar, sculpt, src
-from .utils import register_submodule_factory
+from .utils import register_submodule_factory, get_pref, is_bbruse_mode
 
 model_tuple = (
     src,
@@ -26,7 +26,6 @@ def update_bbrush_mode():
 
 
 def load_subscribe():
-    # print("subscribe")
     bpy.msgbus.subscribe_rna(
         key=(bpy.types.Object, 'mode'),
         owner=owner,
@@ -38,8 +37,17 @@ def load_subscribe():
 
 @persistent
 def load_post(a, b):
-    # print("load_post", a, b)
     sculpt.BBrushSculpt.toggle_object_mode()
+
+
+def update_depth_map():
+    """Dot in Bbrush mode refresh depth map"""
+    context = bpy.context
+    pref = get_pref()
+    if not is_bbruse_mode():
+        if pref.depth_display_mode in ("ALWAYS_DISPLAY", "ONLY_SCULPT") and depth_map.check_is_draw(context):
+            depth_map.gpu_buffer.clear_cache()
+    return pref.depth_refresh_interval
 
 
 def register():
@@ -48,6 +56,7 @@ def register():
     bpy.app.handlers.load_post.append(load_post)
 
     bpy.app.timers.register(update_bbrush_mode, first_interval=1, persistent=True)
+    bpy.app.timers.register(update_depth_map, first_interval=1, persistent=True)
 
 
 def unregister():
@@ -57,3 +66,5 @@ def unregister():
 
     if bpy.app.timers.is_registered(update_bbrush_mode):
         bpy.app.timers.unregister(update_bbrush_mode)
+    if bpy.app.timers.is_registered(update_depth_map):
+        bpy.app.timers.unregister(update_depth_map)

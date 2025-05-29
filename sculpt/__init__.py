@@ -52,8 +52,14 @@ class BBrushSculpt(
         context.window_manager.modal_handler_add(self)
         return {"RUNNING_MODAL"}
 
-    def modal(self, context, event):
+    def modal(self, context, event: "bpy.types.Event"):
         # print("modal", self.bl_idname, event.value, event.type)
+
+        if event.value == "RELEASE" or event.value_prev == "RELEASE":
+            self.refresh_depth_map()
+
+        if event.type in {"TIMER", "MOUSEMOVE", "WINDOW_DEACTIVATE", "INBETWEEN_MOUSEMOVE"}:
+            return {"PASS_THROUGH"}
 
         if check_mouse_in_3d_area(context, event):
             self.update_brush_shelf(context, event)
@@ -77,6 +83,10 @@ class BBrushSculpt(
 
     def execute(self, context):
         return {"FINISHED"}
+
+    def refresh_depth_map(self):
+        from ..depth_map.gpu_buffer import clear_cache
+        clear_cache()
 
 
 def register():
