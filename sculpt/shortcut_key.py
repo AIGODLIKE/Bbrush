@@ -75,19 +75,21 @@ class ShortcutKey:
 
     def start_shortcut_key(self):
         space = bpy.types.SpaceView3D
-        self.shortcut_key_handle = space.draw_handler_add(self.draw_shortcut_key, (), 'WINDOW', 'POST_PIXEL')
+        # self.shortcut_key_handle = space.draw_handler_add(self.draw_shortcut_key, (), 'WINDOW', 'POST_PIXEL')
         self.shortcut_key_points = ((0, 0), (0, 0))
 
     def stop_shortcut_key(self, ):
         self.shortcut_key_points = None
-        if handle := self.shortcut_key_handle:
-            bpy.types.SpaceView3D.draw_handler_remove(handle, 'WINDOW')
+        # if handle := self.shortcut_key_handle:
+        #     bpy.types.SpaceView3D.draw_handler_remove(handle, 'WINDOW')
 
     def draw_shortcut_key(self):
-        from bpy.app.translations import pgettext_iface as translate
-        context = bpy.context
         pref = get_pref()
+
         if pref.show_shortcut_keys:
+            from bpy.app.translations import pgettext_iface as translate
+            context = bpy.context
+
             font_id = self.font_info['font_id']
             font_size = pref.shortcut_show_size
             column_space_size = 10 * font_size

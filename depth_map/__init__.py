@@ -1,4 +1,5 @@
 import bpy
+import gpu
 from mathutils import Vector
 
 from .gpu_buffer import draw_gpu_buffer
@@ -23,9 +24,18 @@ def check_is_draw(context):
 
 
 def draw_depth():
+    from ..sculpt import brush_runtime
     global depth_buffer_check
 
     context = bpy.context
+
+    gpu.state.blend_set("NONE")
+    # NONE, ALPHA, ALPHA_PREMULT, ADDITIVE, ADDITIVE_PREMULT, MULTIPLY, SUBTRACT, INVERT,
+    gpu.state.depth_test_set("NONE")  # NONE, ALWAYS, LESS, LESS_EQUAL, EQUAL, GREATER and GREATER_EQUAL
+    gpu.state.depth_mask_set(True)
+
+    if brush_runtime is not None:
+        brush_runtime.draw_shortcut_key()
 
     if check_is_draw(context):
         filling_data(context)
@@ -36,7 +46,6 @@ def draw_depth():
         """
     elif depth_buffer_check:
         depth_buffer_check = {}
-
 
 def filling_data(context):
     global depth_buffer_check
