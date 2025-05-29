@@ -448,6 +448,7 @@ class BrushDrag(bpy.types.Operator, DragBase):
 
     def invoke(self, context, event):
         from .shortcut_key import BrushShortcutKeyScale
+        from .. import brush_runtime
         is_in_modal = check_mouse_in_model(context, event)
         active_tool = ToolSelectPanelHelper.tool_active_from_context(bpy.context)
 
@@ -478,7 +479,6 @@ class BrushDrag(bpy.types.Operator, DragBase):
         ):
             return self.start_modal(context, event)
         elif not is_in_modal:
-            from .. import brush_runtime
             if brush_runtime and brush_runtime.brush_mode != "SCULPT":  # 不是雕刻并且不在模型上
                 return self.start_modal(context, event)
             else:
@@ -487,6 +487,11 @@ class BrushDrag(bpy.types.Operator, DragBase):
                 else:
                     bpy.ops.view3d.rotate("INVOKE_DEFAULT")  # 旋转视图
                 return {"FINISHED"}
+        now_mouse = Vector((event.mouse_x, event.mouse_y))
+
+        left = brush_runtime.left_mouse
+        offset_mouse = left + (left - now_mouse)
+        context.window.cursor_warp(int(offset_mouse.x), int(offset_mouse.y))
         return {"PASS_THROUGH"}
 
     def modal(self, context, event):

@@ -1,4 +1,5 @@
 import bpy
+from mathutils import Vector
 
 from . import brush
 from .handle import BrushHandle
@@ -29,6 +30,8 @@ class BBrushSculpt(
     bl_description = "Sculpting in the style of Zbrush"
     bl_options = {"REGISTER"}
 
+    left_mouse = Vector((0, 0))
+
     def exit(self, context):
         global brush_runtime
         brush_runtime = None
@@ -54,6 +57,8 @@ class BBrushSculpt(
 
     def modal(self, context, event: "bpy.types.Event"):
         # print("modal", self.bl_idname, event.value, event.type)
+        if event.value == "PRESS" and event.type == "LEFTMOUSE":
+            self.left_mouse = Vector((event.mouse_x, event.mouse_y))
 
         if event.value == "RELEASE" or event.value_prev == "RELEASE":
             self.refresh_depth_map()
