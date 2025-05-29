@@ -109,7 +109,7 @@ def draw_gpu_buffer(context, depth_buffer):
     gpu.state.depth_mask_set(False)
 
     depth_scale = get_pref().depth_scale
-    draw_box(*depth_buffer["draw_box"])
+    # draw_box(*depth_buffer["draw_box"])
     with gpu.matrix.push_pop():
         gpu.matrix.scale([2, 2])
         gpu.matrix.translate([-0.5, -0.5, 0])

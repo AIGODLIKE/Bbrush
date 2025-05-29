@@ -1,6 +1,7 @@
 import bpy
 import gpu
 
+
 class DepthMap:
     depth_display_items = (
         ("ALWAYS_DISPLAY", "Always display",
