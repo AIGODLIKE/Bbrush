@@ -1,5 +1,4 @@
 import bpy
-import gpu
 from mathutils import Vector
 
 from .gpu_buffer import draw_gpu_buffer
@@ -10,6 +9,7 @@ handel = None
 depth_buffer_check = {
     # "wh": ((x1, x2), (y1, y2)),
     # "translate":w, -h, 0
+    # "draw_error": "ERROR INFO"
 }
 
 
@@ -29,23 +29,25 @@ def draw_depth():
 
     context = bpy.context
 
-    gpu.state.blend_set("NONE")
+    # gpu.state.blend_set("NONE")
     # NONE, ALPHA, ALPHA_PREMULT, ADDITIVE, ADDITIVE_PREMULT, MULTIPLY, SUBTRACT, INVERT,
-    gpu.state.depth_test_set("NONE")  # NONE, ALWAYS, LESS, LESS_EQUAL, EQUAL, GREATER and GREATER_EQUAL
-    gpu.state.depth_mask_set(True)
+    # gpu.state.depth_test_set("ALWAYS")  # NONE, ALWAYS, LESS, LESS_EQUAL, EQUAL, GREATER and GREATER_EQUAL
+    # gpu.state.depth_mask_set(False)
 
     if brush_runtime is not None:
         brush_runtime.draw_shortcut_key()
 
     if check_is_draw(context):
         filling_data(context)
-        draw_gpu_buffer(context, depth_buffer_check)
 
+        if draw_error := draw_gpu_buffer(context, depth_buffer_check):
+            depth_buffer_check["draw_error"] = draw_error
         """
         draw_gpu_buffer_new_buffer_funcs(sam_width, sam_height, width, height, sampling)
         """
     elif depth_buffer_check:
         depth_buffer_check = {}
+
 
 def filling_data(context):
     global depth_buffer_check
@@ -78,13 +80,14 @@ def filling_data(context):
     x2, y2 = limitation + draw_size
 
     # 添加坐标 存起来笔刷的操作符判断鼠标有没有放在深度图上使用
-    depth_buffer_check["area_points"] = ((x1, x2), (y1, y2))
-    depth_buffer_check["draw_box"] = (x1, x2, y1, y2)
+    depth_buffer_check["area_points"] = (x1, x2), (y1, y2)
+    depth_buffer_check["draw_box"] = x1, x2, y1, y2
+    depth_buffer_check["text_location"] = x1, y1
 
     # 修改为符合gpu绘制的坐标
     w = 1 / width * x1
     h = 1 / height * (y1 + draw_height)
-    depth_buffer_check["translate"] = (w, h, 0)
+    depth_buffer_check["translate"] = w, h, 0
 
 
 def register():

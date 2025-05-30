@@ -1,5 +1,6 @@
 from functools import cache
 
+import blf
 import gpu
 from gpu_extras.batch import batch_for_shader
 
@@ -113,14 +114,25 @@ def draw_gpu_buffer(context, depth_buffer):
     gpu.state.depth_mask_set(False)
 
     depth_scale = get_pref().depth_scale
-    # draw_box(*depth_buffer["draw_box"])
-    with gpu.matrix.push_pop():
-        gpu.matrix.scale([2, 2])
-        gpu.matrix.translate([-0.5, -0.5, 0])
-        gpu.matrix.translate(depth_buffer["translate"])
-        gpu.matrix.scale([depth_scale, depth_scale])
-
-        draw_shader_old(context.region.width, context.region.height)  # 使用自定义着色器绘制,将会快很多
+    if "draw_error" not in depth_buffer:
+        with gpu.matrix.push_pop():
+            gpu.matrix.scale([2, 2])
+            gpu.matrix.translate([-0.5, -0.5, 0])
+            gpu.matrix.translate(depth_buffer["translate"])
+            gpu.matrix.scale([depth_scale, depth_scale])
+            try:
+                draw_shader_old(context.region.width, context.region.height)  # 使用自定义着色器绘制,将会快很多
+            except Exception as e:
+                return e.args
+    else:
+        error_text = depth_buffer["draw_error"]
+        draw_box(*depth_buffer["draw_box"])
+        x, y = depth_buffer["text_location"]
+        font_id = 0
+        blf.position(font_id, x, y, 0)
+        blf.draw(font_id, error_text + f"{x} {y}")
+        blf.position(font_id, x, y+20, 0)
+        blf.draw(font_id, "Drag Depth Map Error")
 
 
 def clear_cache():
