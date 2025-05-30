@@ -27,8 +27,15 @@ class Preferences(
 
     depth_ray_size: bpy.props.IntProperty(
         name="Depth ray check size(px)",
-        description="Check if the mouse is placed over the model, mouse cursor range size", default=30, min=10,
+        description="Check if the mouse is placed over the model, mouse cursor range size", default=100, min=10,
         max=300)
+    drag_offset_compensation: bpy.props.FloatProperty(
+        name="Drag Offset Compensation",
+        description="Compensate for mouse position movement during drawing",
+        min=0.1,
+        default=0.5,
+        max=2
+    )
 
     def draw(self, context):
         layout = self.layout
@@ -38,6 +45,7 @@ class Preferences(
         col.prop(self, "always_use_bbrush_sculpt_mode")
         col.label(text="Tips:Automatically enter Bbrush mode when entering carving mode")
         col.prop(self, "depth_ray_size")
+        col.prop(self, "drag_offset_compensation")
 
         self.draw_top_ber(layout)
         self.draw_depth(layout)

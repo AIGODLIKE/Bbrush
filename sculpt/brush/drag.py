@@ -18,6 +18,7 @@ from ...utils import (
     get_active_tool,
     refresh_ui,
     line_to_convex_shell,
+    get_pref,
 )
 from ...utils.gpu import draw_text, draw_line, draw_smooth_line
 
@@ -372,6 +373,16 @@ class DragBase(DragDraw):
         return {"FINISHED"}
 
 
+def mouse_offset_compensation(context, event):
+    """偏移补偿         在鼠标放在模型边缘的时候会出现不跟手的情况 对其进行优化"""
+    pref = get_pref()
+    from .. import brush_runtime
+    now_mouse = Vector((event.mouse_x, event.mouse_y))
+    left = brush_runtime.left_mouse
+    offset_mouse = (left - now_mouse) * pref.drag_offset_compensation + left
+    context.window.cursor_warp(int(offset_mouse.x), int(offset_mouse.y))
+
+
 class BrushDrag(bpy.types.Operator, DragBase):
     bl_idname = "sculpt.bbrush_drag"
     bl_label = "Drag"
@@ -487,11 +498,9 @@ class BrushDrag(bpy.types.Operator, DragBase):
                 else:
                     bpy.ops.view3d.rotate("INVOKE_DEFAULT")  # 旋转视图
                 return {"FINISHED"}
-        now_mouse = Vector((event.mouse_x, event.mouse_y))
 
-        left = brush_runtime.left_mouse
-        offset_mouse = left + (left - now_mouse)
-        context.window.cursor_warp(int(offset_mouse.x), int(offset_mouse.y))
+        mouse_offset_compensation(context, event)
+
         return {"PASS_THROUGH"}
 
     def modal(self, context, event):

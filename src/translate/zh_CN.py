@@ -131,5 +131,7 @@ data = {
     "Shortcut Key Move offset x:%i y:%i": "快捷键偏移 x:%i y:%i",
     "Shortcut Key Portability": "快捷键可移动",
     "Rotate View/Depth Move": "旋转视图/移动深度图",
-    "Refresh interval": "刷新间隔"
+    "Refresh interval": "刷新间隔",
+    "Compensate for mouse position movement during drawing": "在绘制时会出现鼠标位置移动,对其进行补偿",
+    "Drag Offset Compensation": "拖动偏移补偿"
 }
