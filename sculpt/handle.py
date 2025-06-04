@@ -23,6 +23,7 @@ class BrushHandle:
 
         self.restore_brush_shelf(context)
         self.restore_key(context)
+        self.restore_view_property(context)
 
         self.refresh_ui(context)
 
@@ -38,6 +39,7 @@ class BrushHandle:
         self.start_key(context)
         self.start_shortcut_key()
         self.start_brush_shelf(context)
+        self.start_view_property(context)
         self.refresh_ui(context)
 
     @staticmethod

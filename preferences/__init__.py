@@ -3,13 +3,15 @@ import bpy
 from .depth_map import DepthMap
 from .shortcut_key import ShortcutKey
 from .topbar import TopBar
+from .view import View
 from .. import __package__ as base_name
 from .. import sculpt
 
 
 class Preferences(
     bpy.types.AddonPreferences,
-    
+
+    View,
     TopBar,
     DepthMap,
     ShortcutKey,
@@ -40,16 +42,30 @@ class Preferences(
     def draw(self, context):
         layout = self.layout
 
-        col = layout.box()
-        col.label(text="Sculpt")
-        col.prop(self, "always_use_bbrush_sculpt_mode")
-        col.label(text="Tips:Automatically enter Bbrush mode when entering carving mode")
-        col.prop(self, "depth_ray_size")
-        col.prop(self, "drag_offset_compensation")
+        col = layout.column()
+        col.use_property_split = True
+        col.use_property_decorate = False
 
-        self.draw_top_ber(layout)
-        self.draw_depth(layout)
-        self.draw_shortcut(layout)
+        box = col.box()
+        box.label(text="Sculpt")
+        box.prop(self, "always_use_bbrush_sculpt_mode")
+        box.prop(self, "depth_ray_size")
+        box.prop(self, "drag_offset_compensation")
+
+        if self.always_use_bbrush_sculpt_mode:
+            sub_col = box.column()
+            sub_col.alert = True
+            sub_col.label(text="Tips:Automatically enter Bbrush mode when entering carving mode")
+
+        split = col.split()
+
+        column = split.column()
+        self.draw_top_ber(column)
+        self.draw_view(column)
+
+        column = split.column()
+        self.draw_depth(column)
+        self.draw_shortcut(column)
 
 
 def register():

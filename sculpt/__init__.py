@@ -6,6 +6,7 @@ from .handle import BrushHandle
 from .key import BrushKey
 from .shortcut_key import ShortcutKey
 from .switch_brush_shelf import SwitchBrushShelf
+from .view_property import ViewProperty
 from ..adapter import operator_invoke_confirm
 from ..utils import get_pref, check_mouse_in_3d_area
 
@@ -24,6 +25,7 @@ class BBrushSculpt(
     BrushHandle,
     SwitchBrushShelf,
     ShortcutKey,
+    ViewProperty,
 ):
     bl_idname = "sculpt.bbrush_sculpt"
     bl_label = "BBrush sculpting"

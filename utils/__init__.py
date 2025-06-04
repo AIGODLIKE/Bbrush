@@ -225,3 +225,44 @@ def refresh_ui(context):
 def clear_cache():
     """清理缓存"""
     ...
+
+
+def get_property_rna_info(bl_rna, property_name: "str") -> "dict|None":
+    """通过rna 获取属性的所有参数"""
+    if property_name in bl_rna.properties:
+        prop = bl_rna.properties[property_name]
+
+        data = {
+            "name": prop.name,
+            "description": prop.description,
+        }
+
+        # if prop.type == 'POINTER':
+        #     pro = get_property(pro, exclude, reversal)
+        # elif typ == 'COLLECTION':
+        #     pro = __collection_data__(pro, exclude, reversal)
+        if prop.type == 'ENUM':
+            data["items"] = list(((i.identifier, i.name, i.description) for i in prop.enum_items))
+        elif prop.type == "FLOAT" or prop.subtype == "COLOR":
+            for key_a, key_b in {
+                "hard_max": "max",
+                "hard_min": "min",
+                "soft_min": "soft_min",
+                "soft_max": "soft_max",
+                "step": "step",
+            }.items():
+                if value := getattr(prop, key_a, None):
+                    data[key_b] = value
+
+        if default := getattr(prop, "default", None):
+            data["default"] = default
+
+        if options := getattr(prop, "options", None):
+            data["options"] = options
+
+        if subtype := getattr(prop, "subtype", None):
+            if subtype != "NONE":
+                data["subtype"] = subtype
+
+        print("get_property_rna_info", property_name, data)
+        return data
