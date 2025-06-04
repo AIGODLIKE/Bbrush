@@ -264,5 +264,5 @@ def get_property_rna_info(bl_rna, property_name: "str") -> "dict|None":
             if subtype != "NONE":
                 data["subtype"] = subtype
 
-        print("get_property_rna_info", property_name, data)
+        # print("get_property_rna_info", property_name, data)
         return data
