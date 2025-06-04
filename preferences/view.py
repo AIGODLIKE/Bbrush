@@ -12,6 +12,7 @@ def get_view_property_info(x):
 
 
 class View:
+    use_view: bpy.props.BoolProperty(name="Use view pref", default=True)
     view_rotate_method: bpy.props.EnumProperty(
         **{**get_input_property_info("view_rotate_method"), "default": "TRACKBALL"})
     view_rotate_sensitivity_turntable: bpy.props.FloatProperty(
@@ -28,6 +29,10 @@ class View:
     def draw_view(self, layout):
 
         box = layout.column().box()
+        box.prop(self, "use_view")
+        
+        box = box.column()
+        box.active = self.use_view
 
         box.label(text="View")
 
