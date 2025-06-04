@@ -12,7 +12,8 @@ def get_view_property_info(x):
 
 
 class View:
-    view_rotate_method: bpy.props.EnumProperty(**get_input_property_info("view_rotate_method"))
+    view_rotate_method: bpy.props.EnumProperty(
+        **{**get_input_property_info("view_rotate_method"), "default": "TRACKBALL"})
     view_rotate_sensitivity_turntable: bpy.props.FloatProperty(
         **get_input_property_info("view_rotate_sensitivity_turntable"))
     view_rotate_sensitivity_trackball: bpy.props.FloatProperty(
@@ -26,23 +27,25 @@ class View:
 
     def draw_view(self, layout):
 
-        col = layout.column().box()
+        box = layout.column().box()
 
-        col.label(text="View")
+        box.label(text="View")
 
-        col.row().prop(self, "view_rotate_method", expand=True)
+        box.row().prop(self, "view_rotate_method", expand=True)
         if self.view_rotate_method == 'TURNTABLE':
-            col.prop(self, "view_rotate_sensitivity_turntable")
+            box.prop(self, "view_rotate_sensitivity_turntable")
         else:
-            col.prop(self, "view_rotate_sensitivity_trackball")
-        col.prop(self, "use_rotate_around_active")
+            box.prop(self, "view_rotate_sensitivity_trackball")
+        box.prop(self, "use_rotate_around_active")
 
-        col.separator()
+        box.separator()
 
-        col = col.column(heading="Auto")
+        col = box.column(heading="Auto")
         col.prop(self, "use_auto_perspective", text="Perspective")
         col.prop(self, "use_mouse_depth_navigate", text="Depth")
 
-        col = col.column()
+        col = box.column()
         col.prop(self, "smooth_view")
         col.prop(self, "rotation_angle")
+
+        box.label(text="View preferences used when entering Bbrush mode")
