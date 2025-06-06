@@ -60,6 +60,9 @@ def register():
 
 
 def unregister():
+    from .sculpt import brush_runtime
+    if brush_runtime is not None:
+        brush_runtime.exit(bpy.context)
     unregister_module()
 
     bpy.msgbus.clear_by_owner(owner)
