@@ -58,7 +58,8 @@ class BBrushSculpt(
         return {"RUNNING_MODAL"}
 
     def modal(self, context, event: "bpy.types.Event"):
-        # print("modal", self.bl_idname, event.value, event.type)
+        print("modal", self.bl_idname, event.value, event.type)
+        return {"PASS_THROUGH"}
         if event.value == "PRESS" and event.type == "LEFTMOUSE":
             self.left_mouse = Vector((event.mouse_x, event.mouse_y))
 
