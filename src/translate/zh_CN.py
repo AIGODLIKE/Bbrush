@@ -135,5 +135,6 @@ data = {
     "Compensate for mouse position movement during drawing": "在绘制时会出现鼠标位置移动,对其进行补偿",
     "Drag offset compensation": "拖动偏移补偿",
     "View preferences used when entering Bbrush mode": "进入Bbrush模式时使用的视图偏好设置",
-    "Enabled drag offset compensation": "启用拖动偏移补偿"
+    "Enabled drag offset compensation": "启用拖动偏移补偿",
+    "Do not reinstall or upgrade this plugin in Bbrush mode!": "请不要在Bbrush模式下进行重新安装或升级此插件!"
 }

@@ -52,14 +52,13 @@ class BBrushSculpt(
                 self.is_exit = False
         brush_runtime = self
 
-        # self.start(context)
-        # self.update_brush_shelf(context, event)
+        self.start(context)
+        self.update_brush_shelf(context, event)
         context.window_manager.modal_handler_add(self)
         return {"RUNNING_MODAL"}
 
     def modal(self, context, event: "bpy.types.Event"):
-        print("modal", self.bl_idname, event.value, event.type)
-        return {"PASS_THROUGH"}
+        # print("modal", self.bl_idname, event.value, event.type)
         if event.value == "PRESS" and event.type == "LEFTMOUSE":
             self.left_mouse = Vector((event.mouse_x, event.mouse_y))
 

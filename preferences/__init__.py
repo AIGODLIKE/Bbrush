@@ -56,10 +56,11 @@ class Preferences(
         box.prop(self, "enabled_drag_offset_compensation")
         box.prop(self, "drag_offset_compensation")
 
+        sub_col = box.column()
+        sub_col.alert = True
         if self.always_use_bbrush_sculpt_mode:
-            sub_col = box.column()
-            sub_col.alert = True
             sub_col.label(text="Tips:Automatically enter Bbrush mode when entering carving mode")
+        sub_col.label(text="、")
 
         split = col.split()
 
