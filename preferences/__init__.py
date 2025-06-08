@@ -60,7 +60,7 @@ class Preferences(
         sub_col.alert = True
         if self.always_use_bbrush_sculpt_mode:
             sub_col.label(text="Tips:Automatically enter Bbrush mode when entering carving mode")
-        sub_col.label(text="、")
+        sub_col.label(text="Do not reinstall or upgrade this plugin in Bbrush mode!")
 
         split = col.split()
 
