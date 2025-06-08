@@ -34,9 +34,14 @@ def load_subscribe():
         options={"PERSISTENT"}
     )
 
+def refresh_subscribe():
+    bpy.msgbus.clear_by_owner(owner)
+    load_subscribe()
+
 
 @persistent
 def load_post(a, b):
+    refresh_subscribe()
     sculpt.BBrushSculpt.toggle_object_mode()
 
 
@@ -60,9 +65,6 @@ def register():
 
 
 def unregister():
-    from .sculpt import brush_runtime
-    if brush_runtime is not None:
-        brush_runtime.exit(bpy.context)
     unregister_module()
 
     bpy.msgbus.clear_by_owner(owner)
@@ -71,3 +73,4 @@ def unregister():
         bpy.app.timers.unregister(update_bbrush_mode)
     if bpy.app.timers.is_registered(update_depth_map):
         bpy.app.timers.unregister(update_depth_map)
+    bpy.app.handlers.load_post.remove(load_post)
