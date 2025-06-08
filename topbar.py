@@ -25,17 +25,16 @@ def top_bar_draw(self, context):
         sub_row = layout.row(align=True)
         sub_row.separator(factor=2)
 
-        if not pref.always_use_bbrush_sculpt_mode:
-            ss = sub_row.row(align=True)
-            ss.alignment = "CENTER"
-            if is_bbrush_mode:
-                # ss.scale_x = 1.5
-                ss.alert = is_bbrush_mode
+        ss = sub_row.row(align=True)
+        ss.alignment = "CENTER"
+        if is_bbrush_mode:
+            # ss.scale_x = 1.5
+            ss.alert = is_bbrush_mode
 
-            ss.operator(BBrushSculpt.bl_idname, text=get_top_bar_text(pref, is_bbrush_mode),
-                        icon="SCULPTMODE_HLT").is_exit = is_bbrush_mode
-            if not is_bbrush_mode:
-                ss.separator()
+        ss.operator(BBrushSculpt.bl_idname, text=get_top_bar_text(pref, is_bbrush_mode),
+                    icon="SCULPTMODE_HLT").is_exit = is_bbrush_mode
+        if not is_bbrush_mode:
+            ss.separator()
 
         if is_bbrush_mode:
             sub_row.prop(pref, "always_use_bbrush_sculpt_mode", emboss=True, icon="AUTO", text="")
