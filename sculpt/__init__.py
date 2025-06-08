@@ -52,8 +52,8 @@ class BBrushSculpt(
                 self.is_exit = False
         brush_runtime = self
 
-        self.start(context)
-        self.update_brush_shelf(context, event)
+        # self.start(context)
+        # self.update_brush_shelf(context, event)
         context.window_manager.modal_handler_add(self)
         return {"RUNNING_MODAL"}
 
