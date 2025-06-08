@@ -1,6 +1,8 @@
 import bpy
 from mathutils import Vector
 
+from . import check_runtime_and_fix
+
 
 class ScaleOperator:
     bl_options = {"REGISTER"}
@@ -22,6 +24,7 @@ class ScaleOperator:
         return x, y
 
     def invoke(self, context, event):
+        check_runtime_and_fix()
         self.start_mouse = Vector((event.mouse_region_x, event.mouse_region_y))
         self.start_scale = self.get_start_scale()
 
@@ -29,6 +32,7 @@ class ScaleOperator:
         return {"RUNNING_MODAL"}
 
     def modal(self, context, event):
+        check_runtime_and_fix()
         from . import refresh_ui
         if event.value == "RELEASE":
             context.area.header_text_set(None)

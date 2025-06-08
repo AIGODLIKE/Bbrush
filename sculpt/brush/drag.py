@@ -13,6 +13,7 @@ from ...utils import (
     check_mouse_in_model,
     check_mouse_in_depth_map_area,
     check_mouse_in_shortcut_key_area,
+    check_runtime_and_fix,
     check_area_in_model,
     get_brush_shape,
     get_active_tool,
@@ -376,11 +377,12 @@ class DragBase(DragDraw):
 def mouse_offset_compensation(context, event):
     """偏移补偿         在鼠标放在模型边缘的时候会出现不跟手的情况 对其进行优化"""
     pref = get_pref()
-    from .. import brush_runtime
-    now_mouse = Vector((event.mouse_x, event.mouse_y))
-    left = brush_runtime.left_mouse
-    offset_mouse = (left - now_mouse) * pref.drag_offset_compensation + left
-    context.window.cursor_warp(int(offset_mouse.x), int(offset_mouse.y))
+    if pref.enabled_drag_offset_compensation:
+        from .. import brush_runtime
+        now_mouse = Vector((event.mouse_x, event.mouse_y))
+        left = brush_runtime.left_mouse
+        offset_mouse = (left - now_mouse) * pref.drag_offset_compensation + left
+        context.window.cursor_warp(int(offset_mouse.x), int(offset_mouse.y))
 
 
 class BrushDrag(bpy.types.Operator, DragBase):
@@ -463,6 +465,7 @@ class BrushDrag(bpy.types.Operator, DragBase):
         is_in_modal = check_mouse_in_model(context, event)
         active_tool = ToolSelectPanelHelper.tool_active_from_context(bpy.context)
 
+        check_runtime_and_fix()
         print(self.bl_label, is_in_modal, self.brush_mode, active_tool.idname)
 
         if self.__class__.draw_handle is not None:
@@ -507,6 +510,7 @@ class BrushDrag(bpy.types.Operator, DragBase):
         """        拖动的时候不在模型上拖,执行其它操作        """
         # print("drag_event", self.shape, self.is_reverse, len(self.mouse_route), len(self.mouse_route_convex_shell),
         #       event.value, event.type)
+        check_runtime_and_fix()
 
         self.is_reverse = event.alt
 

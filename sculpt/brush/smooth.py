@@ -9,6 +9,7 @@ class BrushSmooth(bpy.types.Operator):
     bl_options = {'REGISTER'}
 
     def invoke(self, context, event):
+        check_runtime_and_fix()
         is_in_modal = check_mouse_in_model(context, event)
         print(context, event, self.bl_label, is_in_modal)
         if not is_in_modal:
