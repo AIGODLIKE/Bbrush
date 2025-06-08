@@ -31,6 +31,8 @@ class Preferences(
         name="Depth ray check size(px)",
         description="Check if the mouse is placed over the model, mouse cursor range size", default=100, min=10,
         max=300)
+
+    enabled_drag_offset_compensation: bpy.props.FloatProperty(name="Enabled drag offset compensation", default=True)
     drag_offset_compensation: bpy.props.FloatProperty(
         name="Drag Offset Compensation",
         description="Compensate for mouse position movement during drawing",
@@ -50,6 +52,7 @@ class Preferences(
         box.label(text="Sculpt")
         box.prop(self, "always_use_bbrush_sculpt_mode")
         box.prop(self, "depth_ray_size")
+        box.prop(self, "enabled_drag_offset_compensation")
         box.prop(self, "drag_offset_compensation")
 
         if self.always_use_bbrush_sculpt_mode:

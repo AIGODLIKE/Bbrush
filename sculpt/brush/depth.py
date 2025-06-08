@@ -1,7 +1,7 @@
 import bpy
 from mathutils import Vector
 
-from ...utils import get_pref, check_mouse_in_depth_map_area
+from ...utils import get_pref, check_mouse_in_depth_map_area,check_runtime_and_fix
 from ...utils.class_template import ScaleOperator, MoveOperator
 
 

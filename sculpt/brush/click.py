@@ -1,6 +1,6 @@
 import bpy
 
-from ...utils import check_mouse_in_model
+from ...utils import check_mouse_in_model, check_runtime_and_fix
 
 
 class BrushClick(bpy.types.Operator):
@@ -14,6 +14,7 @@ class BrushClick(bpy.types.Operator):
         return brush_runtime is not None
 
     def invoke(self, context, event):
+        check_runtime_and_fix()
         from .. import brush_runtime
         is_in_modal = check_mouse_in_model(context, event)
         if brush_runtime.brush_mode == "MASK":

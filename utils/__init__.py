@@ -200,6 +200,13 @@ def check_mouse_in_shortcut_key_area(event) -> bool:
     )
 
 
+def check_runtime_and_fix():
+    """部分情况下会炸,比如 在运行时拖动重新安装"""
+    from ..sculpt import brush_runtime, BBrushSculpt
+    if brush_runtime:
+        BBrushSculpt.toggle_object_mode()
+
+
 def is_bbruse_mode() -> bool:
     """检查是否在BBrush模式"""
     from ..sculpt import brush_runtime
