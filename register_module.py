@@ -41,7 +41,7 @@ def refresh_subscribe():
 
 
 @persistent
-def load_post(a, b):
+def load_post(args):
     refresh_subscribe()
     sculpt.BBrushSculpt.toggle_object_mode()
 
