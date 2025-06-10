@@ -136,5 +136,8 @@ data = {
     "Drag offset compensation": "拖动偏移补偿",
     "View preferences used when entering Bbrush mode": "进入Bbrush模式时使用的视图偏好设置",
     "Enabled drag offset compensation": "启用拖动偏移补偿",
-    "Do not reinstall or upgrade this plugin in Bbrush mode!": "请不要在Bbrush模式下进行重新安装或升级此插件!"
+    "Do not reinstall or upgrade this plugin in Bbrush mode!": "请不要在Bbrush模式下进行重新安装或升级此插件!",
+    "Use view pref": "使用视图偏好设置",
+    "BBrush fix": "BBrush 修复",
+    "Fix Bbrush error": "修复Bbrush错误",
 }

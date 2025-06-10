@@ -6,25 +6,30 @@ import bpy
 
 brush_key_path = join(dirname(dirname(__file__)), "src", "key", "BBrush.py")
 
+last_key_path = None
+
 
 class BrushKey:
-    last_key_path = None
-
     preset_subdir = "keyconfig"
     preset_operator = "preferences.keyconfig_activate"
 
     def start_key(self, context):
         """src/key/BBrush.py"""
+        global last_key_path
+
         last_key = context.window_manager.keyconfigs.active.name
-        self.last_key_path = self.get_key_preset_path(last_key)
-        print("last_key_path", self.last_key_path)
+        last_key_path = self.get_key_preset_path(last_key)
+        # print("last_key_path", last_key_path)
         bpy.ops.preferences.keyconfig_import("EXEC_DEFAULT", filepath=brush_key_path, keep_original=True)
 
-    def restore_key(self, context):
+    @staticmethod
+    def restore_key():
+        global last_key_path
+
         bpy.ops.wm.keyconfig_preset_remove("EXEC_DEFAULT", name="BBrush", remove_name=True)
-        if self.last_key_path:
+        if last_key_path:
             try:
-                bpy.ops.preferences.keyconfig_activate("EXEC_DEFAULT", filepath=self.last_key_path)
+                bpy.ops.preferences.keyconfig_activate("EXEC_DEFAULT", filepath=last_key_path)
             except Exception as e:
                 print("Error", e.args)
         else:

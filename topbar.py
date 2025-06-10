@@ -13,7 +13,7 @@ def get_top_bar_text(pref, is_bbrush_mode):
 
 
 def top_bar_draw(self, context):
-    from .sculpt import BBrushSculpt
+    from .sculpt import BBrushSculpt, FixBbrushError
     pref = get_pref()
 
     layout = self.layout
@@ -22,25 +22,27 @@ def top_bar_draw(self, context):
 
     if context.mode == "SCULPT":
 
-        sub_row = layout.row(align=True)
-        sub_row.separator(factor=2)
+        row = layout.row(align=True)
+        row.separator(factor=2)
 
-        ss = sub_row.row(align=True)
-        ss.alignment = "CENTER"
+        sub_row = row.row(align=True)
+        sub_row.alignment = "CENTER"
         if is_bbrush_mode:
-            # ss.scale_x = 1.5
-            ss.alert = is_bbrush_mode
+            # sub_row.scale_x = 1.5
+            sub_row.alert = is_bbrush_mode
 
-        ss.operator(BBrushSculpt.bl_idname, text=get_top_bar_text(pref, is_bbrush_mode),
+        sub_row.operator(BBrushSculpt.bl_idname, text=get_top_bar_text(pref, is_bbrush_mode),
                     icon="SCULPTMODE_HLT").is_exit = is_bbrush_mode
         if not is_bbrush_mode:
-            ss.separator()
+            FixBbrushError.draw_button(row)
+            row.separator()
 
         if is_bbrush_mode:
-            sub_row.prop(pref, "always_use_bbrush_sculpt_mode", emboss=True, icon="AUTO", text="")
+            row.prop(pref, "always_use_bbrush_sculpt_mode", emboss=True, icon="AUTO", text="")
 
             row = layout.row(align=True)
             row.prop(pref, "show_shortcut_keys", emboss=True, icon="EVENT_K", text="")
+            FixBbrushError.draw_button(row)
             text = "Silhouette Mode" if pref.top_bar_show_text else ""
             row.prop(pref, "depth_display_mode", emboss=True, text=text)
             row.separator(factor=5)

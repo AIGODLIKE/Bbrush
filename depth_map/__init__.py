@@ -24,7 +24,6 @@ def check_is_draw(context):
 
 
 def draw_depth():
-    from ..sculpt import brush_runtime
     global depth_buffer_check
 
     context = bpy.context
@@ -34,8 +33,18 @@ def draw_depth():
     # gpu.state.depth_test_set("ALWAYS")  # NONE, ALWAYS, LESS, LESS_EQUAL, EQUAL, GREATER and GREATER_EQUAL
     # gpu.state.depth_mask_set(False)
 
-    if brush_runtime is not None:
-        brush_runtime.draw_shortcut_key()
+    try:
+        from ..sculpt import brush_runtime
+        if brush_runtime is not None:
+            brush_runtime.draw_shortcut_key()
+    except ReferenceError as e:
+        from ..sculpt import fix_bbrush_error
+        fix_bbrush_error()
+
+        import traceback
+        traceback.print_exc()
+        traceback.print_stack()
+        print(e.args)
 
     if check_is_draw(context):
         filling_data(context)

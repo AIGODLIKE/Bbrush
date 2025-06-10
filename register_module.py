@@ -34,6 +34,7 @@ def load_subscribe():
         options={"PERSISTENT"}
     )
 
+
 def refresh_subscribe():
     bpy.msgbus.clear_by_owner(owner)
     load_subscribe()
@@ -50,6 +51,9 @@ def update_depth_map():
     context = bpy.context
     pref = get_pref()
     if not is_bbruse_mode():
+        if context.window_manager.keyconfigs.active.name == "BBrush":
+            bpy.ops.wm.keyconfig_preset_remove("EXEC_DEFAULT", name="BBrush", remove_name=True)
+
         if pref.depth_display_mode in ("ALWAYS_DISPLAY", "ONLY_SCULPT") and depth_map.check_is_draw(context):
             depth_map.gpu_buffer.clear_cache()
     return pref.depth_refresh_interval
@@ -65,6 +69,9 @@ def register():
 
 
 def unregister():
+    sculpt.fix_bbrush_error()
+    sculpt.BBrushSculpt.restore_key()
+
     unregister_module()
 
     bpy.msgbus.clear_by_owner(owner)

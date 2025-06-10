@@ -74,14 +74,10 @@ class ShortcutKey:
         return [{"doc": "EMM Test"}, ]
 
     def start_shortcut_key(self):
-        space = bpy.types.SpaceView3D
-        # self.shortcut_key_handle = space.draw_handler_add(self.draw_shortcut_key, (), 'WINDOW', 'POST_PIXEL')
         self.shortcut_key_points = ((0, 0), (0, 0))
 
     def stop_shortcut_key(self, ):
         self.shortcut_key_points = None
-        # if handle := self.shortcut_key_handle:
-        #     bpy.types.SpaceView3D.draw_handler_remove(handle, 'WINDOW')
 
     def draw_shortcut_key(self):
         pref = get_pref()

@@ -15,18 +15,18 @@ class BrushHandle:
             return True
         elif context.mode != "SCULPT":
             return True
-
         return False
 
     def exit(self, context):
         """退出Bbrush模式"""
 
+        self.restore_key()
         self.restore_brush_shelf(context)
-        self.restore_key(context)
         self.restore_view_property(context)
 
         self.refresh_ui(context)
 
+        bpy.ops.wm.redraw_timer(type='DRAW', iterations=1)
         return {"FINISHED"}
 
     def cancel(self, context):
