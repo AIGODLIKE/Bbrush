@@ -498,6 +498,8 @@ class BrushDrag(bpy.types.Operator, DragBase):
             else:
                 if event.alt:
                     bpy.ops.view3d.move("INVOKE_DEFAULT")  # 平移视图
+                elif event.ctrl:
+                    bpy.ops.view3d.zoom("INVOKE_DEFAULT")  #
                 else:
                     bpy.ops.view3d.rotate("INVOKE_DEFAULT")  # 旋转视图
                 return {"FINISHED"}
@@ -546,7 +548,7 @@ class BrushDrag(bpy.types.Operator, DragBase):
         refresh_ui(context)
         return {"RUNNING_MODAL"}
 
-    def polyline_update(self, context, event):
+    def polyline_update(self, context, event) -> "set|None":
         is_press = event.value == "PRESS"
 
         is_left = event.type == "LEFTMOUSE"
@@ -569,3 +571,4 @@ class BrushDrag(bpy.types.Operator, DragBase):
             else:
                 self.exit(context, event)
                 return {'CANCELLED'}
+        return None

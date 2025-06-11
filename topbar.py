@@ -13,7 +13,7 @@ def get_top_bar_text(pref, is_bbrush_mode):
 
 
 def top_bar_draw(self, context):
-    from .sculpt import BBrushSculpt, FixBbrushError
+    from .sculpt import FixBbrushError, BbrushExit, BbrushStart
     pref = get_pref()
 
     layout = self.layout
@@ -31,8 +31,10 @@ def top_bar_draw(self, context):
             # sub_row.scale_x = 1.5
             sub_row.alert = is_bbrush_mode
 
-        sub_row.operator(BBrushSculpt.bl_idname, text=get_top_bar_text(pref, is_bbrush_mode),
-                    icon="SCULPTMODE_HLT").is_exit = is_bbrush_mode
+        operator = BbrushExit.bl_idname if is_bbrush_mode else BbrushStart.bl_idname
+
+        sub_row.operator(operator, text=get_top_bar_text(pref, is_bbrush_mode), icon="SCULPTMODE_HLT")
+        
         if not is_bbrush_mode:
             FixBbrushError.draw_button(row)
             row.separator()

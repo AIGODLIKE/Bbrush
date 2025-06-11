@@ -135,6 +135,6 @@ def draw_gpu_buffer(context, depth_buffer):
         blf.draw(font_id, "Drag Depth Map Error")
 
 
-def clear_cache():
+def clear_gpu_cache():
     global gpu_cache
     gpu_cache.clear()

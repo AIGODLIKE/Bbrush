@@ -22,7 +22,7 @@ def update_bbrush_mode():
     在切换模式的时候
     在启动Blender的时候
     """
-    sculpt.BBrushSculpt.toggle_object_mode()
+    sculpt.try_start_bbrush_mode()
 
 
 def load_subscribe():
@@ -43,7 +43,7 @@ def refresh_subscribe():
 @persistent
 def load_post(args):
     refresh_subscribe()
-    sculpt.BBrushSculpt.toggle_object_mode()
+    sculpt.try_start_bbrush_mode()
 
 
 def update_depth_map():
@@ -54,8 +54,8 @@ def update_depth_map():
         if context.window_manager.keyconfigs.active.name == "BBrush":
             bpy.ops.wm.keyconfig_preset_remove("EXEC_DEFAULT", name="BBrush", remove_name=True)
 
-        if pref.depth_display_mode in ("ALWAYS_DISPLAY", "ONLY_SCULPT") and depth_map.check_is_draw(context):
-            depth_map.gpu_buffer.clear_cache()
+        if pref.depth_display_mode in ("ALWAYS_DISPLAY", "ONLY_SCULPT") and depth_map.check_depth_map_is_draw(context):
+            depth_map.gpu_buffer.clear_gpu_cache()
     return pref.depth_refresh_interval
 
 
@@ -70,7 +70,7 @@ def register():
 
 def unregister():
     sculpt.fix_bbrush_error()
-    sculpt.BBrushSculpt.restore_key()
+    sculpt.BbrushExit.exit(bpy.context)
 
     unregister_module()
 

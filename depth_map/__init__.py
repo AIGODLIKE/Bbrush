@@ -13,7 +13,7 @@ depth_buffer_check = {
 }
 
 
-def check_is_draw(context):
+def check_depth_map_is_draw(context):
     pref = get_pref()
     mode = pref.depth_display_mode
     is_sculpt = context.mode == "SCULPT"
@@ -25,18 +25,13 @@ def check_is_draw(context):
 
 def draw_depth():
     global depth_buffer_check
-
     context = bpy.context
-
-    # gpu.state.blend_set("NONE")
-    # NONE, ALPHA, ALPHA_PREMULT, ADDITIVE, ADDITIVE_PREMULT, MULTIPLY, SUBTRACT, INVERT,
-    # gpu.state.depth_test_set("ALWAYS")  # NONE, ALWAYS, LESS, LESS_EQUAL, EQUAL, GREATER and GREATER_EQUAL
-    # gpu.state.depth_mask_set(False)
 
     try:
         from ..sculpt import brush_runtime
-        if brush_runtime is not None:
-            brush_runtime.draw_shortcut_key()
+        from ..sculpt.shortcut_key import ShortcutKey
+        if is_bbruse_mode():
+            ShortcutKey.draw_shortcut_key()
     except ReferenceError as e:
         from ..sculpt import fix_bbrush_error
         fix_bbrush_error()
@@ -46,7 +41,7 @@ def draw_depth():
         traceback.print_stack()
         print(e.args)
 
-    if check_is_draw(context):
+    if check_depth_map_is_draw(context):
         filling_data(context)
 
         if draw_error := draw_gpu_buffer(context, depth_buffer_check):

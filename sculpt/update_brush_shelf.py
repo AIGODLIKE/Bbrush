@@ -4,6 +4,7 @@ from bl_ui.space_toolsystem_toolbar import VIEW3D_PT_tools_active
 from bpy.utils.toolsystem import ToolDef
 
 from .brush import other
+from ..debug import DEBUG_UPDATE_BRUSH_SHELF
 from ..utils import refresh_ui, get_active_tool
 
 active_brush_toolbar = {  # 记录活动笔刷的名称
@@ -66,10 +67,9 @@ def tool_ops(tools):
             brush_shelf["SCULPT"].append(tool)
 
 
-
 BRUSH_SHELF_MODE = {
     # list(itertools.product(a,a,a))
-    # (ctrl,alt,shift):SHELF_MODE
+    # (ctrl, alt, shift): SHELF_MODE
     (True, True, True): "HIDE",
     (True, False, True): "HIDE",
 
@@ -92,54 +92,60 @@ def set_brush_shelf(shelf_mode):
         tol._tools["SCULPT"] = shelf
 
 
-class SwitchBrushShelf:
+class UpdateBrushShelf(bpy.types.Operator):
+    bl_idname = "sculpt.bbursh_update_brush_shelf"
+    bl_label = "Update Brush Shelf"
+
+    def invoke(self, context, event):
+        self.update_brush_shelf(context, event)
+        return {"PASS_THROUGH", "FINISHED"}
+
     # SCULPT,SMOOTH,HIDE,MASK,ORIGINAL
-    brush_mode = "NONE"
+    brush_shelf_mode = "NONE"
 
-    @staticmethod
-    def refresh_ui(context):
-        refresh_ui(context)
-
-    def update_brush_shelf(self, context, event):
+    @classmethod
+    def update_brush_shelf(cls, context, event):
         """更新笔刷资产架"""
         if context.space_data is None:
             # 可能在切换窗口
             # return
             ...
-
-        # print("update_brush_shelf", self.bl_idname, event.value, event.type)
+        if DEBUG_UPDATE_BRUSH_SHELF:
+            print("update_brush_shelf", cls.bl_idname, event.value, event.type)
 
         key = (event.ctrl, event.alt, event.shift)
         mode = BRUSH_SHELF_MODE[key]  # 使用组合键来确认是否需要更新笔刷工具架
 
-        (active_tool, WorkSpaceTool, index) = get_active_tool(context)
+        (active_tool, work_space_tool, index) = get_active_tool(context)
 
-        if mode != self.brush_mode:
-
+        if mode != cls.brush_shelf_mode:
             if active_tool:
-                active_brush_toolbar[self.brush_mode] = active_tool.idname
-
+                active_brush_toolbar[cls.brush_shelf_mode] = active_tool.idname
             set_brush_shelf(mode)
+            cls.brush_shelf_mode = mode
+            refresh_ui(context)
 
-            self.brush_mode = mode
-            self.refresh_ui(context)
-
-        (active_tool, WorkSpaceTool, index) = get_active_tool(context)
-        if WorkSpaceTool is None:
+        (active_tool, work_space_tool, index) = get_active_tool(context)
+        if work_space_tool is None:
             tool = active_brush_toolbar[mode]
-            cls = ToolSelectPanelHelper._tool_class_from_space_type("VIEW_3D")
-            (item, index) = cls._tool_get_by_id(context, tool)
-
+            cls_helper = ToolSelectPanelHelper._tool_class_from_space_type("VIEW_3D")
+            (item, index) = cls_helper._tool_get_by_id(context, tool)
             if item:
                 res = activate_by_id(context, "VIEW_3D", tool)
                 # if res:
                 #     bpy.ops.wm.tool_set_by_id(name=tool)
 
-    def restore_brush_shelf(self, context):
+        from . import brush_runtime
+        brush_runtime.brush_mode = mode
+
+    @staticmethod
+    def restore_brush_shelf(context):
         """恢复笔刷工具架"""
         set_brush_shelf("ORIGINAL")
-        self.refresh_ui(context)
+        refresh_ui(context)
         brush_shelf.clear()
+        if DEBUG_UPDATE_BRUSH_SHELF:
+            print("restore_brush_shelf")
 
     @staticmethod
     def start_brush_shelf(context):
@@ -164,3 +170,6 @@ class SwitchBrushShelf:
             other.circular_hide,
             other.ellipse_hide,
         ))
+
+        if DEBUG_UPDATE_BRUSH_SHELF:
+            print("start_brush_shelf")

@@ -1,6 +1,6 @@
 import bpy
 
-from ...utils import check_mouse_in_model
+from ...utils import check_mouse_in_model, check_runtime_and_fix
 
 
 class BrushSmooth(bpy.types.Operator):
