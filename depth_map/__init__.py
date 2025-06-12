@@ -30,10 +30,10 @@ def draw_depth():
 
     try:
 
-        region_3d = context.space_data.region_3d
-        view_matrix = region_3d.view_matrix
+        # region_3d = context.space_data.region_3d
+        # view_matrix = region_3d.view_matrix
+        # print(view_matrix)
 
-        print(view_matrix)
         from ..sculpt import brush_runtime
         from ..sculpt.shortcut_key import ShortcutKey
         if is_bbruse_mode():

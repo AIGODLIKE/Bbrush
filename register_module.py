@@ -64,7 +64,6 @@ def load_post(args):
 
 @persistent
 def depsgraph_update_post(a, b):
-    print(bpy.context.window.modal_operators)
     ...
 
 
