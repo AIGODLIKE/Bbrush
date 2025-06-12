@@ -152,6 +152,7 @@ def find_mouse_in_area(context, event) -> "bpy.types.Area|None":
         aw = xy + Vector((area.width, area.height)).freeze()
         if xy.x < mouse.x < aw.x and xy.y < mouse.y < aw.y:
             return area
+    return None
 
 
 def check_mouse_in_3d_area(context, event) -> bool:
@@ -202,13 +203,6 @@ def check_mouse_in_shortcut_key_area(event) -> bool:
             brush_runtime.shortcut_key_points and
             mouse_in_area_point_in(event, brush_runtime.shortcut_key_points)
     )
-
-
-def check_runtime_and_fix():
-    """部分情况下会炸,比如 在运行时拖动重新安装"""
-    from ..sculpt import brush_runtime, try_toggle_bbrush_mode
-    if brush_runtime:
-        try_toggle_bbrush_mode()
 
 
 def is_bbruse_mode() -> bool:

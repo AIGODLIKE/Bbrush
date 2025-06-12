@@ -35,7 +35,7 @@ class BrushShortcutKeyMove(bpy.types.Operator, MoveOperator):
     @classmethod
     def poll(cls, context):
         pref = get_pref()
-        return pref.show_shortcut_keys and pref.shortcut_key_portability
+        return pref.show_shortcut_keys and pref.shortcut_key_portability and super().poll(context)
 
     def get_start_offset(self) -> Vector:
         return Vector(get_pref().shortcut_offset)

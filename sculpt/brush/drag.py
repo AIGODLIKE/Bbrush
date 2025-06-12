@@ -9,20 +9,21 @@ from gpu_extras.batch import batch_for_shader
 from mathutils import Vector
 
 from ...adapter import sculpt_invert_hide_face
+from ...debug import DEBUG_DRAG
 from ...utils import (
     check_mouse_in_model,
     check_mouse_in_depth_map_area,
     check_mouse_in_shortcut_key_area,
-    check_runtime_and_fix,
     check_area_in_model,
     get_brush_shape,
     get_active_tool,
     refresh_ui,
     line_to_convex_shell,
     get_pref,
+    is_bbruse_mode,
 )
 from ...utils.gpu import draw_text, draw_line, draw_smooth_line
-from ...debug import DEBUG_DRAG
+
 
 def lasso_mask(lasso_path, value, use_front_faces_only):
     path = [{
@@ -459,13 +460,16 @@ class BrushDrag(bpy.types.Operator, DragBase):
 
         return {'RUNNING_MODAL'}
 
+    @classmethod
+    def poll(cls, context):
+        return is_bbruse_mode()
+
     def invoke(self, context, event):
         from .shortcut_key import BrushShortcutKeyScale
         from .. import brush_runtime
         is_in_modal = check_mouse_in_model(context, event)
         active_tool = ToolSelectPanelHelper.tool_active_from_context(bpy.context)
 
-        check_runtime_and_fix()
         if DEBUG_DRAG:
             print(self.bl_idname, is_in_modal, self.brush_mode, active_tool.idname)
 
@@ -513,7 +517,6 @@ class BrushDrag(bpy.types.Operator, DragBase):
         """        拖动的时候不在模型上拖,执行其它操作        """
         # print("drag_event", self.shape, self.is_reverse, len(self.mouse_route), len(self.mouse_route_convex_shell),
         #       event.value, event.type)
-        check_runtime_and_fix()
 
         self.is_reverse = event.alt
 

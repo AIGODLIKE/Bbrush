@@ -43,6 +43,8 @@ keyconfig_version = (4, 4, 32)
 keyconfig_data = [
     ("Sculpt", {"space_type": "EMPTY", "region_type": "WINDOW"}, {
         "items": [
+            ("object.transfer_mode", {"type": "LEFTMOUSE", "value": "RELEASE", "alt": True}, None),
+
             ("sculpt.bbrush_depth_move", {"type": "RIGHTMOUSE", "value": "CLICK_DRAG"}, None),
             ("sculpt.bbrush_shortcut_key_move", {"type": "RIGHTMOUSE", "value": "CLICK_DRAG"}, None),
 
@@ -51,7 +53,6 @@ keyconfig_data = [
             ("sculpt.bbrush_click", {"type": "LEFTMOUSE", "value": "CLICK", "any": True}, None),
             ("sculpt.bbrush_drag", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "any": True}, None),
 
-            ("object.transfer_mode", {"type": "LEFTMOUSE", "value": "CLICK", "alt": True}, None),
             ("wm.call_panel", {"type": "RIGHTMOUSE", "value": "CLICK"},
              {"properties": [("name", "VIEW3D_PT_sculpt_context_menu"), ]}),
             ("view3d.rotate", {"type": "RIGHTMOUSE", "value": "CLICK_DRAG"}, None),

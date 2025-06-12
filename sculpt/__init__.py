@@ -37,10 +37,8 @@ class BbrushStart(bpy.types.Operator):
             return {"CANCELLED"}
 
         self.start(context, event)
-        return self.execute(context)
-
-    def execute(self, context):
         return {"FINISHED"}
+
 
     @staticmethod
     def start(context, event):
@@ -95,9 +93,6 @@ class BbrushExit(bpy.types.Operator):
 
         refresh_ui(context)
 
-        # if bpy.ops.wm.redraw_timer.poll():
-        #     bpy.ops.wm.redraw_timer(type='DRAW', iterations=1)
-
 
 class FixBbrushError(bpy.types.Operator):
     bl_idname = "sculpt.bbrush_fix"
@@ -124,8 +119,6 @@ class LeftMouse(bpy.types.Operator):
     bl_description = "LeftMouse"
     bl_options = {"REGISTER"}
 
-    is_run = None
-
     @classmethod
     def poll(cls, context):
         return is_bbruse_mode()
@@ -133,36 +126,22 @@ class LeftMouse(bpy.types.Operator):
     def invoke(self, context, event):
         global brush_runtime
 
-        if LeftMouse.is_run:
-            return {"FINISHED", "PASS_THROUGH"}
-
-        if event.value == "PRESS" and event.type == "LEFTMOUSE":
-            brush_runtime.left_mouse = Vector((event.mouse_x, event.mouse_y))
-        if DEBUG_LEFT_MOUSE:
-            print(self.bl_idname, event.value, event.type, "\t", event.value_prev, event.type_prev)
-
-        LeftMouse.is_run = True
-        context.window_manager.modal_handler_add(self)
-        return {"RUNNING_MODAL", "PASS_THROUGH"}
-
-    def modal(self, context, event: "bpy.types.Event"):
-        if DEBUG_LEFT_MOUSE:
-            print("\t modal", event.value, event.type, "\t", event.value_prev, event.type_prev)
-
-        if event.value == "RELEASE" or event.value_prev == "RELEASE":
-            refresh_depth_map()
-
-        is_release_leftmouse = event.value == "RELEASE" and event.type == "LEFTMOUSE"
+        is_leftmouse = event.type == "LEFTMOUSE"
+        is_release = event.value == "RELEASE"
+        is_press = event.value == "PRESS"
         is_release_leftmouse_prev = event.value_prev == "RELEASE" and event.type_prev == "LEFTMOUSE"
-        if is_release_leftmouse:
-            bpy.ops.sculpt.bbrush_click("INVOKE_DEFAULT")
-        if is_release_leftmouse or is_release_leftmouse_prev:
+
+        if is_press and is_leftmouse:
+            brush_runtime.left_mouse = Vector((event.mouse_x, event.mouse_y))
+        if is_release_leftmouse_prev or event.value == "RELEASE" or event.value_prev == "RELEASE":
             refresh_depth_map()
-            if DEBUG_LEFT_MOUSE:
-                print("exit leftmouse")
+        if is_release and is_leftmouse:
+            bpy.ops.sculpt.bbrush_click("INVOKE_DEFAULT")
             LeftMouse.is_run = None
-            return {"PASS_THROUGH", "FINISHED"}
-        return {"PASS_THROUGH"}
+
+        if DEBUG_LEFT_MOUSE:
+            print("left mouse", "\t", event.value, event.type, "\t", event.value_prev, event.type_prev)
+        return {"FINISHED", "PASS_THROUGH"}
 
 
 def refresh_depth_map():

@@ -1,14 +1,17 @@
 import bpy
 from mathutils import Vector
 
-from . import check_runtime_and_fix
-
 
 class ScaleOperator:
     bl_options = {"REGISTER"}
 
     start_mouse = None
     start_scale = None
+
+    @classmethod
+    def poll(cls, context):
+        from . import is_bbruse_mode
+        return is_bbruse_mode()
 
     def get_start_scale(self) -> float:
         return 0
@@ -24,7 +27,6 @@ class ScaleOperator:
         return x, y
 
     def invoke(self, context, event):
-        check_runtime_and_fix()
         self.start_mouse = Vector((event.mouse_region_x, event.mouse_region_y))
         self.start_scale = self.get_start_scale()
 
@@ -32,7 +34,6 @@ class ScaleOperator:
         return {"RUNNING_MODAL"}
 
     def modal(self, context, event):
-        check_runtime_and_fix()
         from . import refresh_ui
         if event.value == "RELEASE":
             context.area.header_text_set(None)
@@ -48,15 +49,17 @@ class ScaleOperator:
         refresh_ui(context)
         return {"RUNNING_MODAL"}
 
-    def execute(self, context):
-        return {"PASS_THROUGH"}
-
 
 class MoveOperator:
     bl_options = {"REGISTER"}
 
     start_mouse = None
     start_offset = None
+
+    @classmethod
+    def poll(cls, context):
+        from . import is_bbruse_mode
+        return is_bbruse_mode()
 
     def get_start_offset(self) -> Vector:
         return Vector((0, 0))
@@ -94,6 +97,3 @@ class MoveOperator:
 
         refresh_ui(context)
         return {"RUNNING_MODAL"}
-
-    def execute(self, context):
-        return {"PASS_THROUGH"}
