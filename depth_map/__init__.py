@@ -33,8 +33,8 @@ def draw_depth():
         if is_bbruse_mode():
             ShortcutKey.draw_shortcut_key()
     except ReferenceError as e:
-        from ..sculpt import fix_bbrush_error
-        fix_bbrush_error()
+        from ..sculpt import BbrushExit
+        BbrushExit.exit(context)
 
         import traceback
         traceback.print_exc()

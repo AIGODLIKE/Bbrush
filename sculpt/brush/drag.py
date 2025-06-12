@@ -22,7 +22,7 @@ from ...utils import (
     get_pref,
 )
 from ...utils.gpu import draw_text, draw_line, draw_smooth_line
-
+from ...debug import DEBUG_DRAG
 
 def lasso_mask(lasso_path, value, use_front_faces_only):
     path = [{
@@ -466,7 +466,8 @@ class BrushDrag(bpy.types.Operator, DragBase):
         active_tool = ToolSelectPanelHelper.tool_active_from_context(bpy.context)
 
         check_runtime_and_fix()
-        print(self.bl_label, is_in_modal, self.brush_mode, active_tool.idname)
+        if DEBUG_DRAG:
+            print(self.bl_idname, is_in_modal, self.brush_mode, active_tool.idname)
 
         if self.__class__.draw_handle is not None:
             return {"FINISHED"}

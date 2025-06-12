@@ -18,19 +18,19 @@ params = blender_default.Params()
 sculpt_keymap = blender_default.km_sculpt(params)
 
 mask_keys = [
-    ("sculpt.mask_filter", {"type": "NUMPAD_PLUS", "value": "PRESS", },
+    ("sculpt.mask_filter", {"type": "NUMPAD_PLUS", "value": "PRESS", "ctrl": True},
      {"properties": [("filter_type", "GROW"), ("auto_iteration_count", True)]}),
-    ("sculpt.mask_filter", {"type": "NUMPAD_MINUS", "value": "PRESS", },
+    ("sculpt.mask_filter", {"type": "NUMPAD_MINUS", "value": "PRESS", "ctrl": True},
      {"properties": [("filter_type", "SHRINK"), ("auto_iteration_count", True)]}),
 
-    ("sculpt.mask_filter", {"type": "UP_ARROW", "value": "PRESS", },
+    ("sculpt.mask_filter", {"type": "UP_ARROW", "value": "PRESS", "ctrl": True},
      {"properties": [("filter_type", "CONTRAST_INCREASE"), ("auto_iteration_count", True)]}),
-    ("sculpt.mask_filter", {"type": "NUMPAD_ASTERIX", "value": "PRESS", },
+    ("sculpt.mask_filter", {"type": "NUMPAD_ASTERIX", "value": "PRESS", "ctrl": True},
      {"properties": [("filter_type", "CONTRAST_INCREASE"), ("auto_iteration_count", True)]}),
 
-    ("sculpt.mask_filter", {"type": "DOWN_ARROW", "value": "PRESS", },
+    ("sculpt.mask_filter", {"type": "DOWN_ARROW", "value": "PRESS", "ctrl": True},
      {"properties": [("filter_type", "CONTRAST_DECREASE"), ("auto_iteration_count", True)]}),
-    ("sculpt.mask_filter", {"type": "NUMPAD_SLASH", "value": "PRESS", },
+    ("sculpt.mask_filter", {"type": "NUMPAD_SLASH", "value": "PRESS", "ctrl": True},
      {"properties": [("filter_type", "CONTRAST_DECREASE"), ("auto_iteration_count", True)]}),
 ]
 update_brush_shelf_keys = [

@@ -110,11 +110,12 @@ class UpdateBrushShelf(bpy.types.Operator):
             # 可能在切换窗口
             # return
             ...
-        if DEBUG_UPDATE_BRUSH_SHELF:
-            print("update_brush_shelf", cls.bl_idname, event.value, event.type)
 
         key = (event.ctrl, event.alt, event.shift)
         mode = BRUSH_SHELF_MODE[key]  # 使用组合键来确认是否需要更新笔刷工具架
+
+        if DEBUG_UPDATE_BRUSH_SHELF:
+            print(cls.bl_idname, "\t", mode, "\t", event.type, event.value)
 
         (active_tool, work_space_tool, index) = get_active_tool(context)
 
@@ -141,11 +142,15 @@ class UpdateBrushShelf(bpy.types.Operator):
     @staticmethod
     def restore_brush_shelf(context):
         """恢复笔刷工具架"""
-        set_brush_shelf("ORIGINAL")
-        refresh_ui(context)
-        brush_shelf.clear()
+        global brush_shelf
         if DEBUG_UPDATE_BRUSH_SHELF:
-            print("restore_brush_shelf")
+            # import traceback
+            # traceback.print_stack()
+            print("restore_brush_shelf", brush_shelf.keys())
+        if "ORIGINAL" in brush_shelf.keys():
+            set_brush_shelf("ORIGINAL")
+
+        brush_shelf.clear()
 
     @staticmethod
     def start_brush_shelf(context):
@@ -172,4 +177,4 @@ class UpdateBrushShelf(bpy.types.Operator):
         ))
 
         if DEBUG_UPDATE_BRUSH_SHELF:
-            print("start_brush_shelf")
+            print("start_brush_shelf", brush_shelf.keys())

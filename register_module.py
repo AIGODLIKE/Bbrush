@@ -17,12 +17,14 @@ register_module, unregister_module = register_submodule_factory(model_tuple)
 owner = object()
 
 
-def update_bbrush_mode():
-    """
-    在切换模式的时候
-    在启动Blender的时候
-    """
-    sculpt.try_start_bbrush_mode()
+def start_update_bbrush_mode():
+    """在启动Blender的时候"""
+    sculpt.try_toggle_bbrush_mode()
+
+
+def object_mode_update_bbrush_mode():
+    """在切换模式的时候"""
+    sculpt.try_toggle_bbrush_mode()
 
 
 def load_subscribe():
@@ -30,7 +32,7 @@ def load_subscribe():
         key=(bpy.types.Object, 'mode'),
         owner=owner,
         args=(),
-        notify=update_bbrush_mode,
+        notify=object_mode_update_bbrush_mode,
         options={"PERSISTENT"}
     )
 
@@ -43,7 +45,7 @@ def refresh_subscribe():
 @persistent
 def load_post(args):
     refresh_subscribe()
-    sculpt.try_start_bbrush_mode()
+    sculpt.try_toggle_bbrush_mode()
 
 
 def update_depth_map():
@@ -61,23 +63,23 @@ def update_depth_map():
 
 def register():
     register_module()
+
     load_subscribe()
     bpy.app.handlers.load_post.append(load_post)
 
-    bpy.app.timers.register(update_bbrush_mode, first_interval=1, persistent=True)
+    bpy.app.timers.register(start_update_bbrush_mode, first_interval=1, persistent=True)
     bpy.app.timers.register(update_depth_map, first_interval=1, persistent=True)
 
 
 def unregister():
-    sculpt.fix_bbrush_error()
     sculpt.BbrushExit.exit(bpy.context)
-
-    unregister_module()
 
     bpy.msgbus.clear_by_owner(owner)
 
-    if bpy.app.timers.is_registered(update_bbrush_mode):
-        bpy.app.timers.unregister(update_bbrush_mode)
+    if bpy.app.timers.is_registered(object_mode_update_bbrush_mode):
+        bpy.app.timers.unregister(object_mode_update_bbrush_mode)
     if bpy.app.timers.is_registered(update_depth_map):
         bpy.app.timers.unregister(update_depth_map)
     bpy.app.handlers.load_post.remove(load_post)
+
+    unregister_module()

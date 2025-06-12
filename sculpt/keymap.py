@@ -61,10 +61,11 @@ class BrushKeymap:
     def restore_key(context):
         global last_key_path
 
+        active_keyconfig = context.preferences.keymap.active_keyconfig
         if DEBUG_KEYMAP:
-            print("restore_key")
-            print("last_key_path", last_key_path)
-        bpy.ops.wm.keyconfig_preset_remove("EXEC_DEFAULT", name="BBrush", remove_name=True)
+            print("restore_key", active_keyconfig, last_key_path)
+        if active_keyconfig == "BBrush":
+            bpy.ops.wm.keyconfig_preset_remove("EXEC_DEFAULT", name="BBrush", remove_name=True)
         if last_key_path:
             try:
                 bpy.ops.preferences.keyconfig_activate("EXEC_DEFAULT", filepath=last_key_path)
@@ -74,5 +75,3 @@ class BrushKeymap:
                     print("active_keyconfig", context.window_manager.keyconfigs.active.name)
             except Exception as e:
                 print("Error", e.args)
-        else:
-            print("未找到 last_key path")

@@ -88,7 +88,7 @@ class ShortcutKey:
         from . import brush_runtime
         pref = get_pref()
 
-        if pref.show_shortcut_keys and brush_runtime is not None:
+        if pref.show_shortcut_keys and brush_runtime is not None and brush_runtime.shortcut_key_points is not None:
             from bpy.app.translations import pgettext_iface as translate
             context = bpy.context
 

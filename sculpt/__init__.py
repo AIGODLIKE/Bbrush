@@ -8,7 +8,7 @@ from .shortcut_key import ShortcutKey
 from .update_brush_shelf import UpdateBrushShelf
 from .view_property import ViewProperty
 from ..debug import DEBUG_LEFT_MOUSE
-from ..utils import get_pref, refresh_ui, is_bbruse_mode
+from ..utils import get_pref, refresh_ui, is_bbruse_mode, check_pref
 
 """
 通过运行时切换
@@ -57,11 +57,12 @@ class BbrushExit(bpy.types.Operator):
     bl_idname = "brush.bbrush_exit"
     bl_label = "Bbrush Exit"
 
+    exit_always: bpy.props.BoolProperty(default=False)
+
     def execute(self, context):
         pref = get_pref()
-        if pref.always_use_bbrush_sculpt_mode:
-            pref.always_use_bbrush_sculpt_mode = False
-
+        if pref.always_use_bbrush_sculpt_mode and self.exit_always:
+            pref["always_use_bbrush_sculpt_mode"] = False
         self.exit(context)
         return {"FINISHED"}
 
@@ -78,8 +79,8 @@ class BbrushExit(bpy.types.Operator):
 
         refresh_ui(context)
 
-        if bpy.ops.wm.redraw_timer.poll():
-            bpy.ops.wm.redraw_timer(type='DRAW', iterations=1)
+        # if bpy.ops.wm.redraw_timer.poll():
+        #     bpy.ops.wm.redraw_timer(type='DRAW', iterations=1)
 
 
 class FixBbrushError(bpy.types.Operator):
@@ -94,21 +95,6 @@ class FixBbrushError(bpy.types.Operator):
         from .view_property import ViewProperty
 
         BbrushExit.exit(context)
-
-        # if brush_runtime is not None:
-        #     is_reference_error = False
-        #     try:
-        #         brush_runtime.brush_mode
-        #     except ReferenceError:
-        #         is_reference_error = True
-        #
-        #     if is_reference_error:
-        #         fix_bbrush_error()
-        #     else:
-        #         BbrushExit.exit(context)
-        #
-        # BrushKeymap.restore_key()
-        # ViewProperty.restore_view_property(context)
         return {"FINISHED"}
 
     @classmethod
@@ -137,7 +123,7 @@ class LeftMouse(bpy.types.Operator):
         if event.value == "PRESS" and event.type == "LEFTMOUSE":
             brush_runtime.left_mouse = Vector((event.mouse_x, event.mouse_y))
         if DEBUG_LEFT_MOUSE:
-            print(self.bl_idname, event.value, event.type)
+            print(self.bl_idname, event.value, event.type, "\t", event.value_prev, event.type_prev)
 
         LeftMouse.is_run = True
         context.window_manager.modal_handler_add(self)
@@ -145,13 +131,15 @@ class LeftMouse(bpy.types.Operator):
 
     def modal(self, context, event: "bpy.types.Event"):
         if DEBUG_LEFT_MOUSE:
-            print(event.value, event.type, event.value_prev, event.type_prev)
+            print("\t modal", event.value, event.type, "\t", event.value_prev, event.type_prev)
 
         if event.value == "RELEASE" or event.value_prev == "RELEASE":
             refresh_depth_map()
 
         is_release_leftmouse = event.value == "RELEASE" and event.type == "LEFTMOUSE"
         is_release_leftmouse_prev = event.value_prev == "RELEASE" and event.type_prev == "LEFTMOUSE"
+        if is_release_leftmouse:
+            bpy.ops.sculpt.bbrush_click("INVOKE_DEFAULT")
         if is_release_leftmouse or is_release_leftmouse_prev:
             refresh_depth_map()
             if DEBUG_LEFT_MOUSE:
@@ -168,15 +156,21 @@ def refresh_depth_map():
     # print("refresh_depth_map")
 
 
-def try_start_bbrush_mode():
-    """在用户切换模式时使用此方法"""
-    if bpy.context.mode == "SCULPT" and get_pref().always_use_bbrush_sculpt_mode:
-        bpy.ops.brush.bbrush_start("INVOKE_DEFAULT")
+def try_toggle_bbrush_mode(is_start=False):
+    """在用户切换物体模式时
+    在启动Blender时
+    在开启强制Bbrush模式时
 
+    使用此方法"""
+    is_bbruse = is_bbruse_mode()
 
-def fix_bbrush_error():
-    global brush_runtime
-    brush_runtime = None
+    if bpy.context.mode == "SCULPT":
+        if check_pref() and get_pref().always_use_bbrush_sculpt_mode and not is_bbruse:
+            bpy.ops.brush.bbrush_start("INVOKE_DEFAULT")
+    elif is_bbruse:
+        bpy.ops.brush.bbrush_exit("INVOKE_DEFAULT", exit_always=False)
+    else:
+        ...
 
 
 class_list = [

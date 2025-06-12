@@ -6,6 +6,10 @@ from .line_to_convex_shell import line_to_convex_shell
 from .. import __package__ as base_name
 
 
+def check_pref() -> bool:
+    return base_name in bpy.context.preferences.addons
+
+
 def get_pref():
     """获取偏好设置"""
     return bpy.context.preferences.addons[base_name].preferences
@@ -202,9 +206,9 @@ def check_mouse_in_shortcut_key_area(event) -> bool:
 
 def check_runtime_and_fix():
     """部分情况下会炸,比如 在运行时拖动重新安装"""
-    from ..sculpt import brush_runtime, try_start_bbrush_mode
+    from ..sculpt import brush_runtime, try_toggle_bbrush_mode
     if brush_runtime:
-        try_start_bbrush_mode()
+        try_toggle_bbrush_mode()
 
 
 def is_bbruse_mode() -> bool:
