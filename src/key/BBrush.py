@@ -199,17 +199,20 @@ def view_switch():
 
     rotate[2]["items"].extend([
         ("CONFIRM", {"type": "RIGHTMOUSE", "value": "ANY"}, None),
+        ("CONFIRM", {"type": "MIDDLEMOUSE", "value": "ANY"}, None),
         ("CONFIRM", {"type": "LEFTMOUSE", "value": "ANY"}, None),
         ("SWITCH_TO_ZOOM", {"type": "LEFT_CTRL", "value": "ANY"}, None),
         ("AXIS_SNAP_ENABLE", {"type": "LEFT_SHIFT", "value": "PRESS"}, None),
         ("AXIS_SNAP_DISABLE", {"type": "LEFT_SHIFT", "value": "RELEASE"}, None), ])
     move[2]["items"].extend([
         ("CONFIRM", {"type": "RIGHTMOUSE", "value": "ANY"}, None),
+        ("CONFIRM", {"type": "MIDDLEMOUSE", "value": "ANY"}, None),
         ("CONFIRM", {"type": "LEFTMOUSE", "value": "ANY"}, None),
         ("SWITCH_TO_ZOOM", {"type": "LEFT_ALT", "value": "ANY"}, None),
         ("SWITCH_TO_ZOOM", {"type": "LEFT_CTRL", "value": "ANY"}, None), ])
     zoom[2]["items"].extend([
         ("CONFIRM", {"type": "RIGHTMOUSE", "value": "ANY"}, None),
+        ("CONFIRM", {"type": "MIDDLEMOUSE", "value": "ANY"}, None),
         ("CONFIRM", {"type": "LEFTMOUSE", "value": "ANY"}, None),
         ("SWITCH_TO_ROTATE", {"type": "LEFT_CTRL", "value": "RELEASE"}, None),
         ("SWITCH_TO_MOVE", {"type": "LEFT_CTRL", "value": "PRESS"}, None),

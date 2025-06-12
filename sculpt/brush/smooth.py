@@ -18,7 +18,6 @@ class BrushSmooth(bpy.types.Operator):
         if DEBUG_SMOOTH:
             print(self.bl_idname, context, event, self.bl_label, is_in_modal)
         if not is_in_modal:
-            # 倾斜视图
-            bpy.ops.view3d.view_roll("INVOKE_DEFAULT", type="ANGLE")
+            bpy.ops.view3d.view_roll("INVOKE_DEFAULT", type="ANGLE")  # 倾斜视图
             return {"FINISHED"}
         return {"FINISHED", "PASS_THROUGH"}
