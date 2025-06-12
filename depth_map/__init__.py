@@ -25,14 +25,14 @@ def check_depth_map_is_draw(context):
 
 
 def draw_depth():
-    global depth_buffer_check
+    global depth_buffer_check, update_depth_map_region_matrix
     context = bpy.context
 
     try:
 
-        # region_3d = context.space_data.region_3d
-        # view_matrix = region_3d.view_matrix
-        # print(view_matrix)
+        region_3d = context.space_data.region_3d
+        view_matrix = region_3d.view_matrix
+        update_depth_map_region_matrix[str(hash(region_3d))] = view_matrix.copy()
 
         from ..sculpt import brush_runtime
         from ..sculpt.shortcut_key import ShortcutKey
@@ -101,6 +101,7 @@ def filling_data(context):
 
 
 update_depth_map_modal_operators_len = 0  # 更新深度图用
+update_depth_map_region_matrix = {}
 
 
 def try_update_depth_map():
@@ -110,12 +111,13 @@ def try_update_depth_map():
 
     TODO 在使用~的时候会无法识别到
     """
-    global update_depth_map_modal_operators_len
+    global update_depth_map_modal_operators_len, update_depth_map_region_matrix
 
     context = bpy.context
     modal_operators_len = len(bpy.context.window.modal_operators)
 
     if check_depth_map_is_draw(context):
+        # print("update_depth_map_region_matrix", update_depth_map_region_matrix)
         if update_depth_map_modal_operators_len != modal_operators_len:
             if modal_operators_len == 0:
                 clear_gpu_cache()
@@ -123,6 +125,7 @@ def try_update_depth_map():
             update_depth_map_modal_operators_len = modal_operators_len
         elif modal_operators_len == 0:
             ...
+        update_depth_map_region_matrix.clear()
 
 
 def register():
