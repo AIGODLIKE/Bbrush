@@ -140,7 +140,7 @@ class UpdateBrushShelf(bpy.types.Operator):
         brush_runtime.brush_mode = mode
 
     @staticmethod
-    def restore_brush_shelf(context):
+    def restore_brush_shelf():
         """恢复笔刷工具架"""
         global brush_shelf
         if DEBUG_UPDATE_BRUSH_SHELF:
@@ -178,3 +178,10 @@ class UpdateBrushShelf(bpy.types.Operator):
 
         if DEBUG_UPDATE_BRUSH_SHELF:
             print("start_brush_shelf", brush_shelf.keys())
+
+
+def try_restore_brush_shelf():
+    global brush_shelf
+    if "ORIGINAL" in brush_shelf.keys():
+        UpdateBrushShelf.restore_brush_shelf()
+        print("try_restore_brush_shelf ok")

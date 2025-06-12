@@ -25,14 +25,11 @@ class DepthMap:
     )
     depth_offset: bpy.props.IntVectorProperty(name="Silhouette image offset", default=(0, -80), size=2,
                                               max=114514, min=-114514)
-    depth_refresh_interval: bpy.props.FloatProperty(name="Refresh interval", default=2, min=1, max=10)
 
     def draw_depth(self, layout):
         box = layout.box()
         box.label(text="Silhouette")
         box.prop(self, "depth_display_mode")
-        if self.depth_display_mode in ("ALWAYS_DISPLAY", "ONLY_SCULPT"):
-            box.prop(self, "depth_refresh_interval")
         box.prop(self, "depth_scale")
         row = box.row(align=True)
         row.prop(self, "depth_offset")

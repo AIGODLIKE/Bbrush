@@ -1,8 +1,8 @@
 import bpy
 from mathutils import Vector
 
-from .gpu_buffer import draw_gpu_buffer
-from ..utils import get_pref, is_bbruse_mode, get_region_height, get_region_width
+from .gpu_buffer import draw_gpu_buffer, clear_gpu_cache
+from ..utils import get_pref, is_bbruse_mode, get_region_height, get_region_width, refresh_ui
 
 handel = None
 
@@ -14,6 +14,7 @@ depth_buffer_check = {
 
 
 def check_depth_map_is_draw(context):
+    """检查深度图是否需要绘制"""
     pref = get_pref()
     mode = pref.depth_display_mode
     is_sculpt = context.mode == "SCULPT"
@@ -28,6 +29,11 @@ def draw_depth():
     context = bpy.context
 
     try:
+
+        region_3d = context.space_data.region_3d
+        view_matrix = region_3d.view_matrix
+
+        print(view_matrix)
         from ..sculpt import brush_runtime
         from ..sculpt.shortcut_key import ShortcutKey
         if is_bbruse_mode():
@@ -92,6 +98,31 @@ def filling_data(context):
     w = 1 / width * x1
     h = 1 / height * (y1 + draw_height)
     depth_buffer_check["translate"] = w, h, 0
+
+
+update_depth_map_modal_operators_len = 0  # 更新深度图用
+
+
+def try_update_depth_map():
+    """尝试更新深度图
+    如果操作模态被更改了就更新一次
+    优化性能
+
+    TODO 在使用~的时候会无法识别到
+    """
+    global update_depth_map_modal_operators_len
+
+    context = bpy.context
+    modal_operators_len = len(bpy.context.window.modal_operators)
+
+    if check_depth_map_is_draw(context):
+        if update_depth_map_modal_operators_len != modal_operators_len:
+            if modal_operators_len == 0:
+                clear_gpu_cache()
+                refresh_ui(context)
+            update_depth_map_modal_operators_len = modal_operators_len
+        elif modal_operators_len == 0:
+            ...
 
 
 def register():

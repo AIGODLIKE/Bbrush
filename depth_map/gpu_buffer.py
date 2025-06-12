@@ -138,3 +138,4 @@ def draw_gpu_buffer(context, depth_buffer):
 def clear_gpu_cache():
     global gpu_cache
     gpu_cache.clear()
+

@@ -86,9 +86,8 @@ class BbrushExit(bpy.types.Operator):
             print("exit bbrush")
 
         ShortcutKey.stop_shortcut_key()
-
         BrushKeymap.restore_key(context)
-        UpdateBrushShelf.restore_brush_shelf(context)
+        UpdateBrushShelf.restore_brush_shelf()
         ViewProperty.restore_view_property(context, un_reg)
 
         refresh_ui(context)

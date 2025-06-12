@@ -153,3 +153,7 @@ class ShortcutKey:
             x2 += max_width
 
             brush_runtime.shortcut_key_points = ((x1, x2), (y1, y2))
+
+
+def try_setop_shortcut_key():
+    ...

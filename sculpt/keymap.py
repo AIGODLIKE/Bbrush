@@ -75,3 +75,15 @@ class BrushKeymap:
                     print("active_keyconfig", context.window_manager.keyconfigs.active.name)
             except Exception as e:
                 print("Error", e.args)
+
+
+def try_restore_keymap():
+    """在不是Bbrush模式时
+    快捷键任未复位
+    尝试修复"""
+    context = bpy.context
+    from ..utils import is_bbruse_mode
+    if not is_bbruse_mode():
+        if context.window_manager.keyconfigs.active.name == "BBrush":
+            bpy.ops.wm.keyconfig_preset_remove("EXEC_DEFAULT", name="BBrush", remove_name=True)
+            print("try_restore_keymap ok")
