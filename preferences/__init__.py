@@ -24,7 +24,7 @@ class Preferences(
         "If entering sculpting mode, Bbrush mode will automatically activate; "
         "if exiting sculpting mode, Bbrush mode will deactivate",
         default=False,
-        update=lambda self, context: sculpt.BBrushSculpt.toggle_object_mode()
+        update=lambda self, context: sculpt.try_toggle_bbrush_mode()
     )
 
     depth_ray_size: bpy.props.IntProperty(
@@ -41,7 +41,14 @@ class Preferences(
         max=2
     )
 
+    refresh_fps: bpy.props.IntProperty(name="Refresh FPS", default=5, min=1, max=120)
+
+    @property
+    def refresh_interval(self):
+        return 1 / self.refresh_fps
+
     def draw(self, context):
+        from ..sculpt import FixBbrushError
         layout = self.layout
 
         col = layout.column()
@@ -50,6 +57,7 @@ class Preferences(
 
         box = col.box()
         box.label(text="Sculpt")
+        box.prop(self, "refresh_fps")
         box.prop(self, "always_use_bbrush_sculpt_mode")
         box.prop(self, "depth_ray_size")
 
@@ -57,10 +65,15 @@ class Preferences(
         box.prop(self, "drag_offset_compensation")
 
         sub_col = box.column()
+
         sub_col.alert = True
         if self.always_use_bbrush_sculpt_mode:
             sub_col.label(text="Tips:Automatically enter Bbrush mode when entering carving mode")
-        sub_col.label(text="Do not reinstall or upgrade this plugin in Bbrush mode!")
+
+        sub_col.alert = False
+        sub_col.operator(FixBbrushError.bl_idname)
+        ops = sub_col.operator("wm.url_open", icon="URL", text="Encountering a problem?")
+        ops.url = "https://github.com/AIGODLIKE/Bbrush/issues/new"
 
         split = col.split()
 

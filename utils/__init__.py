@@ -6,6 +6,10 @@ from .line_to_convex_shell import line_to_convex_shell
 from .. import __package__ as base_name
 
 
+def check_pref() -> bool:
+    return base_name in bpy.context.preferences.addons
+
+
 def get_pref():
     """获取偏好设置"""
     return bpy.context.preferences.addons[base_name].preferences
@@ -148,6 +152,7 @@ def find_mouse_in_area(context, event) -> "bpy.types.Area|None":
         aw = xy + Vector((area.width, area.height)).freeze()
         if xy.x < mouse.x < aw.x and xy.y < mouse.y < aw.y:
             return area
+    return None
 
 
 def check_mouse_in_3d_area(context, event) -> bool:
@@ -200,13 +205,6 @@ def check_mouse_in_shortcut_key_area(event) -> bool:
     )
 
 
-def check_runtime_and_fix():
-    """部分情况下会炸,比如 在运行时拖动重新安装"""
-    from ..sculpt import brush_runtime, BBrushSculpt
-    if brush_runtime:
-        BBrushSculpt.toggle_object_mode()
-
-
 def is_bbruse_mode() -> bool:
     """检查是否在BBrush模式"""
     from ..sculpt import brush_runtime
@@ -214,24 +212,19 @@ def is_bbruse_mode() -> bool:
 
 
 def refresh_ui(context):
-    """刷新UI"""
+    """刷新UI
+    # bpy.ops.wm.redraw_timer(type='DRAW', iterations=1)
+    """
     if context.area:
         context.area.tag_redraw()
     if context.region:
         context.region.tag_redraw()
     if context.screen:
         context.screen.update_tag()
-
-    for area in context.screen.areas:
-        if area.type == "VIEW_3D":
-            for region in area.regions:
-                region.tag_redraw()
-    # bpy.ops.wm.redraw_timer(type='DRAW', iterations=1)
-
-
-def clear_cache():
-    """清理缓存"""
-    ...
+        for area in context.screen.areas:
+            if area.type == "VIEW_3D":
+                for region in area.regions:
+                    region.tag_redraw()
 
 
 def get_property_rna_info(bl_rna, property_name: "str") -> "dict|None":
@@ -273,3 +266,4 @@ def get_property_rna_info(bl_rna, property_name: "str") -> "dict|None":
 
         # print("get_property_rna_info", property_name, data)
         return data
+    return None

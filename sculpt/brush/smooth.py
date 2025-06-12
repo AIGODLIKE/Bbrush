@@ -1,23 +1,23 @@
 import bpy
 
-from ...utils import check_mouse_in_model
+from ...debug import DEBUG_SMOOTH
+from ...utils import check_mouse_in_model, is_bbruse_mode
 
 
 class BrushSmooth(bpy.types.Operator):
     bl_idname = "sculpt.bbrush_smooth"
     bl_label = "Smooth"
-    bl_options = {'REGISTER'}
+    bl_options = {"REGISTER"}
+
+    @classmethod
+    def poll(cls, context):
+        return is_bbruse_mode()
 
     def invoke(self, context, event):
-        check_runtime_and_fix()
         is_in_modal = check_mouse_in_model(context, event)
-        print(context, event, self.bl_label, is_in_modal)
+        if DEBUG_SMOOTH:
+            print(self.bl_idname, context, event, self.bl_label, is_in_modal)
         if not is_in_modal:
-            # 倾斜视图
-            bpy.ops.view3d.view_roll('INVOKE_DEFAULT', type='ANGLE')
+            bpy.ops.view3d.view_roll("INVOKE_DEFAULT", type="ANGLE")  # 倾斜视图
             return {"FINISHED"}
-
-        return {'PASS_THROUGH'}
-
-    def execute(self, context):
-        return {"FINISHED"}
+        return {"FINISHED", "PASS_THROUGH"}

@@ -140,4 +140,6 @@ data = {
     "Use view pref": "使用视图偏好设置",
     "BBrush fix": "BBrush 修复",
     "Fix Bbrush error": "修复Bbrush错误",
+    "Shortcut Key Move": "移动快捷键",
+    "Update Brush Shelf": "更新笔刷架"
 }

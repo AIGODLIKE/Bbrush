@@ -1,3 +1,6 @@
+import bpy
+
+from ..debug import DEBUG_VIEW_PREF
 from ..utils import get_pref
 
 property_items = {
@@ -39,13 +42,36 @@ class ViewProperty:
                     setattr(prop, i, value)
                 store[p] = data
             view_property_store = store
+        if DEBUG_VIEW_PREF:
+            print("start_view_property", get_pref().use_view, view_property_store)
 
     @staticmethod
-    def restore_view_property(context):
+    def restore_view_property(context, save_user_pref=False):
         global view_property_store
         if get_pref().use_view:
             for p, data in view_property_store.items():
                 prop = getattr(context.preferences, p)
                 for k, v in data.items():
                     setattr(prop, k, v)
+
+        if DEBUG_VIEW_PREF:
+            store = {}
+            for p, v in property_items.items():
+                prop = getattr(context.preferences, p)
+                data = {}
+                for i in v:
+                    data[i] = getattr(prop, i)
+                store[p] = data
+            print("restore_view_property", get_pref().use_view, view_property_store)
+            print("now pref", store)
+
         view_property_store.clear()
+        if save_user_pref:
+            bpy.ops.wm.save_userpref()
+
+
+def try_restore_view_property():
+    global view_property_store
+    if len(view_property_store) != 0:
+        ViewProperty.restore_view_property(bpy.context)
+        print("try_restore_view_property ok")

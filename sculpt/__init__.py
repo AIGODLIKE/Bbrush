@@ -2,98 +2,95 @@ import bpy
 from mathutils import Vector
 
 from . import brush
-from .handle import BrushHandle
-from .key import BrushKey
+from .keymap import BrushKeymap
+from .runtime import BrushRuntime
 from .shortcut_key import ShortcutKey
-from .switch_brush_shelf import SwitchBrushShelf
+from .update_brush_shelf import UpdateBrushShelf
 from .view_property import ViewProperty
-from ..utils import get_pref, check_mouse_in_3d_area
+from ..debug import DEBUG_LEFT_MOUSE, DEBUG_MODE_TOGGLE
+from ..utils import get_pref, refresh_ui, is_bbruse_mode, check_pref
 
 """
-将整个模态作为一个操作符
-进入BBrush模式即进入操作符模态
-将所有内容退出
+通过运行时切换
 
-快捷键
-
+快捷键 keymap
+更新笔刷栏
+绘制快捷键
+视图偏好设置属性
 """
 
-brush_runtime: "BBrushSculpt|None" = None
+brush_runtime: "BrushRuntime|None" = None
 
 
-class BBrushSculpt(
-    bpy.types.Operator,
-    BrushKey,
-    BrushHandle,
-    SwitchBrushShelf,
-    ShortcutKey,
-    ViewProperty,
-):
-    bl_idname = "sculpt.bbrush_sculpt"
-    bl_label = "BBrush sculpting"
-    bl_description = "Sculpting in the style of Zbrush"
-    bl_options = {"REGISTER"}
-
-    left_mouse = Vector((0, 0))
-
-    def exit(self, context):
-        global brush_runtime
-        brush_runtime = None
-        self.stop_shortcut_key()
-        return super().exit(context)
+class BbrushStart(bpy.types.Operator):
+    bl_idname = "brush.bbrush_start"
+    bl_label = "Bbrush Start"
 
     def invoke(self, context, event):
         global brush_runtime
 
+        if DEBUG_MODE_TOGGLE:
+            print(self.bl_idname)
+
         # 确保只有一个运行时
         if brush_runtime is not None:
-            brush_runtime.is_exit = self.is_exit
             return {"CANCELLED"}
-        else:
-            if self.is_exit:  # 更新数据太快了
-                self.is_exit = False
-        brush_runtime = self
 
-        self.start(context)
-        self.update_brush_shelf(context, event)
-        context.window_manager.modal_handler_add(self)
-        return {"RUNNING_MODAL"}
-
-    def modal(self, context, event: "bpy.types.Event"):
-        # print("modal", self.bl_idname, event.value, event.type)
-        if event.value == "PRESS" and event.type == "LEFTMOUSE":
-            self.left_mouse = Vector((event.mouse_x, event.mouse_y))
-
-        if event.value == "RELEASE" or event.value_prev == "RELEASE":
-            self.refresh_depth_map()
-
-        if self.check_exit(context, event):
-            pref = get_pref()
-            if pref.always_use_bbrush_sculpt_mode and self.is_exit:
-                pref.always_use_bbrush_sculpt_mode = False
-            return self.exit(context)
-        elif event.type in {"TIMER", "MOUSEMOVE", "WINDOW_DEACTIVATE", "INBETWEEN_MOUSEMOVE"}:
-            return {"PASS_THROUGH"}
-        elif check_mouse_in_3d_area(context, event):
-            self.update_brush_shelf(context, event)
-
-            if self.key_event(context, event):
-                print("key_event", event.value, event.type)
-                return {"RUNNING_MODAL"}
-
-        return {"PASS_THROUGH"}
-
-    def execute(self, context):
+        self.start(context, event)
         return {"FINISHED"}
 
-    def refresh_depth_map(self):
-        from ..depth_map.gpu_buffer import clear_cache
-        clear_cache()
+
+    @staticmethod
+    def start(context, event):
+        global brush_runtime
+        brush_runtime = BrushRuntime()
+
+        if DEBUG_MODE_TOGGLE:
+            print("exit bbrush")
+
+        UpdateBrushShelf.start_brush_shelf(context)
+        UpdateBrushShelf.update_brush_shelf(context, event)
+
+        BrushKeymap.start_key(context)
+        ShortcutKey.start_shortcut_key()
+        ViewProperty.start_view_property(context)
+        refresh_ui(context)
 
 
-def fix_bbrush_error():
-    global brush_runtime
-    brush_runtime = None
+class BbrushExit(bpy.types.Operator):
+    bl_idname = "brush.bbrush_exit"
+    bl_label = "Bbrush Exit"
+
+    exit_always: bpy.props.BoolProperty(default=False)
+
+    def execute(self, context):
+        if DEBUG_MODE_TOGGLE:
+            print(self.bl_idname)
+        pref = get_pref()
+        if pref.always_use_bbrush_sculpt_mode and self.exit_always:
+            pref["always_use_bbrush_sculpt_mode"] = False
+        self.exit(context)
+        return {"FINISHED"}
+
+    @staticmethod
+    def exit(context, un_reg=False):
+        """
+        :param context:
+        :param un_reg: 是注销操作
+        :return:
+        """
+        global brush_runtime
+        brush_runtime = None
+
+        if DEBUG_MODE_TOGGLE:
+            print("exit bbrush")
+
+        ShortcutKey.stop_shortcut_key()
+        BrushKeymap.restore_key(context)
+        UpdateBrushShelf.restore_brush_shelf()
+        ViewProperty.restore_view_property(context, un_reg)
+
+        refresh_ui(context)
 
 
 class FixBbrushError(bpy.types.Operator):
@@ -104,23 +101,10 @@ class FixBbrushError(bpy.types.Operator):
 
     def execute(self, context):
         global brush_runtime
-        from .key import BrushKey
+        from .keymap import BrushKeymap
         from .view_property import ViewProperty
 
-        if brush_runtime is not None:
-            is_reference_error = False
-            try:
-                brush_runtime.brush_mode
-            except ReferenceError:
-                is_reference_error = True
-
-            if is_reference_error:
-                fix_bbrush_error()
-            else:
-                brush_runtime.is_exit = True
-
-        BrushKey.restore_key()
-        ViewProperty.restore_view_property(context)
+        BbrushExit.exit(context)
         return {"FINISHED"}
 
     @classmethod
@@ -128,13 +112,77 @@ class FixBbrushError(bpy.types.Operator):
         layout.operator(cls.bl_idname, text="", icon="EVENT_F")
 
 
+class LeftMouse(bpy.types.Operator):
+    bl_idname = "sculpt.bbrush_leftmouse"
+    bl_label = "Sculpt"
+    bl_description = "LeftMouse"
+    bl_options = {"REGISTER"}
+
+    @classmethod
+    def poll(cls, context):
+        return is_bbruse_mode()
+
+    def invoke(self, context, event):
+        global brush_runtime
+
+        is_leftmouse = event.type == "LEFTMOUSE"
+        is_release = event.value == "RELEASE"
+        is_press = event.value == "PRESS"
+        is_release_leftmouse_prev = event.value_prev == "RELEASE" and event.type_prev == "LEFTMOUSE"
+
+        if is_press and is_leftmouse:
+            brush_runtime.left_mouse = Vector((event.mouse_x, event.mouse_y))
+        if is_release_leftmouse_prev or event.value == "RELEASE" or event.value_prev == "RELEASE":
+            refresh_depth_map()
+        if is_release and is_leftmouse:
+            bpy.ops.sculpt.bbrush_click("INVOKE_DEFAULT")
+            LeftMouse.is_run = None
+
+        if DEBUG_LEFT_MOUSE:
+            print("left mouse", "\t", event.value, event.type, "\t", event.value_prev, event.type_prev)
+        return {"FINISHED", "PASS_THROUGH"}
+
+
+def refresh_depth_map():
+    from ..depth_map.gpu_buffer import clear_gpu_cache
+    clear_gpu_cache()
+    # if DEBUG_LEFT_MOUSE:
+    # print("refresh_depth_map")
+
+
+def try_toggle_bbrush_mode(is_start=False):
+    """在用户切换物体模式时
+    在启动Blender时
+    在开启强制Bbrush模式时
+
+    使用此方法"""
+    is_bbruse = is_bbruse_mode()
+
+    if bpy.context.mode == "SCULPT":
+        if check_pref() and get_pref().always_use_bbrush_sculpt_mode and not is_bbruse:
+            bpy.ops.brush.bbrush_start("INVOKE_DEFAULT")
+    elif is_bbruse:
+        bpy.ops.brush.bbrush_exit("INVOKE_DEFAULT", exit_always=False)
+    else:
+        ...
+
+
+class_list = [
+    BbrushStart,
+    BbrushExit,
+    FixBbrushError,
+    LeftMouse,
+    UpdateBrushShelf,
+]
+
+register_class, unregister_class = bpy.utils.register_classes_factory(class_list)
+
+
 def register():
     brush.register()
-    bpy.utils.register_class(BBrushSculpt)
-    bpy.utils.register_class(FixBbrushError)
+    register_class()
 
 
 def unregister():
-    bpy.utils.unregister_class(BBrushSculpt)
-    bpy.utils.unregister_class(FixBbrushError)
     brush.unregister()
+    unregister_class()

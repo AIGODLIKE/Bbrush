@@ -17,18 +17,42 @@ blender_default = bpy.utils.execfile(os.path.normpath(blender_default_file))
 params = blender_default.Params()
 sculpt_keymap = blender_default.km_sculpt(params)
 
+mask_keys = [
+    ("sculpt.mask_filter", {"type": "NUMPAD_PLUS", "value": "PRESS", "ctrl": True},
+     {"properties": [("filter_type", "GROW"), ("auto_iteration_count", True)]}),
+    ("sculpt.mask_filter", {"type": "NUMPAD_MINUS", "value": "PRESS", "ctrl": True},
+     {"properties": [("filter_type", "SHRINK"), ("auto_iteration_count", True)]}),
+
+    ("sculpt.mask_filter", {"type": "UP_ARROW", "value": "PRESS", "ctrl": True},
+     {"properties": [("filter_type", "CONTRAST_INCREASE"), ("auto_iteration_count", True)]}),
+    ("sculpt.mask_filter", {"type": "NUMPAD_ASTERIX", "value": "PRESS", "ctrl": True},
+     {"properties": [("filter_type", "CONTRAST_INCREASE"), ("auto_iteration_count", True)]}),
+
+    ("sculpt.mask_filter", {"type": "DOWN_ARROW", "value": "PRESS", "ctrl": True},
+     {"properties": [("filter_type", "CONTRAST_DECREASE"), ("auto_iteration_count", True)]}),
+    ("sculpt.mask_filter", {"type": "NUMPAD_SLASH", "value": "PRESS", "ctrl": True},
+     {"properties": [("filter_type", "CONTRAST_DECREASE"), ("auto_iteration_count", True)]}),
+]
+update_brush_shelf_keys = [
+    ("sculpt.bbursh_update_brush_shelf", {"type": "LEFT_CTRL", "value": "ANY", "any": True}, None),
+    ("sculpt.bbursh_update_brush_shelf", {"type": "LEFT_ALT", "value": "ANY", "any": True}, None),
+    ("sculpt.bbursh_update_brush_shelf", {"type": "LEFT_SHIFT", "value": "ANY", "any": True}, None),
+]
+
 keyconfig_version = (4, 4, 32)
 keyconfig_data = [
     ("Sculpt", {"space_type": "EMPTY", "region_type": "WINDOW"}, {
         "items": [
+            ("object.transfer_mode", {"type": "LEFTMOUSE", "value": "RELEASE", "alt": True}, None),
+
             ("sculpt.bbrush_depth_move", {"type": "RIGHTMOUSE", "value": "CLICK_DRAG"}, None),
             ("sculpt.bbrush_shortcut_key_move", {"type": "RIGHTMOUSE", "value": "CLICK_DRAG"}, None),
 
+            ("sculpt.bbrush_leftmouse", {"type": "LEFTMOUSE", "value": "ANY", "any": True}, None),
             ("sculpt.bbrush_smooth", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "shift": True}, None),
             ("sculpt.bbrush_click", {"type": "LEFTMOUSE", "value": "CLICK", "any": True}, None),
             ("sculpt.bbrush_drag", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "any": True}, None),
 
-            ("object.transfer_mode", {"type": "LEFTMOUSE", "value": "CLICK", "alt": True}, None),
             ("wm.call_panel", {"type": "RIGHTMOUSE", "value": "CLICK"},
              {"properties": [("name", "VIEW3D_PT_sculpt_context_menu"), ]}),
             ("view3d.rotate", {"type": "RIGHTMOUSE", "value": "CLICK_DRAG"}, None),
@@ -49,10 +73,13 @@ keyconfig_data = [
             ("sculpt.brush_stroke", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "ctrl": True, "alt": True},
              {"properties": [("mode", "INVERT"), ]}),
 
+            *mask_keys,
+            *update_brush_shelf_keys,
+
             *(item for item in sculpt_keymap[2]["items"] if
               item[0] not in ("sculpt.brush_stroke", "paint.mask_lasso_gesture"))
         ]
-     }
+    }
      ),
 
     # Mask
@@ -171,22 +198,25 @@ def view_switch():
     zoom = blender_default.km_view3d_zoom_modal(params)
 
     rotate[2]["items"].extend([
-        ('CONFIRM', {'type': 'RIGHTMOUSE', 'value': 'ANY'}, None),
-        ('CONFIRM', {'type': 'LEFTMOUSE', 'value': 'ANY'}, None),
-        ('SWITCH_TO_ZOOM', {'type': 'LEFT_CTRL', 'value': 'ANY'}, None),
-        ('AXIS_SNAP_ENABLE', {'type': 'LEFT_SHIFT', 'value': 'PRESS'}, None),
-        ('AXIS_SNAP_DISABLE', {'type': 'LEFT_SHIFT', 'value': 'RELEASE'}, None), ])
+        ("CONFIRM", {"type": "RIGHTMOUSE", "value": "ANY"}, None),
+        ("CONFIRM", {"type": "MIDDLEMOUSE", "value": "ANY"}, None),
+        ("CONFIRM", {"type": "LEFTMOUSE", "value": "ANY"}, None),
+        ("SWITCH_TO_ZOOM", {"type": "LEFT_CTRL", "value": "ANY"}, None),
+        ("AXIS_SNAP_ENABLE", {"type": "LEFT_SHIFT", "value": "PRESS"}, None),
+        ("AXIS_SNAP_DISABLE", {"type": "LEFT_SHIFT", "value": "RELEASE"}, None), ])
     move[2]["items"].extend([
-        ('CONFIRM', {'type': 'RIGHTMOUSE', 'value': 'ANY'}, None),
-        ('CONFIRM', {'type': 'LEFTMOUSE', 'value': 'ANY'}, None),
-        ('SWITCH_TO_ZOOM', {'type': 'LEFT_ALT', 'value': 'ANY'}, None),
-        ('SWITCH_TO_ZOOM', {'type': 'LEFT_CTRL', 'value': 'ANY'}, None), ])
+        ("CONFIRM", {"type": "RIGHTMOUSE", "value": "ANY"}, None),
+        ("CONFIRM", {"type": "MIDDLEMOUSE", "value": "ANY"}, None),
+        ("CONFIRM", {"type": "LEFTMOUSE", "value": "ANY"}, None),
+        ("SWITCH_TO_ZOOM", {"type": "LEFT_ALT", "value": "ANY"}, None),
+        ("SWITCH_TO_ZOOM", {"type": "LEFT_CTRL", "value": "ANY"}, None), ])
     zoom[2]["items"].extend([
-        ('CONFIRM', {'type': 'RIGHTMOUSE', 'value': 'ANY'}, None),
-        ('CONFIRM', {'type': 'LEFTMOUSE', 'value': 'ANY'}, None),
-        ('SWITCH_TO_ROTATE', {'type': 'LEFT_CTRL', 'value': 'RELEASE'}, None),
-        ('SWITCH_TO_MOVE', {'type': 'LEFT_CTRL', 'value': 'PRESS'}, None),
-        ('SWITCH_TO_MOVE', {'type': 'LEFT_ALT', 'value': 'ANY'}, None), ])
+        ("CONFIRM", {"type": "RIGHTMOUSE", "value": "ANY"}, None),
+        ("CONFIRM", {"type": "MIDDLEMOUSE", "value": "ANY"}, None),
+        ("CONFIRM", {"type": "LEFTMOUSE", "value": "ANY"}, None),
+        ("SWITCH_TO_ROTATE", {"type": "LEFT_CTRL", "value": "RELEASE"}, None),
+        ("SWITCH_TO_MOVE", {"type": "LEFT_CTRL", "value": "PRESS"}, None),
+        ("SWITCH_TO_MOVE", {"type": "LEFT_ALT", "value": "ANY"}, None), ])
 
     keyconfig_data.append(rotate)
     keyconfig_data.append(move)
