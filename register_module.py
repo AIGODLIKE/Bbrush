@@ -72,7 +72,7 @@ def register():
 
 
 def unregister():
-    sculpt.BbrushExit.exit(bpy.context)
+    sculpt.BbrushExit.exit(bpy.context, True)
 
     bpy.msgbus.clear_by_owner(owner)
 

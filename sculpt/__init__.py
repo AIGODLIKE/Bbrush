@@ -7,7 +7,7 @@ from .runtime import BrushRuntime
 from .shortcut_key import ShortcutKey
 from .update_brush_shelf import UpdateBrushShelf
 from .view_property import ViewProperty
-from ..debug import DEBUG_LEFT_MOUSE
+from ..debug import DEBUG_LEFT_MOUSE, DEBUG_MODE_TOGGLE
 from ..utils import get_pref, refresh_ui, is_bbruse_mode, check_pref
 
 """
@@ -29,6 +29,9 @@ class BbrushStart(bpy.types.Operator):
     def invoke(self, context, event):
         global brush_runtime
 
+        if DEBUG_MODE_TOGGLE:
+            print(self.bl_idname)
+
         # 确保只有一个运行时
         if brush_runtime is not None:
             return {"CANCELLED"}
@@ -43,6 +46,9 @@ class BbrushStart(bpy.types.Operator):
     def start(context, event):
         global brush_runtime
         brush_runtime = BrushRuntime()
+
+        if DEBUG_MODE_TOGGLE:
+            print("exit bbrush")
 
         UpdateBrushShelf.start_brush_shelf(context)
         UpdateBrushShelf.update_brush_shelf(context, event)
@@ -60,6 +66,8 @@ class BbrushExit(bpy.types.Operator):
     exit_always: bpy.props.BoolProperty(default=False)
 
     def execute(self, context):
+        if DEBUG_MODE_TOGGLE:
+            print(self.bl_idname)
         pref = get_pref()
         if pref.always_use_bbrush_sculpt_mode and self.exit_always:
             pref["always_use_bbrush_sculpt_mode"] = False
@@ -67,15 +75,23 @@ class BbrushExit(bpy.types.Operator):
         return {"FINISHED"}
 
     @staticmethod
-    def exit(context):
+    def exit(context, un_reg=False):
+        """
+        :param context:
+        :param un_reg: 是注销操作
+        :return:
+        """
         global brush_runtime
         brush_runtime = None
+
+        if DEBUG_MODE_TOGGLE:
+            print("exit bbrush")
 
         ShortcutKey.stop_shortcut_key()
 
         BrushKeymap.restore_key(context)
         UpdateBrushShelf.restore_brush_shelf(context)
-        ViewProperty.restore_view_property(context)
+        ViewProperty.restore_view_property(context, un_reg)
 
         refresh_ui(context)
 

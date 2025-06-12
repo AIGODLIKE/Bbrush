@@ -42,6 +42,7 @@ class Preferences(
     )
 
     def draw(self, context):
+        from ..sculpt import FixBbrushError
         layout = self.layout
 
         col = layout.column()
@@ -57,10 +58,15 @@ class Preferences(
         box.prop(self, "drag_offset_compensation")
 
         sub_col = box.column()
+
         sub_col.alert = True
         if self.always_use_bbrush_sculpt_mode:
             sub_col.label(text="Tips:Automatically enter Bbrush mode when entering carving mode")
-        sub_col.label(text="Do not reinstall or upgrade this plugin in Bbrush mode!")
+
+        sub_col.alert = False
+        sub_col.operator(FixBbrushError.bl_idname)
+        ops = sub_col.operator("wm.url_open", icon="URL", text="Encountering a problem?")
+        ops.url = "https://github.com/AIGODLIKE/Bbrush/issues/new"
 
         split = col.split()
 
