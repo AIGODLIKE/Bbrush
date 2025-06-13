@@ -29,7 +29,6 @@ def draw_depth():
     context = bpy.context
 
     try:
-
         region_3d = context.space_data.region_3d
         view_matrix = region_3d.view_matrix
         update_depth_map_region_matrix[str(hash(region_3d))] = view_matrix.copy()

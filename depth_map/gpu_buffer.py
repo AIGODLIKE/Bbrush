@@ -75,9 +75,9 @@ def depth_shader():
 gpu_cache = {}  # 优化性能
 
 
-def draw_shader_old(width, height):
+def draw_shader_old(region_hash, width, height):
     shader, batch = depth_shader()
-    key = width, height in gpu_cache
+    key = region_hash, width, height
 
     if key in gpu_cache:
         texture = gpu_cache[key]
@@ -121,7 +121,10 @@ def draw_gpu_buffer(context, depth_buffer):
             gpu.matrix.translate(depth_buffer["translate"])
             gpu.matrix.scale([depth_scale, depth_scale])
             try:
-                draw_shader_old(context.region.width, context.region.height)  # 使用自定义着色器绘制,将会快很多
+                draw_shader_old(
+                    str(hash(context.region)),
+                    context.region.width,
+                    context.region.height)  # 使用自定义着色器绘制,将会快很多
             except Exception as e:
                 return e.args
     else:
@@ -131,11 +134,10 @@ def draw_gpu_buffer(context, depth_buffer):
         font_id = 0
         blf.position(font_id, x, y, 0)
         blf.draw(font_id, error_text + f"{x} {y}")
-        blf.position(font_id, x, y+20, 0)
+        blf.position(font_id, x, y + 20, 0)
         blf.draw(font_id, "Drag Depth Map Error")
 
 
 def clear_gpu_cache():
     global gpu_cache
     gpu_cache.clear()
-
