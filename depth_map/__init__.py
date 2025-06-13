@@ -1,3 +1,5 @@
+import time
+
 import bpy
 from mathutils import Vector
 
@@ -25,14 +27,11 @@ def check_depth_map_is_draw(context):
 
 
 def draw_depth():
-    global depth_buffer_check, update_depth_map_region_matrix
+    global depth_buffer_check
+    start_time = time.time()
     context = bpy.context
 
     try:
-        region_3d = context.space_data.region_3d
-        view_matrix = region_3d.view_matrix
-        update_depth_map_region_matrix[str(hash(region_3d))] = view_matrix.copy()
-
         from ..sculpt import brush_runtime
         from ..sculpt.shortcut_key import ShortcutKey
         if is_bbruse_mode():
@@ -56,6 +55,7 @@ def draw_depth():
         """
     elif depth_buffer_check:
         depth_buffer_check = {}
+    print(time.time() - start_time)
 
 
 def filling_data(context):
@@ -100,31 +100,32 @@ def filling_data(context):
 
 
 update_depth_map_modal_operators_len = 0  # 更新深度图用
+
+
+def update_depth_map_by_modal_operators() -> bool:
+    """在移动缩放这些操作符会向场景的modal_operators添加操作符运行时
+    用这个来进行判断并刷新"""
+    global update_depth_map_modal_operators_len
+    modal_operators_len = len(bpy.context.window.modal_operators)
+    if update_depth_map_modal_operators_len != modal_operators_len:
+        if modal_operators_len == 0:
+            update_depth_map_modal_operators_len = modal_operators_len
+            return True
+
+    return False
+
+
 update_depth_map_region_matrix = {}
 
 
-def try_update_depth_map():
-    """尝试更新深度图
-    如果操作模态被更改了就更新一次
-    优化性能
-
-    TODO 在使用~的时候会无法识别到
-    """
+def update_depth_map_by_matrix() -> bool:
+    """用每个窗口的矩阵来判断"""
     global update_depth_map_modal_operators_len, update_depth_map_region_matrix
+    print("update_depth_map_region_matrix", update_depth_map_region_matrix)
 
-    context = bpy.context
-    modal_operators_len = len(bpy.context.window.modal_operators)
+    # update_depth_map_region_matrix.clear()
 
-    if check_depth_map_is_draw(context):
-        # print("update_depth_map_region_matrix", update_depth_map_region_matrix)
-        if update_depth_map_modal_operators_len != modal_operators_len:
-            if modal_operators_len == 0:
-                clear_gpu_cache()
-                refresh_ui(context)
-            update_depth_map_modal_operators_len = modal_operators_len
-        elif modal_operators_len == 0:
-            ...
-        update_depth_map_region_matrix.clear()
+    return False
 
 
 def register():

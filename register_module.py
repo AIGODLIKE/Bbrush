@@ -51,8 +51,6 @@ def bbrush_timer():
         sculpt.view_property.try_restore_view_property()
         sculpt.update_brush_shelf.try_restore_brush_shelf()
 
-    depth_map.try_update_depth_map()
-
     return pref.refresh_interval
 
 

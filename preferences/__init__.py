@@ -41,7 +41,7 @@ class Preferences(
         max=2
     )
 
-    refresh_fps: bpy.props.IntProperty(name="Refresh FPS", default=5, min=1, max=120)
+    refresh_fps: bpy.props.IntProperty(name="Refresh FPS", default=1, min=1, max=120)
 
     @property
     def refresh_interval(self):

@@ -1,6 +1,7 @@
 from functools import cache
 
 import blf
+import bpy
 import gpu
 from gpu_extras.batch import batch_for_shader
 
@@ -72,12 +73,14 @@ def depth_shader():
     return shader, batch
 
 
-gpu_cache = {}  # 优化性能
+gpu_cache = {
+
+}  # 优化性能
 
 
-def draw_shader_old(region_hash, width, height):
+def draw_shader_old(region_hash, matrix_hash, modal_operators_len, width, height):
     shader, batch = depth_shader()
-    key = region_hash, width, height
+    key = region_hash, matrix_hash, modal_operators_len, width, height
 
     if key in gpu_cache:
         texture = gpu_cache[key]
@@ -87,7 +90,6 @@ def draw_shader_old(region_hash, width, height):
 
         gpu_cache.clear()
         gpu_cache[key] = texture
-        # print("refresh depth map")
 
     mv = gpu.matrix.get_model_view_matrix()
     shader.uniform_float("ModelViewProjectionMatrix", mv)
@@ -121,8 +123,16 @@ def draw_gpu_buffer(context, depth_buffer):
             gpu.matrix.translate(depth_buffer["translate"])
             gpu.matrix.scale([depth_scale, depth_scale])
             try:
+                region_3d = context.space_data.region_3d
+                view_matrix = region_3d.view_matrix
+                matrix_hash = str(hash(view_matrix.copy().freeze()))
+                region_hash = str(hash(context.region))
+                modal_operators_len = len(bpy.context.window.modal_operators)
+
                 draw_shader_old(
-                    str(hash(context.region)),
+                    region_hash,
+                    matrix_hash,
+                    modal_operators_len,
                     context.region.width,
                     context.region.height)  # 使用自定义着色器绘制,将会快很多
             except Exception as e:
