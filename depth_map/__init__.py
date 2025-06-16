@@ -28,7 +28,6 @@ def check_depth_map_is_draw(context):
 
 def draw_depth():
     global depth_buffer_check
-    start_time = time.time()
     context = bpy.context
 
     try:
@@ -55,7 +54,6 @@ def draw_depth():
         """
     elif depth_buffer_check:
         depth_buffer_check = {}
-    print(time.time() - start_time)
 
 
 def filling_data(context):
