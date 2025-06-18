@@ -1,3 +1,5 @@
+from math import pi
+
 import blf
 import bpy
 import gpu
@@ -5,6 +7,9 @@ from gpu_extras.batch import batch_for_shader
 from mathutils import Vector
 
 from ..utils import get_pref, get_region_height, get_region_width
+
+X_PI_S = pi / 8
+Z_PI_S = pi / 5
 
 
 def get_draw_width_height() -> Vector:
@@ -21,14 +26,22 @@ class ViewNavigationGizmo(bpy.types.Gizmo):
 
     __slots__ = (
         "draw_points",
-        "start_mouse"
+        "start_mouse",
+        "last_mouse",
+        "start_rotate",
+        "rotate_index",
+        # "now_rotate",
     )
+
+    @classmethod
+    def poll(cls, context):
+        return context.space_data and context.space_data.region_3d
 
     def draw(self, context):
         from ..utils import get_view_navigation_texture
         pref = get_pref()
 
-        texture = get_view_navigation_texture(0, 0)
+        texture = get_view_navigation_texture(*self.rotate_index)
         shader = gpu.shader.from_builtin('IMAGE')
         dw, dh = draw_size = get_draw_width_height()
 
@@ -79,12 +92,15 @@ class ViewNavigationGizmo(bpy.types.Gizmo):
     def setup(self):
         self.draw_points = ((0, 0), (0, 0))
         self.start_mouse = Vector((0, 0))
-        print("setup", self.bl_idname, dir(self))
-        # self.target_set_operator("view3d.rotate")
+        self.rotate_index = (0, 0)
 
     def invoke(self, context, event):
-        print("invoke")
-        self.start_mouse = Vector((event.mouse_region_x, 0))
+        print("invoke", self)
+        self.last_mouse = self.start_mouse = Vector((event.mouse_region_x, 0))
+        self.start_rotate = context.space_data.region_3d.view_rotation.to_euler()
+
+        "C.screen.areas[3].spaces[0].region_3d.view_rotation = Euler((0,0,pi/2)).to_quaternion()"
+        self.refresh_rotate_index(context)
         return {'RUNNING_MODAL'}
 
     def exit(self, context, cancel):
@@ -95,18 +111,27 @@ class ViewNavigationGizmo(bpy.types.Gizmo):
             ...
 
     def modal(self, context, event, tweak):
-        # delta = (event.mouse_y - self.init_mouse_y) / 10.0
-        # if 'SNAP' in tweak:
-        #     delta = round(delta)
-        # if 'PRECISE' in tweak:
-        #     delta /= 10.0
-        # value = self.init_value - delta
-        # self.target_set_value("offset", value)
-        # context.area.header_text_set("My Gizmo: {:.4f}".format(value))
-        if event.type == "A":
+        # if event.
+        if event.type == "LEFTMOUSE" and event.value == "RELEASE":
+            self.exit(context, False)
             return {"FINISHED"}
         print("modal")
         return {'RUNNING_MODAL'}
+
+    def refresh_rotate_index(self, context):
+        # C.screen.areas[3].spaces[0].region_3d.view_rotation = Euler((pi/2,0,0)).to_quaternion()
+        x, _, z = context.space_data.region_3d.view_rotation.to_euler()
+        while x < 0:
+            x = pi - x
+        while z < 0:
+            z = pi - z
+        while z > pi:
+            z = z - pi
+        while x > pi:
+            x = x - pi
+        xi, zi = int(x // X_PI_S), int(z // Z_PI_S)
+        print(xi, zi, x, z)
+        self.rotate_index = (xi, zi)
 
 
 def ui_scale():
@@ -128,6 +153,7 @@ class ViewNavigationGizmoGroup(bpy.types.GizmoGroup):
     bl_options = {'PERSISTENT', 'SCALE', 'SHOW_MODAL_ALL'}
 
     def draw_prepare(self, context):
+        self.view_navigat.refresh_rotate_index(context)
         return
         # ui scale
         ui = ui_scale()
@@ -171,11 +197,7 @@ class ViewNavigationGizmoGroup(bpy.types.GizmoGroup):
 
     def setup(self, context):
         # 调整焦距控件
-        gz = self.gizmos.new(ViewNavigationGizmo.bl_idname)
-        # gz.icon = 'VIEW_PERSPECTIVE'
-        # gz.icon_value = previews_icons.get("A").icon_id
-        # gz.draw_options = {'BACKDROP', 'OUTLINE'}
-        gz.target_set_operator("view3d.rotate")
+        self.view_navigat = gz = self.gizmos.new(ViewNavigationGizmo.bl_idname)
         gz.use_tooltip = True
         gz.use_draw_modal = True
         gz.alpha = .8
@@ -188,6 +210,7 @@ class ViewNavigationGizmoGroup(bpy.types.GizmoGroup):
     def refresh(self, context):
         ob = context.object
         self.draw_prepare(context)
+        self.view_navigat.refresh_rotate_index(context)
 
 
 classes = (

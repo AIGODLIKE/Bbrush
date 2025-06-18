@@ -36,8 +36,8 @@ def load_vn_image(image_path: str) -> bool:
         # print(len(np_data), pixels_len, len(image.pixels))
         # print(wi, hi)
         temp_image = bpy.data.images.new(f"temp_{image_path}", wi, hi)
-        for i in range(ws):
-            for j in range(hs):
+        for j in range(hs):
+            for i in range(ws):
                 data = sized_data[j * hi:(j + 1) * hi, i * wi:(i + 1) * wi, ::]
                 temp_image.pixels.foreach_set(data.ravel())
                 texture_dict[(i, j)] = gpu.texture.from_image(temp_image)
@@ -54,16 +54,9 @@ def load_vn_image(image_path: str) -> bool:
     return False
 
 
-if __name__ == "__main__":
-    for s in bpy.data.images:
-        bpy.data.images.remove(s)
-    load_vn_image(r"C:\Users\remote\Desktop\Default.PSD")
-
-
 def register():
     ...
 
 
 def unregister():
     texture_cache.clear()
-    print("unregister")
