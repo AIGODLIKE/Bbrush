@@ -1,10 +1,11 @@
 from math import degrees
+from math import pi
 
 import blf
 import bpy
 import gpu
 from gpu_extras.batch import batch_for_shader
-from mathutils import Vector
+from mathutils import Vector, Euler
 
 from ..utils import get_pref, get_region_height, get_region_width
 
@@ -14,6 +15,12 @@ def get_draw_width_height() -> Vector:
     scale = get_pref().view_navigation_gizmo_scale
     w, h = texture_draw_size
     return Vector((int(w * scale), int(h * scale)))
+
+
+def get_hw_view_rotation(hw):
+    h, w = hw
+    x, z = pi / 5, pi / 8,
+    return Euler((h * x, 0, w * z), "XYZ").to_quaternion()
 
 
 class ViewNavigationGizmo(bpy.types.Gizmo):
@@ -27,6 +34,7 @@ class ViewNavigationGizmo(bpy.types.Gizmo):
         "last_mouse",
         "start_rotate",
         "rotate_index",
+        "start_rotate_index",
         # "now_rotate",
     )
 
@@ -92,11 +100,14 @@ class ViewNavigationGizmo(bpy.types.Gizmo):
         self.rotate_index = (0, 0)
 
     def invoke(self, context, event):
-        print("invoke", self)
-        self.last_mouse = self.start_mouse = Vector((event.mouse_region_x, 0))
-        self.start_rotate = context.space_data.region_3d.view_rotation.to_euler()
-
         "C.screen.areas[3].spaces[0].region_3d.view_rotation = Euler((0,0,pi/2)).to_quaternion()"
+        print("invoke", self)
+
+        self.last_mouse = self.start_mouse = Vector((event.mouse_region_x, 0))
+        self.start_rotate = context.space_data.region_3d.view_rotation
+        self.start_rotate_index = self.rotate_index
+
+        self.update_view_rotate(context, self.start_rotate_index)
         self.refresh_rotate_index(context)
         return {'RUNNING_MODAL'}
 
@@ -105,7 +116,7 @@ class ViewNavigationGizmo(bpy.types.Gizmo):
         print("exit")
         self.draw_points = None
         if cancel:
-            ...
+            context.space_data.region_3d.view_rotation = self.start_rotate
 
     def modal(self, context, event, tweak):
         # if event.
@@ -156,8 +167,9 @@ class ViewNavigationGizmo(bpy.types.Gizmo):
             return
         self.rotate_index = (xi, zi)
 
-    def update_view_rotate(self, context):
-        ...
+    def update_view_rotate(self, context, rotate_index):
+        rotation = get_hw_view_rotation(rotate_index)
+        context.space_data.region_3d.view_rotation = rotation
 
 
 def ui_scale():

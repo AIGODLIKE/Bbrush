@@ -38,6 +38,7 @@ def get_region(region_type, context=None) -> "None|bpy.types.Region":
     for region in area.regions:
         if region.type == region_type:
             return region
+    return None
 
 
 def get_toolbar_width(region_type="TOOLS"):
@@ -47,6 +48,7 @@ def get_toolbar_width(region_type="TOOLS"):
                 return i.width
             elif region_type in ("HEADER", "TOOL_HEADER"):
                 return i.height
+    return None
 
 
 def get_region_height(context, region_type="TOOLS") -> int:
