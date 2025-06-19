@@ -1,4 +1,5 @@
 from math import pi
+from math import radians,degrees
 
 import blf
 import bpy
@@ -8,8 +9,8 @@ from mathutils import Vector
 
 from ..utils import get_pref, get_region_height, get_region_width
 
-X_PI_S = pi / 8
-Z_PI_S = pi / 5
+X_PI_S = pi / 5
+Z_PI_S = pi / 4
 
 
 def get_draw_width_height() -> Vector:
@@ -120,18 +121,24 @@ class ViewNavigationGizmo(bpy.types.Gizmo):
 
     def refresh_rotate_index(self, context):
         # C.screen.areas[3].spaces[0].region_3d.view_rotation = Euler((pi/2,0,0)).to_quaternion()
-        x, _, z = context.space_data.region_3d.view_rotation.to_euler()
-        while x < 0:
-            x = pi - x
-        while z < 0:
-            z = pi - z
-        while z > pi:
-            z = z - pi
-        while x > pi:
-            x = x - pi
-        xi, zi = int(x // X_PI_S), int(z // Z_PI_S)
-        print(xi, zi, x, z)
+        ox, _, oz, = x, _, z = context.space_data.region_3d.view_rotation.to_euler()
+
+        if z < 0:
+            z += pi / 4 / 2
+        xi, zi = int(x // X_PI_S), int(z // -Z_PI_S)
+        if zi < 0:
+            zi += 8
+
+        print(xi, zi, x, z, "\t", degrees(ox), degrees(oz))
+        if xi < 0 or xi > 4:
+            return
+        if zi < 0 or zi > 7:
+            return
+
         self.rotate_index = (xi, zi)
+
+    def update_view_rotate(self, context):
+        ...
 
 
 def ui_scale():

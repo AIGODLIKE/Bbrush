@@ -276,4 +276,5 @@ def get_view_navigation_texture(h, w):
         return view_navigation.texture_cache[key]
     else:
         view_navigation.load_vn_image(r"C:\Users\remote\Desktop\Default.PSD")
+        print(view_navigation.texture_cache.keys())
         return view_navigation.texture_cache[key]
