@@ -1,5 +1,4 @@
-from math import pi
-from math import radians,degrees
+from math import degrees
 
 import blf
 import bpy
@@ -8,9 +7,6 @@ from gpu_extras.batch import batch_for_shader
 from mathutils import Vector
 
 from ..utils import get_pref, get_region_height, get_region_width
-
-X_PI_S = pi / 5
-Z_PI_S = pi / 4
 
 
 def get_draw_width_height() -> Vector:
@@ -123,18 +119,41 @@ class ViewNavigationGizmo(bpy.types.Gizmo):
         # C.screen.areas[3].spaces[0].region_3d.view_rotation = Euler((pi/2,0,0)).to_quaternion()
         ox, _, oz, = x, _, z = context.space_data.region_3d.view_rotation.to_euler()
 
-        if z < 0:
-            z += pi / 4 / 2
-        xi, zi = int(x // X_PI_S), int(z // -Z_PI_S)
-        if zi < 0:
-            zi += 8
+        xa, za = degrees(x), degrees(z)
 
-        print(xi, zi, x, z, "\t", degrees(ox), degrees(oz))
+        abs_x = abs(xa)
+        abs_z = abs(za)
+        if xa < 0:  # 负
+            if abs_x < 90:
+                xi = 0
+            else:
+                xi = 5
+        else:
+            if abs_x < 22.5:
+                xi = 0
+            else:
+                xi = (abs_x - 22.5) // 45 + 1
+
+        if za < 0:  # 负
+            if abs_z < 22.5:
+                zi = 0
+            else:
+                zi = abs_z // 45
+        else:
+            if abs_z < 22.5:
+                zi = 0
+            else:
+                zi = 7 - ((abs_z - 22.5) // 45)
+
+        xi = int(xi)
+        zi = int(zi)
+
+        print(xi, zi, x, z, "\t", xa, za)  # "\t", abs_x, abs_z
+
         if xi < 0 or xi > 4:
             return
         if zi < 0 or zi > 7:
             return
-
         self.rotate_index = (xi, zi)
 
     def update_view_rotate(self, context):
