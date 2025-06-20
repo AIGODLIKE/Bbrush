@@ -1,5 +1,4 @@
 from math import degrees, radians
-from math import pi
 
 import blf
 import bpy
@@ -194,20 +193,30 @@ class ViewNavigationGizmo(bpy.types.Gizmo):
         if za < 0:  # 负
             if abs_z < 22.5:
                 zi = 0
+            elif abs_z < 67.5:
+                zi = 1
+            elif abs_z < 112.5:
+                zi = 2
+            elif abs_z < 157.5:
+                zi = 3
             else:
-                zi = abs_z // 45
+                zi = 4
         else:
             if abs_z < 22.5:
                 zi = 0
-            elif abs_z > 45 + 22.5:
-                zi = 1
+            elif abs_z < 67.5:
+                zi = 7
+            elif abs_z < 112.5:
+                zi = 6
+            elif abs_z < 157.5:
+                zi = 5
             else:
-                zi = 7 - (abs_z // 45)
+                zi = 4
 
         xi = int(xi)
         zi = int(zi)
 
-        print("refresh_rotate_index", xi, zi, x, z, "\t", xa, za)  # "\t", abs_x, abs_z
+        print("refresh_rotate_index", xi, zi, "\t", xa, za)  # "\t", abs_x, abs_z x, z,
 
         if xi < 0 or xi > 4:
             return
