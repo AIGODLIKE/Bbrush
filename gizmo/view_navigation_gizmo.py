@@ -1,4 +1,4 @@
-from math import degrees
+from math import degrees, radians
 from math import pi
 
 import blf
@@ -19,8 +19,20 @@ def get_draw_width_height() -> Vector:
 
 def get_hw_view_rotation(hw):
     h, w = hw
-    x, z = pi / 5, pi / 8,
-    return Euler((h * x, 0, w * z), "XYZ").to_quaternion()
+
+    x = radians(45)
+    z = {
+        0: 0,
+        1: -45,
+        2: -90,
+        3: -135,
+        4: -180,
+        5: 135,
+        6: 90,
+        7: 45,
+    }.get(w)
+
+    return Euler((h * x, 0, radians(z)), "XYZ").to_quaternion()
 
 
 class ViewNavigationGizmo(bpy.types.Gizmo):
@@ -103,7 +115,7 @@ class ViewNavigationGizmo(bpy.types.Gizmo):
         "C.screen.areas[3].spaces[0].region_3d.view_rotation = Euler((0,0,pi/2)).to_quaternion()"
         print("invoke", self)
 
-        self.last_mouse = self.start_mouse = Vector((event.mouse_region_x, 0))
+        self.last_mouse = self.start_mouse = Vector((event.mouse_region_x, event.mouse_region_y))
         self.start_rotate = context.space_data.region_3d.view_rotation
         self.start_rotate_index = self.rotate_index
 
@@ -113,17 +125,51 @@ class ViewNavigationGizmo(bpy.types.Gizmo):
 
     def exit(self, context, cancel):
         context.area.header_text_set(None)
-        print("exit")
-        self.draw_points = None
+        print("exit", cancel)
         if cancel:
             context.space_data.region_3d.view_rotation = self.start_rotate
 
     def modal(self, context, event, tweak):
         # if event.
+        start_mouse = self.start_mouse
+        mouse = Vector((event.mouse_region_x, event.mouse_region_y))
+        move = 20
+
+        diff_x = mouse.x - start_mouse.x
+        diff_y = mouse.y - start_mouse.y
+
+        is_x = abs(diff_x) > move
+        is_y = abs(diff_y) > move
         if event.type == "LEFTMOUSE" and event.value == "RELEASE":
             self.exit(context, False)
             return {"FINISHED"}
-        print("modal")
+        if is_x or is_y:
+            h, w = self.rotate_index
+            if is_y:
+                if diff_y > 0:
+                    h += 1
+                else:
+                    h -= 1
+                h = max(0, min(h, 4))
+            elif is_x:
+                if diff_x > 0:
+                    w += 1
+                else:
+                    w -= 1
+
+                print("aa w", w, diff_y)
+                if w < 0:
+                    w = 7
+                elif w > 7:
+                    w = 0
+                w = max(0, min(w, 7))
+                print("aa ff", w, diff_y)
+            print("a", h, w)
+            self.update_view_rotate(context, (h, w))
+            self.rotate_index = (h, w)
+            self.start_mouse = mouse
+
+        # print("modal", self.rotate_index)
         return {'RUNNING_MODAL'}
 
     def refresh_rotate_index(self, context):
@@ -153,13 +199,15 @@ class ViewNavigationGizmo(bpy.types.Gizmo):
         else:
             if abs_z < 22.5:
                 zi = 0
+            elif abs_z > 45 + 22.5:
+                zi = 1
             else:
-                zi = 7 - ((abs_z - 22.5) // 45)
+                zi = 7 - (abs_z // 45)
 
         xi = int(xi)
         zi = int(zi)
 
-        print(xi, zi, x, z, "\t", xa, za)  # "\t", abs_x, abs_z
+        print("refresh_rotate_index", xi, zi, x, z, "\t", xa, za)  # "\t", abs_x, abs_z
 
         if xi < 0 or xi > 4:
             return
