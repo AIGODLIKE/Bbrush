@@ -37,11 +37,11 @@ def load_vn_image(image_path: str) -> bool:
         # print(len(np_data), pixels_len, len(image.pixels))
         # print(wi, hi)
         temp_image = bpy.data.images.new(f"temp_{image_path}", wi, hi)
-        for i in range(width_split):
-            for j in range(height_split):
-                key = (height_split - j - 1, i)
+        for w in range(width_split):
+            for h in range(height_split):
+                key = (w, height_split - h - 1)
 
-                data = sized_data[j * hi:(j + 1) * hi, i * wi:(i + 1) * wi, ::]
+                data = sized_data[h * hi:(h + 1) * hi, w * wi:(w + 1) * wi, ::]
                 temp_image.pixels.foreach_set(data.ravel())
 
                 texture_dict[key] = gpu.texture.from_image(temp_image)
