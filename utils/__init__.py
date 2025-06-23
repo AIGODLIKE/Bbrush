@@ -1,3 +1,5 @@
+import os
+
 import bpy
 from bl_ui.space_toolsystem_common import ToolSelectPanelHelper
 from mathutils import Vector
@@ -277,6 +279,7 @@ def get_view_navigation_texture(h, w):
     if len(view_navigation.texture_cache) == 40 and key in view_navigation.texture_cache:
         return view_navigation.texture_cache[key]
     else:
-        view_navigation.load_vn_image(r"C:\Users\remote\Desktop\Default.PSD")
-        # print(view_navigation.texture_cache.keys())
+        folder = os.path.dirname(os.path.dirname(__file__))
+        default_file_path = os.path.join(folder, "src", "view_navigation", "Default.png")
+        view_navigation.load_vn_image(default_file_path)
         return view_navigation.texture_cache[key]

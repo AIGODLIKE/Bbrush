@@ -34,6 +34,26 @@ def get_hw_view_rotation(hw):
     return Euler((h * x, 0, radians(z)), "XYZ").to_quaternion()
 
 
+def get_rotation_xz(context) -> tuple[float, float]:
+    # C.screen.areas[3].spaces[0].region_3d.view_rotation = Euler((pi/2,0,0)).to_quaternion()
+    view_rotation = context.space_data.region_3d.view_rotation
+    z = Vector((0, 0, 1))
+    z_l = Vector((0, 0, 0)), z
+    a = view_rotation @ z
+    a_l = Vector((0, 0, 0)), a
+    c = Vector((a.y, a.z))
+    d = 0 if c == Vector((0, 0)) else c.angle_signed(Vector((0, 1)))
+
+    y = Vector((0, 1, 0))
+    y_l = Vector((0, 0, 0)), y
+    b = view_rotation @ y
+    b_l = Vector((0, 0, 0)), b
+    e = Vector((b.x, b.y))
+
+    f = 0 if e == Vector((0, 0)) else Vector((0, 1)).angle_signed(e)
+    return round(degrees(d), 2), round(degrees(f), 2)
+
+
 class ViewNavigationGizmo(bpy.types.Gizmo):
     bl_idname = "VIEW3D_GT_view_navigation"
     bl_label = "VIEW3D_GT_view_navigation"
@@ -57,15 +77,16 @@ class ViewNavigationGizmo(bpy.types.Gizmo):
         from ..utils import get_view_navigation_texture
         pref = get_pref()
 
+        gpu.state.blend_set("ALPHA")
         texture = get_view_navigation_texture(*self.rotate_index)
-        shader = gpu.shader.from_builtin('IMAGE')
+        shader = gpu.shader.from_builtin("IMAGE")
         dw, dh = draw_size = get_draw_width_height()
 
         area = context.area
         area_wh = Vector((area.width, area.height))
         with gpu.matrix.push_pop():
             header_height = get_region_height(context, "HEADER") + get_region_height(context, "TOOL_HEADER")
-            ui_width = get_region_width(context, "UI") + get_region_width(context, "HUD")
+            ui_width = get_region_width(context, "UI")  # + get_region_width(context, "HUD")
             area_offset = area_wh - draw_size
             draw_offset = Vector((-ui_width, -header_height)) + Vector(pref.view_navigation_gizmo_offset)
             offset = area_offset + draw_offset
@@ -129,7 +150,6 @@ class ViewNavigationGizmo(bpy.types.Gizmo):
             context.space_data.region_3d.view_rotation = self.start_rotate
 
     def modal(self, context, event, tweak):
-        # if event.
         start_mouse = self.start_mouse
         mouse = Vector((event.mouse_region_x, event.mouse_region_y))
         move = 20
@@ -172,57 +192,84 @@ class ViewNavigationGizmo(bpy.types.Gizmo):
         return {'RUNNING_MODAL'}
 
     def refresh_rotate_index(self, context):
-        # C.screen.areas[3].spaces[0].region_3d.view_rotation = Euler((pi/2,0,0)).to_quaternion()
-        ox, _, oz, = x, _, z = context.space_data.region_3d.view_rotation.to_euler()
 
-        xa, za = degrees(x), degrees(z)
+        view_rotation = context.space_data.region_3d.view_rotation
 
-        abs_x = abs(xa)
-        abs_z = abs(za)
-        if xa < 0:  # 负
-            if abs_x < 90:
-                xi = 0
+        d, f = get_rotation_xz(context)
+        # b = view_rotation.to_euler("ZXY")
+        # print("refresh_rotate_index", degrees(b.z))
+        ox, _, oz, = rotation_x, y, rotation_z = view_rotation.to_euler()  # 视图旋转
+
+        x_angle, z_angle = degrees(rotation_x), degrees(rotation_z)
+
+        print("refresh_rotate_index",
+              # f" z = {z_l}", f" a = {a_l}",
+              f"\t{d}",
+              f"\t{f}",
+              f"\t{x_angle}",
+              f"\t{z_angle}",
+              )
+
+        abs_x_angle = abs(x_angle)
+        abs_z_angle = abs(z_angle)
+
+        width_index = height_index = 0
+
+        if x_angle < 0:  # 负
+            if abs_x_angle < 22.5:
+                width_index = 4
+            elif abs_x_angle < 67.5:
+                width_index = 3
+            elif abs_x_angle < 112.5:
+                width_index = 2
+            elif abs_x_angle < 157.5:
+                width_index = 1
             else:
-                xi = 5
+                width_index = 0
         else:
-            if abs_x < 22.5:
-                xi = 0
+            if abs_x_angle < 22.5:
+                width_index = 0
             else:
-                xi = (abs_x - 22.5) // 45 + 1
+                width_index = (abs_x_angle - 22.5) // 45 + 1
 
-        if za < 0:  # 负
-            if abs_z < 22.5:
-                zi = 0
-            elif abs_z < 67.5:
-                zi = 1
-            elif abs_z < 112.5:
-                zi = 2
-            elif abs_z < 157.5:
-                zi = 3
+        if z_angle < 0:  # 负
+            if abs_z_angle < 22.5:
+                height_index = 0
+            elif abs_z_angle < 67.5:
+                height_index = 1
+            elif abs_z_angle < 112.5:
+                height_index = 2
+            elif abs_z_angle < 157.5:
+                height_index = 3
             else:
-                zi = 4
+                height_index = 4
         else:
-            if abs_z < 22.5:
-                zi = 0
-            elif abs_z < 67.5:
-                zi = 7
-            elif abs_z < 112.5:
-                zi = 6
-            elif abs_z < 157.5:
-                zi = 5
+            if abs_z_angle < 22.5:
+                height_index = 0
+            elif abs_z_angle < 67.5:
+                height_index = 7
+            elif abs_z_angle < 112.5:
+                height_index = 6
+            elif abs_z_angle < 157.5:
+                height_index = 5
             else:
-                zi = 4
+                height_index = 4
 
-        xi = int(xi)
-        zi = int(zi)
+        if x_angle < 0 and z_angle < 0:
+            ...
 
-        print("refresh_rotate_index", xi, zi, "\t", xa, za)  # "\t", abs_x, abs_z x, z,
+        width_index = int(width_index)
+        height_index = int(height_index)
 
-        if xi < 0 or xi > 4:
+        # print("refresh_rotate_index", width_index, height_index, "\t", "x", round(x_angle, 2), "  z:",
+        #       round(z_angle, 2))
+        # "\t", abs_x_angle, abs_z_angle rotation_x, rotation_z,
+
+        if width_index < 0 or width_index > 4:
             return
-        if zi < 0 or zi > 7:
+        if height_index < 0 or height_index > 7:
             return
-        self.rotate_index = (xi, zi)
+        self.rotate_index = (width_index, height_index)
 
     def update_view_rotate(self, context, rotate_index):
         rotation = get_hw_view_rotation(rotate_index)
