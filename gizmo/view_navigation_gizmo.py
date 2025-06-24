@@ -82,43 +82,53 @@ def get_2d_rotation_axis_xz(context) -> tuple[str, float, float]:
         for b in (-1, 1):
             v = Vector((0, 0, 0))
             v[index] = b
-            name = f"-{axis}" if b == -1 else axis
+            v = Matrix.Translation(origin) @ v
+            if view_perspective == "ORTHO":
+                name = f"-{axis}" if b != -1 else axis
+            else:
+                name = f"-{axis}" if b == -1 else axis
+
             length = (view_v - v).length
             if length < min_length:
                 min_length = length
                 active = name
                 active_v = v
 
+    axis_2d_vector = Vector((0, 1))
     if value := {
         "Z": {
-            "X_PANEL": Vector((view_v.y, view_v.z)),
-            "X_AXIS": Vector((0, 1)),
-            "Y_PANEL": Vector((view_v.x, view_v.z)),
-            "Y_AXIS": Vector((0, 1)),
+            "X_PANEL": Vector((vector.y, vector.z)),
+            "Y_PANEL": Vector((vector.x, vector.z)),
         },
         "-Z": {
-            "X_PANEL": Vector((view_v.y, view_v.z)),
-            "X_AXIS": Vector((0, 1)),
-            "Y_PANEL": Vector((view_v.x, view_v.z)),
-            "Y_AXIS": Vector((0, 1)),
+            "X_PANEL": Vector((-vector.y, -vector.z)),
+            "Y_PANEL": Vector((vector.x, -vector.z)),
         },
         "-Y": {
-            "X_PANEL": Vector((-view_v.z, -view_v.y)),
-            "X_AXIS": Vector((0, 1)),
-            "Y_PANEL": Vector((-view_v.z, view_v.x)),
-            "Y_AXIS": Vector((0, 1)),
+            "X_PANEL": Vector((vector.z, -vector.y)),
+            "Y_PANEL": Vector((vector.x, -vector.y)),
         },
-
+        "Y": {
+            "X_PANEL": Vector((vector.z, vector.y)),
+            "Y_PANEL": Vector((-vector.x, vector.y)),
+        },
+        "X": {
+            "X_PANEL": Vector((vector.z, vector.x)),
+            "Y_PANEL": Vector((vector.y, vector.x)),
+        },
+        "-X": {
+            "X_PANEL": Vector((vector.z, -vector.x)),
+            "Y_PANEL": Vector((-vector.y, -vector.x)),
+        }
     }.get(active):
         x_panel = value["X_PANEL"]
-        x_axis = value["X_AXIS"]
         y_panel = value["Y_PANEL"]
-        y_axis = value["Y_AXIS"]
-        x_2d_angle = 0 if x_panel == Vector((0, 0)) else x_axis.angle_signed(x_panel)
-        y_2d_angle = 0 if y_panel == Vector((0, 0)) else y_axis.angle_signed(y_panel)
+        x_2d_angle = 0 if x_panel == Vector((0, 0)) else axis_2d_vector.angle_signed(x_panel)
+        y_2d_angle = 0 if y_panel == Vector((0, 0)) else axis_2d_vector.angle_signed(y_panel)
 
     print()
     print("vector = ", vector.__repr__())
+    print("active_v = ", active_v.__repr__())
     print("vector_direction = ", vector_direction.__repr__())
     # print(min_length, active, active_v)
     return active, round(degrees(x_2d_angle), 2), round(degrees(y_2d_angle), 2)
