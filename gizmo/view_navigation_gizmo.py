@@ -4,9 +4,15 @@ import blf
 import bpy
 import gpu
 from gpu_extras.batch import batch_for_shader
-from mathutils import Vector, Euler
+from mathutils import Vector, Euler, Matrix
 
 from ..utils import get_pref, get_region_height, get_region_width
+
+"""
+上下两个方向需要考虑旋转
+带轴的旋转改修改为以活动轴作为中心左右角度和上下角度
+来对每个轴进行区分
+"""
 
 
 def get_draw_width_height() -> Vector:
@@ -16,8 +22,8 @@ def get_draw_width_height() -> Vector:
     return Vector((int(w * scale), int(h * scale)))
 
 
-def get_hw_view_rotation(hw):
-    h, w = hw
+def get_wh_view_rotation(wh):
+    w, h = wh
 
     x = radians(45)
     z = {
@@ -34,8 +40,91 @@ def get_hw_view_rotation(hw):
     return Euler((h * x, 0, radians(z)), "XYZ").to_quaternion()
 
 
-def get_rotation_xz(context) -> tuple[float, float]:
-    # C.screen.areas[3].spaces[0].region_3d.view_rotation = Euler((pi/2,0,0)).to_quaternion()
+def from_axis_xy_angle_get_wh_index(axis, x, y) -> tuple[int, int]:
+    """从轴的xy角度获取wh的索引"""
+
+
+def get_view_matrix(context) -> Matrix:
+    """获取视图的矩阵
+    PERSP 透视
+    ORTHO 正交
+    """
+    view_perspective = context.space_data.region_3d.view_perspective
+    perspective_matrix = context.space_data.region_3d.perspective_matrix.inverted()
+    view_matrix = context.space_data.region_3d.view_matrix.inverted()
+    view_rotation_matrix = perspective_matrix if view_perspective == "ORTHO" else view_matrix
+    return view_rotation_matrix
+
+
+def get_2d_rotation_axis_xz(context) -> tuple[str, float, float]:
+    view_rotation_matrix = get_view_matrix(context)
+    view_perspective = context.space_data.region_3d.view_perspective
+
+    origin = view_rotation_matrix @ Vector((0, 0, 0))
+    view_v = view_rotation_matrix @ Vector((0, 0, 1))
+    vector_direction = view_v, origin
+    vector = ((origin - view_v) if view_perspective == "ORTHO" else (view_v - origin)).normalized()
+
+    c = Vector((vector.y, vector.z))
+    x_2d_angle = 0 if c == Vector((0, 0)) else c.angle_signed(Vector((0, 1)))
+
+    e = Vector((vector.x, vector.y))
+    y_2d_angle = 0 if e == Vector((0, 0)) else e.angle_signed(Vector((0, -1)))
+
+    x, y, z = view_rotation_matrix.to_euler()
+    x_angle, y_angle, z_angle = int(degrees(x)), int(degrees(y)), int(degrees(z))
+    angle = x_angle, y_angle, z_angle
+
+    min_length = 999
+    active = None
+    active_v = None
+    for index, axis in enumerate(("X", "Y", "Z")):
+        for b in (-1, 1):
+            v = Vector((0, 0, 0))
+            v[index] = b
+            name = f"-{axis}" if b == -1 else axis
+            length = (view_v - v).length
+            if length < min_length:
+                min_length = length
+                active = name
+                active_v = v
+
+    if value := {
+        "Z": {
+            "X_PANEL": Vector((view_v.y, view_v.z)),
+            "X_AXIS": Vector((0, 1)),
+            "Y_PANEL": Vector((view_v.x, view_v.z)),
+            "Y_AXIS": Vector((0, 1)),
+        },
+        "-Z": {
+            "X_PANEL": Vector((view_v.y, view_v.z)),
+            "X_AXIS": Vector((0, 1)),
+            "Y_PANEL": Vector((view_v.x, view_v.z)),
+            "Y_AXIS": Vector((0, 1)),
+        },
+        "-Y": {
+            "X_PANEL": Vector((-view_v.z, -view_v.y)),
+            "X_AXIS": Vector((0, 1)),
+            "Y_PANEL": Vector((-view_v.z, view_v.x)),
+            "Y_AXIS": Vector((0, 1)),
+        },
+
+    }.get(active):
+        x_panel = value["X_PANEL"]
+        x_axis = value["X_AXIS"]
+        y_panel = value["Y_PANEL"]
+        y_axis = value["Y_AXIS"]
+        x_2d_angle = 0 if x_panel == Vector((0, 0)) else x_axis.angle_signed(x_panel)
+        y_2d_angle = 0 if y_panel == Vector((0, 0)) else y_axis.angle_signed(y_panel)
+
+    print()
+    print("vector = ", vector.__repr__())
+    print("vector_direction = ", vector_direction.__repr__())
+    # print(min_length, active, active_v)
+    return active, round(degrees(x_2d_angle), 2), round(degrees(y_2d_angle), 2)
+
+
+def get_2d_rotation_xz(context) -> tuple[float, float]:
     view_rotation = context.space_data.region_3d.view_rotation
     z = Vector((0, 0, 1))
     z_l = z, Vector((0, 0, 0)),
@@ -44,27 +133,80 @@ def get_rotation_xz(context) -> tuple[float, float]:
     c = Vector((a.y, a.z))
     d = 0 if c == Vector((0, 0)) else c.angle_signed(Vector((0, 1)))
 
-    y = Vector((0, 1, 0))
+    y = Vector((0, -1, 0))
     y_l = y, Vector((0, 0, 0))
-    b = view_rotation @ y
-    b_l = b, Vector((0, 0, 0))
-    e = Vector((b.x, b.y))
+    e = Vector((a.x, a.y))
 
-    f = 0 if e == Vector((0, 0)) else Vector((0, 1)).angle_signed(e)
+    f = 0 if e == Vector((0, 0)) else e.angle_signed(Vector((0, -1)))
     x, y, z = view_rotation.to_euler()
     x_angle, y_angle, z_angle = int(degrees(x)), int(degrees(y)), int(degrees(z))
     angle = x_angle, y_angle, z_angle
-    print("view_rotation = ", view_rotation.__repr__())
-    print("view_rotation_e = ", view_rotation.to_euler().__repr__())
-    print("x_angley_anglez_angle = ", angle.__repr__())
-    print("e = ", e)
-    print("c = ", c)
-    print("z_l = ", z_l)
-    print("a_l = ", a_l)
-    print("y_l = ", y_l)
-    print("b_l = ", b_l)
-    print()
+
+    # print("view_rotation = ", view_rotation.__repr__())
+    # print("view_rotation_e = ", view_rotation.to_euler().__repr__())
+    # print("x_angley_anglez_angle = ", angle.__repr__())
+    # print("a = ", a.__repr__())
+    # print("e = ", e.__repr__())
+    # print("c = ", c.__repr__())
+    # print("z_l = ", z_l)
+    # print("y_l = ", y_l)
+    # print()
+
     return round(degrees(d), 2), round(degrees(f), 2)
+
+
+def get_hw_index_from_2d(context) -> tuple[int, int]:
+    """通过3d视图转换成2d进行识别"""
+    x_2d, z_2d = get_2d_rotation_xz(context)
+    axis, x_2d, z_2d = get_2d_rotation_axis_xz(context)
+
+    x_negative = x_2d < 0
+    z_negative = z_2d < 0
+
+    abs_x_angle = abs(x_2d)
+    abs_z_angle = abs(z_2d)
+
+    if z_negative:  # 负
+        if abs_z_angle < 22.5:
+            w_index = 0
+        elif abs_z_angle < 67.5:
+            w_index = 1
+        elif abs_z_angle < 112.5:
+            w_index = 2
+        elif abs_z_angle < 157.5:
+            w_index = 3
+        else:
+            w_index = 4
+    else:
+        if abs_z_angle < 22.5:
+            w_index = 0
+        elif abs_z_angle < 67.5:
+            w_index = 7
+        elif abs_z_angle < 112.5:
+            w_index = 6
+        elif abs_z_angle < 157.5:
+            w_index = 5
+        else:
+            w_index = 4
+
+    if x_negative:
+        if abs_x_angle < 22.5:
+            h_index = 4
+        elif abs_x_angle < 67.5:
+            h_index = 3
+        elif abs_x_angle < 112.5:
+            h_index = 2
+        elif abs_x_angle < 157.5:
+            h_index = 1
+        else:
+            h_index = 0
+    else:
+        if abs_x_angle < 22.5:
+            h_index = 0
+        else:
+            h_index = (abs_x_angle - 22.5) // 45 + 1
+
+    return w_index, h_index
 
 
 class ViewNavigationGizmo(bpy.types.Gizmo):
@@ -77,9 +219,7 @@ class ViewNavigationGizmo(bpy.types.Gizmo):
         "start_mouse",
         "last_mouse",
         "start_rotate",
-        "rotate_index",
-        "start_rotate_index",
-        # "now_rotate",
+        "rotate_index",  # (w, h)
     )
 
     @classmethod
@@ -121,19 +261,27 @@ class ViewNavigationGizmo(bpy.types.Gizmo):
             self.draw_points = ((x1, y1), (x2, y2))
 
         with gpu.matrix.push_pop():
-            blf.draw(0, str(context.area))
-            gpu.matrix.translate((0, 10))
-            blf.draw(0, str((dw, dh)))
-            gpu.matrix.translate((0, -50))
-            blf.draw(0, str(offset))
-            gpu.matrix.translate((0, -100))
-            blf.draw(0, str(self.draw_points))
+            gpu.matrix.translate((0, -80))
 
             view_rotation = context.space_data.region_3d.view_rotation
-            gpu.matrix.translate((0, -110))
-            blf.draw(0, str(get_rotation_xz(context)))
-            gpu.matrix.translate((0, -120))
-            blf.draw(0, str(view_rotation.to_euler()))
+            x, y, z = view_rotation.to_euler()
+            x_angle, y_angle, z_angle = int(degrees(x)), int(degrees(y)), int(degrees(z))
+            key = x_angle, y_angle, z_angle
+
+            a = axis, x, y = get_2d_rotation_axis_xz(context)
+            for text in (
+                    context.area,
+                    (dw, dh),
+                    offset,
+                    self.draw_points,
+                    get_2d_rotation_xz(context),
+                    a,
+                    from_axis_xy_angle_get_wh_index(axis, x, y),
+                    view_rotation.to_euler(),
+                    key,
+            ):
+                blf.draw(0, str(text))
+                gpu.matrix.translate((0, -20))
 
     def test_select(self, context, mouse_pos):
         if self.draw_points is None:
@@ -156,9 +304,8 @@ class ViewNavigationGizmo(bpy.types.Gizmo):
 
         self.last_mouse = self.start_mouse = Vector((event.mouse_region_x, event.mouse_region_y))
         self.start_rotate = context.space_data.region_3d.view_rotation
-        self.start_rotate_index = self.rotate_index
 
-        self.update_view_rotate(context, self.start_rotate_index)
+        self.update_view_rotate(context, self.rotate_index)
         self.refresh_rotate_index(context)
         return {'RUNNING_MODAL'}
 
@@ -230,88 +377,14 @@ class ViewNavigationGizmo(bpy.types.Gizmo):
             (90, 0, 45): (7, 2),
         }.get(key):
             self.rotate_index = standard_view
-
-        return
-        view_rotation = context.space_data.region_3d.view_rotation
-
-        d, f = get_rotation_xz(context)
-        # b = view_rotation.to_euler("ZXY")
-        # print("refresh_rotate_index", degrees(b.z))
-        ox, _, oz, = rotation_x, y, rotation_z = view_rotation.to_euler()  # 视图旋转
-
-        x_angle, z_angle = degrees(rotation_x), degrees(rotation_z)
-
-        print("refresh_rotate_index",
-              # f" z = {z_l}", f" a = {a_l}",
-              f"\t{d}",
-              f"\t{f}",
-              f"\t{x_angle}",
-              f"\t{z_angle}",
-              )
-
-        abs_x_angle = abs(x_angle)
-        abs_z_angle = abs(z_angle)
-
-        width_index = height_index = 0
-
-        if x_angle < 0:  # 负
-            if abs_x_angle < 22.5:
-                width_index = 4
-            elif abs_x_angle < 67.5:
-                width_index = 3
-            elif abs_x_angle < 112.5:
-                width_index = 2
-            elif abs_x_angle < 157.5:
-                width_index = 1
-            else:
-                width_index = 0
         else:
-            if abs_x_angle < 22.5:
-                width_index = 0
-            else:
-                width_index = (abs_x_angle - 22.5) // 45 + 1
+            w_index, h_index = get_hw_index_from_2d(context)
 
-        if z_angle < 0:  # 负
-            if abs_z_angle < 22.5:
-                height_index = 0
-            elif abs_z_angle < 67.5:
-                height_index = 1
-            elif abs_z_angle < 112.5:
-                height_index = 2
-            elif abs_z_angle < 157.5:
-                height_index = 3
-            else:
-                height_index = 4
-        else:
-            if abs_z_angle < 22.5:
-                height_index = 0
-            elif abs_z_angle < 67.5:
-                height_index = 7
-            elif abs_z_angle < 112.5:
-                height_index = 6
-            elif abs_z_angle < 157.5:
-                height_index = 5
-            else:
-                height_index = 4
-
-        if x_angle < 0 and z_angle < 0:
-            ...
-
-        width_index = int(width_index)
-        height_index = int(height_index)
-
-        # print("refresh_rotate_index", width_index, height_index, "\t", "x", round(x_angle, 2), "  z:",
-        #       round(z_angle, 2))
-        # "\t", abs_x_angle, abs_z_angle rotation_x, rotation_z,
-
-        if width_index < 0 or width_index > 4:
-            return
-        if height_index < 0 or height_index > 7:
-            return
-        self.rotate_index = (width_index, height_index)
+            if 0 > w_index < 7 and 0 > h_index < 4:
+                self.rotate_index = (w_index, h_index)
 
     def update_view_rotate(self, context, rotate_index):
-        rotation = get_hw_view_rotation(rotate_index)
+        rotation = get_wh_view_rotation(rotate_index)
         context.space_data.region_3d.view_rotation = rotation
 
 
