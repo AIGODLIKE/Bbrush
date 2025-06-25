@@ -13,7 +13,7 @@ class ViewNavigationGizmo:
 
     view_navigation_gizmo_offset: bpy.props.IntVectorProperty(
         name="View navigation offset",
-        default=(-60, 0),
+        default=(-70, -90),
         size=2,
         max=0,
         min=-114514,
