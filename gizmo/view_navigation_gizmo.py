@@ -414,7 +414,7 @@ class ViewNavigationGizmoGroup(bpy.types.GizmoGroup):
 
     def setup(self, context):
         # 调整焦距控件
-        self.view_navigat = gz = self.gizmos.new(ViewNavigationGizmo.bl_idname)
+        self.view_navigation_gizmo = gz = self.gizmos.new(ViewNavigationGizmo.bl_idname)
         gz.use_draw_modal = True
 
     def refresh(self, context):
