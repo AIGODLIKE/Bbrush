@@ -3,7 +3,8 @@ import bpy
 from .depth_map import DepthMap
 from .shortcut_key import ShortcutKey
 from .topbar import TopBar
-from .view import View
+from .view_navigation_gizmo import ViewNavigationGizmo
+from .view_navigation_property import ViewNavigationProperty
 from .. import __package__ as base_name
 from .. import sculpt
 
@@ -11,10 +12,12 @@ from .. import sculpt
 class Preferences(
     bpy.types.AddonPreferences,
 
-    View,
     TopBar,
     DepthMap,
     ShortcutKey,
+
+    ViewNavigationGizmo,
+    ViewNavigationProperty,
 ):
     bl_idname = base_name
 
@@ -42,6 +45,7 @@ class Preferences(
     )
 
     refresh_fps: bpy.props.IntProperty(name="Refresh FPS", default=1, min=1, max=120)
+    debug: bpy.props.BoolProperty(name="Debug", default=False)
 
     @property
     def refresh_interval(self):
@@ -79,7 +83,8 @@ class Preferences(
 
         column = split.column()
         self.draw_top_ber(column)
-        self.draw_view(column)
+        self.draw_view_navigation_gizmo(column)
+        self.draw_view_navigation_property(column)
 
         column = split.column()
         self.draw_depth(column)

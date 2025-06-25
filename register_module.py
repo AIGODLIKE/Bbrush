@@ -1,11 +1,13 @@
 import bpy
 from bpy.app.handlers import persistent
 
-from . import depth_map, preferences, topbar, sculpt, src
+from . import depth_map, preferences, topbar, sculpt, src, gizmo
+from .src import view_navigation
 from .utils import register_submodule_factory, get_pref, is_bbruse_mode
 
 model_tuple = (
     src,
+    gizmo,
     topbar,
     sculpt,
     depth_map,
@@ -20,6 +22,7 @@ owner = object()
 def start_update_bbrush_mode():
     """在启动Blender的时候"""
     sculpt.try_toggle_bbrush_mode()
+    view_navigation.register()
 
 
 def object_mode_update_bbrush_mode():
@@ -77,6 +80,7 @@ def register():
 
 
 def unregister():
+    view_navigation.unregister()
     sculpt.BbrushExit.exit(bpy.context, True)
 
     bpy.msgbus.clear_by_owner(owner)

@@ -4,7 +4,8 @@ import bpy
 from mathutils import Vector
 
 from .gpu_buffer import draw_gpu_buffer, clear_gpu_cache
-from ..utils import get_pref, is_bbruse_mode, get_region_height, get_region_width, refresh_ui
+from ..debug import DEBUG_DEPTH_MAP
+from ..utils import get_pref, is_bbruse_mode, get_region_height, get_region_width, check_display_mode_is_draw
 
 handel = None
 
@@ -19,14 +20,12 @@ def check_depth_map_is_draw(context):
     """检查深度图是否需要绘制"""
     pref = get_pref()
     mode = pref.depth_display_mode
-    is_sculpt = context.mode == "SCULPT"
-    always = mode == "ALWAYS_DISPLAY"
-    only_sculpt = (mode == "ONLY_SCULPT") and is_sculpt
-    only_bbrush = (mode == "ONLY_BBRUSH") and is_sculpt and is_bbruse_mode()
-    return always or only_sculpt or only_bbrush
+    return check_display_mode_is_draw(context, mode)
 
 
 def draw_depth():
+    if DEBUG_DEPTH_MAP:
+        start_time = time.time()
     global depth_buffer_check
     context = bpy.context
 
@@ -54,6 +53,9 @@ def draw_depth():
         """
     elif depth_buffer_check:
         depth_buffer_check = {}
+
+    if DEBUG_DEPTH_MAP:
+        print("draw_depth time:", time.time() - start_time)
 
 
 def filling_data(context):
@@ -109,19 +111,6 @@ def update_depth_map_by_modal_operators() -> bool:
         if modal_operators_len == 0:
             update_depth_map_modal_operators_len = modal_operators_len
             return True
-
-    return False
-
-
-update_depth_map_region_matrix = {}
-
-
-def update_depth_map_by_matrix() -> bool:
-    """用每个窗口的矩阵来判断"""
-    global update_depth_map_modal_operators_len, update_depth_map_region_matrix
-    print("update_depth_map_region_matrix", update_depth_map_region_matrix)
-
-    # update_depth_map_region_matrix.clear()
 
     return False
 

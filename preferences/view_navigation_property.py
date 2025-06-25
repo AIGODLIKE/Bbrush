@@ -11,8 +11,8 @@ def get_view_property_info(x):
     return get_property_rna_info(bpy.types.PreferencesView.bl_rna, x)
 
 
-class View:
-    use_view: bpy.props.BoolProperty(name="Use view pref", default=True)
+class ViewNavigationProperty:
+    use_navigation_property: bpy.props.BoolProperty(name="Use view pref", default=True)
     view_rotate_method: bpy.props.EnumProperty(
         **{**get_input_property_info("view_rotate_method"), "default": "TRACKBALL"})
     view_rotate_sensitivity_turntable: bpy.props.FloatProperty(
@@ -26,13 +26,13 @@ class View:
     smooth_view: bpy.props.IntProperty(**get_view_property_info("smooth_view"))
     rotation_angle: bpy.props.FloatProperty(**get_view_property_info("rotation_angle"))
 
-    def draw_view(self, layout):
+    def draw_view_navigation_property(self, layout):
 
         box = layout.column().box()
-        box.prop(self, "use_view")
+        box.prop(self, "use_navigation_property")
         
         box = box.column()
-        box.active = self.use_view
+        box.active = self.use_navigation_property
 
         box.label(text="View")
 

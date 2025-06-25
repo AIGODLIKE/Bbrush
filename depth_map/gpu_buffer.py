@@ -7,7 +7,6 @@ from gpu_extras.batch import batch_for_shader
 
 from ..utils import get_pref
 
-
 def get_coord(st=(-1, -1), interval=(2, 2)):
     """输入一个起始坐标,反回一个坐标列表,三角面连接顺序是(0, 1, 2), (2, 0, 3)
     从左下到右上
