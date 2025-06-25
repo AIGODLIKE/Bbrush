@@ -413,7 +413,9 @@ class ViewNavigationGizmoGroup(bpy.types.GizmoGroup):
         self.view_navigation_gizmo.refresh_rotate_index(context)
 
     def setup(self, context):
-        self.view_navigation_gizmo = self.gizmos.new(ViewNavigationGizmo.bl_idname)
+        # 调整焦距控件
+        self.view_navigat = gz = self.gizmos.new(ViewNavigationGizmo.bl_idname)
+        gz.use_draw_modal = True
 
     def refresh(self, context):
         self.view_navigation_gizmo.refresh_rotate_index(context)
