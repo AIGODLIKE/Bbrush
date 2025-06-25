@@ -40,10 +40,6 @@ def get_wh_view_rotation(wh):
     return Euler((h * x, 0, radians(z)), "XYZ").to_quaternion()
 
 
-def from_axis_xy_angle_get_wh_index(axis, x, y) -> tuple[int, int]:
-    """从轴的xy角度获取wh的索引"""
-
-
 def get_view_matrix(context) -> Matrix:
     """获取视图的矩阵
     PERSP 透视
@@ -56,7 +52,11 @@ def get_view_matrix(context) -> Matrix:
     return view_rotation_matrix
 
 
-def get_2d_rotation_axis_xz(context) -> tuple[str, float, float]:
+def get_2d_rotation_axis_xy_angle(context) -> tuple[str, float, float]:
+    """
+    通过2D旋转获取
+    轴朝向和角度
+    """
     view_rotation_matrix = get_view_matrix(context)
     view_perspective = context.space_data.region_3d.view_perspective
 
@@ -126,11 +126,6 @@ def get_2d_rotation_axis_xz(context) -> tuple[str, float, float]:
         x_2d_angle = 0 if x_panel == Vector((0, 0)) else axis_2d_vector.angle_signed(x_panel)
         y_2d_angle = 0 if y_panel == Vector((0, 0)) else axis_2d_vector.angle_signed(y_panel)
 
-    print()
-    print("vector = ", vector.__repr__())
-    print("active_v = ", active_v.__repr__())
-    print("vector_direction = ", vector_direction.__repr__())
-    # print(min_length, active, active_v)
     return active, round(degrees(x_2d_angle), 2), round(degrees(y_2d_angle), 2)
 
 
@@ -165,58 +160,130 @@ def get_2d_rotation_xz(context) -> tuple[float, float]:
     return round(degrees(d), 2), round(degrees(f), 2)
 
 
+def from_2d_get_axis_and_index(context) -> tuple[str, int, int]:
+    axis, x_2d, y_2d = get_2d_rotation_axis_xy_angle(context)
+
+    if x_2d > 22.5:
+        x_index = 0
+    elif x_2d < -22.5:
+        x_index = 2
+    else:
+        x_index = 1
+
+    if y_2d > 22.5:
+        y_index = 2
+    elif y_2d < -22.5:
+        y_index = 0
+    else:
+        y_index = 1
+    return axis, x_index, y_index
+
+
 def get_hw_index_from_2d(context) -> tuple[int, int]:
     """通过3d视图转换成2d进行识别"""
-    x_2d, z_2d = get_2d_rotation_xz(context)
-    axis, x_2d, z_2d = get_2d_rotation_axis_xz(context)
+    axis, x_2d_index, y_2d_index = from_2d_get_axis_and_index(context)
+    key = (x_2d_index, y_2d_index)
+    print(axis, key)
+    if value := {
+        "X": {
+            (0, 0): (7, 1),
+            (0, 1): (6, 1),
+            (0, 2): (5, 1),
+            (1, 0): (7, 2),
+            (1, 1): (6, 2),
+            (1, 2): (5, 2),
+            (2, 0): (7, 3),
+            (2, 1): (6, 3),
+            (2, 2): (5, 3),
+        },
+        "-X": {
+            (0, 0): (3, 1),
+            (0, 1): (2, 1),
+            (0, 2): (1, 1),
+            (1, 0): (3, 2),
+            (1, 1): (2, 2),
+            (1, 2): (1, 2),
+            (2, 0): (3, 3),
+            (2, 1): (2, 3),
+            (2, 2): (1, 3),
+        },
+        "Y": {
+            (0, 0): (5, 1),
+            (0, 1): (4, 1),
+            (0, 2): (3, 1),
+            (1, 0): (5, 2),
+            (1, 1): (4, 2),
+            (1, 2): (3, 2),
+            (2, 0): (5, 3),
+            (2, 1): (4, 3),
+            (2, 2): (3, 3),
+        },
+        "-Y": {
+            (0, 0): (1, 1),
+            (0, 1): (0, 1),
+            (0, 2): (7, 1),
+            (1, 0): (1, 2),
+            (1, 1): (0, 2),
+            (1, 2): (7, 2),
+            (2, 0): (1, 3),
+            (2, 1): (0, 3),
+            (2, 2): (7, 3),
+        },
+        "Z": {
+            (0, 0): (3, 1),
+            (0, 1): (4, 1),
+            (0, 2): (5, 1),
+            (1, 0): (2, 1),
+            (1, 1): (0, 0),
+            (1, 2): (6, 1),
+            (2, 0): (1, 1),
+            (2, 1): (0, 1),
+            (2, 2): (7, 1),
+        },
+        "-Z": {
+            (0, 0): (1, 3),
+            (0, 1): (0, 3),
+            (0, 2): (7, 3),
+            (1, 0): (2, 3),
+            (1, 1): (4, 4),
+            (1, 2): (6, 3),
+            (2, 0): (3, 3),
+            (2, 1): (4, 3),
+            (2, 2): (5, 3),
+        },
+    }.get(axis):
+        if wh_index := value.get(key):
+            w, h = wh_index
+            if axis in ("Z", "-Z") and key == (1, 1):
+                view_rotation_matrix = get_view_matrix(context)
+                x, y, z = view_rotation_matrix.to_euler()
+                z_angle = degrees(z)
 
-    x_negative = x_2d < 0
-    z_negative = z_2d < 0
-
-    abs_x_angle = abs(x_2d)
-    abs_z_angle = abs(z_2d)
-
-    if z_negative:  # 负
-        if abs_z_angle < 22.5:
-            w_index = 0
-        elif abs_z_angle < 67.5:
-            w_index = 1
-        elif abs_z_angle < 112.5:
-            w_index = 2
-        elif abs_z_angle < 157.5:
-            w_index = 3
-        else:
-            w_index = 4
-    else:
-        if abs_z_angle < 22.5:
-            w_index = 0
-        elif abs_z_angle < 67.5:
-            w_index = 7
-        elif abs_z_angle < 112.5:
-            w_index = 6
-        elif abs_z_angle < 157.5:
-            w_index = 5
-        else:
-            w_index = 4
-
-    if x_negative:
-        if abs_x_angle < 22.5:
-            h_index = 4
-        elif abs_x_angle < 67.5:
-            h_index = 3
-        elif abs_x_angle < 112.5:
-            h_index = 2
-        elif abs_x_angle < 157.5:
-            h_index = 1
-        else:
-            h_index = 0
-    else:
-        if abs_x_angle < 22.5:
-            h_index = 0
-        else:
-            h_index = (abs_x_angle - 22.5) // 45 + 1
-
-    return w_index, h_index
+                abs_z_angle = abs(z_angle)
+                if z_angle < 0:  # 负
+                    if abs_z_angle < 22.5:
+                        w = 0
+                    elif abs_z_angle < 67.5:
+                        w = 1
+                    elif abs_z_angle < 112.5:
+                        w = 2
+                    elif abs_z_angle < 157.5:
+                        w = 3
+                    else:
+                        w = 4
+                else:
+                    if abs_z_angle < 22.5:
+                        w = 0
+                    elif abs_z_angle < 67.5:
+                        w = 7
+                    elif abs_z_angle < 112.5:
+                        w = 6
+                    elif abs_z_angle < 157.5:
+                        w = 5
+                    else:
+                        w = 4
+            return w, h
+    return 0, 0
 
 
 class ViewNavigationGizmo(bpy.types.Gizmo):
@@ -230,6 +297,7 @@ class ViewNavigationGizmo(bpy.types.Gizmo):
         "last_mouse",
         "start_rotate",
         "rotate_index",  # (w, h)
+        "in_modal",
     )
 
     @classmethod
@@ -273,22 +341,23 @@ class ViewNavigationGizmo(bpy.types.Gizmo):
         with gpu.matrix.push_pop():
             gpu.matrix.translate((0, -80))
 
-            view_rotation = context.space_data.region_3d.view_rotation
-            x, y, z = view_rotation.to_euler()
+            view_rotation_matrix = get_view_matrix(context)
+            x, y, z = view_rotation_matrix.to_euler()
             x_angle, y_angle, z_angle = int(degrees(x)), int(degrees(y)), int(degrees(z))
             key = x_angle, y_angle, z_angle
 
-            a = axis, x, y = get_2d_rotation_axis_xz(context)
+            a = axis, x, y = get_2d_rotation_axis_xy_angle(context)
             for text in (
                     context.area,
                     (dw, dh),
                     offset,
                     self.draw_points,
-                    get_2d_rotation_xz(context),
                     a,
-                    from_axis_xy_angle_get_wh_index(axis, x, y),
-                    view_rotation.to_euler(),
+                    from_2d_get_axis_and_index(context),
+                    get_hw_index_from_2d(context),
+                    view_rotation_matrix.to_euler(),
                     key,
+                    self.rotate_index,
             ):
                 blf.draw(0, str(text))
                 gpu.matrix.translate((0, -20))
@@ -307,6 +376,7 @@ class ViewNavigationGizmo(bpy.types.Gizmo):
         self.draw_points = ((0, 0), (0, 0))
         self.start_mouse = Vector((0, 0))
         self.rotate_index = (0, 0)
+        self.in_modal = False
 
     def invoke(self, context, event):
         "C.screen.areas[3].spaces[0].region_3d.view_rotation = Euler((0,0,pi/2)).to_quaternion()"
@@ -317,11 +387,14 @@ class ViewNavigationGizmo(bpy.types.Gizmo):
 
         self.update_view_rotate(context, self.rotate_index)
         self.refresh_rotate_index(context)
+
+        self.in_modal = True
         return {'RUNNING_MODAL'}
 
     def exit(self, context, cancel):
         context.area.header_text_set(None)
         print("exit", cancel)
+        self.in_modal = False
         if cancel:
             context.space_data.region_3d.view_rotation = self.start_rotate
 
@@ -339,7 +412,7 @@ class ViewNavigationGizmo(bpy.types.Gizmo):
             self.exit(context, False)
             return {"FINISHED"}
         if is_x or is_y:
-            h, w = self.rotate_index
+            w, h = self.rotate_index
             if is_y:
                 if diff_y > 0:
                     h += 1
@@ -360,14 +433,16 @@ class ViewNavigationGizmo(bpy.types.Gizmo):
                 w = max(0, min(w, 7))
                 print("aa ff", w, diff_y)
             print("a", h, w)
-            self.update_view_rotate(context, (h, w))
-            self.rotate_index = (h, w)
+            self.update_view_rotate(context, (w, h))
+            self.rotate_index = (w, h)
             self.start_mouse = mouse
 
         # print("modal", self.rotate_index)
         return {'RUNNING_MODAL'}
 
     def refresh_rotate_index(self, context):
+        if self.in_modal:
+            return
         view_rotation = context.space_data.region_3d.view_rotation
         x, y, z = view_rotation.to_euler()
         x_angle, y_angle, z_angle = int(degrees(x)), int(degrees(y)), int(degrees(z))
@@ -390,7 +465,7 @@ class ViewNavigationGizmo(bpy.types.Gizmo):
         else:
             w_index, h_index = get_hw_index_from_2d(context)
 
-            if 0 > w_index < 7 and 0 > h_index < 4:
+            if 0 <= w_index < 8 and 0 <= h_index < 5:
                 self.rotate_index = (w_index, h_index)
 
     def update_view_rotate(self, context, rotate_index):
