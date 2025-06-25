@@ -299,5 +299,5 @@ def get_view_navigation_texture(h, w):
         folder = os.path.dirname(os.path.dirname(__file__))
         default_file_path = os.path.join(folder, "src", "view_navigation", "Default.png")
         view_navigation.load_view_navigation_image(default_file_path)
-        print(view_navigation.texture_cache.keys())
+        # print(view_navigation.texture_cache.keys())
         return view_navigation.texture_cache[key]

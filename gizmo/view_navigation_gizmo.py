@@ -1,6 +1,6 @@
-from functools import cache
 from math import degrees, radians
 
+import blf
 import bpy
 import gpu
 from gpu_extras.batch import batch_for_shader
@@ -234,20 +234,6 @@ def get_hw_index_from_2d(context) -> tuple[int, int]:
     return 0, 0
 
 
-@cache
-def get_cache_shader(w, h):
-    dw, dh = w, h
-    shader = gpu.shader.from_builtin("IMAGE")
-    batch = batch_for_shader(
-        shader, "TRI_FAN",
-        {
-            "pos": ((0, 0), (dw, 0), (dw, dh), (0, dh)),
-            "texCoord": ((0, 0), (1, 0), (1, 1), (0, 1)),
-        },
-    )
-    return shader, batch
-
-
 def update_view_rotate(context, rotate_index):
     rotation = get_wh_view_rotation(rotate_index)
     context.space_data.region_3d.view_rotation = rotation
@@ -274,7 +260,6 @@ class ViewNavigationGizmo(bpy.types.Gizmo):
     def draw(self, context):
         from ..utils import get_view_navigation_texture
         pref = get_pref()
-
         gpu.state.blend_set("ALPHA")
         texture = get_view_navigation_texture(*self.rotate_index)
         dw, dh = draw_size = get_draw_view_navigation_texture_width_height()
@@ -289,7 +274,15 @@ class ViewNavigationGizmo(bpy.types.Gizmo):
             offset = area_offset + draw_offset
 
             gpu.matrix.translate(offset)
-            shader, batch = get_cache_shader(dw, dh)
+
+            shader = gpu.shader.from_builtin("IMAGE")
+            batch = batch_for_shader(
+                shader, "TRI_FAN",
+                {
+                    "pos": ((0, 0), (dw, 0), (dw, dh), (0, dh)),
+                    "texCoord": ((0, 0), (1, 0), (1, 1), (0, 1)),
+                },
+            )
             shader.uniform_sampler("image", texture)
             shader.bind()
             batch.draw(shader)
@@ -322,6 +315,9 @@ class ViewNavigationGizmo(bpy.types.Gizmo):
                 ):
                     blf.draw(0, str(text))
                     gpu.matrix.translate((0, -20))
+
+    def draw_select(self, context, select_id):
+        self.draw(context)
 
     def test_select(self, context, mouse_pos):
         if self.draw_points is None:
@@ -405,7 +401,7 @@ class ViewNavigationGizmoGroup(bpy.types.GizmoGroup):
     bl_label = "View Gizmo"
     bl_space_type = "VIEW_3D"
     bl_region_type = "WINDOW"
-    bl_options = {"PERSISTENT", "SCALE"}
+    bl_options = {"PERSISTENT", "SCALE", "SHOW_MODAL_ALL"}
 
     @classmethod
     def poll(cls, context):
