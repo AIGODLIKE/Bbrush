@@ -11,7 +11,7 @@ texture_cache = {
 texture_draw_size = (235, 256)
 
 
-def load_vn_image(image_path: str) -> bool:
+def load_view_navigation_image(image_path: str) -> bool:
     """反回是否加载正确的布尔值"""
     global texture_cache, texture_draw_size
     try:

@@ -1,4 +1,5 @@
 import os
+from functools import cache
 
 import bpy
 from bl_ui.space_toolsystem_common import ToolSelectPanelHelper
@@ -6,6 +7,22 @@ from mathutils import Vector
 
 from .line_to_convex_shell import line_to_convex_shell
 from .. import __package__ as base_name
+
+DISPLAY_ITEMS = (
+    ("ALWAYS_DISPLAY", "Always display",
+     "Keep the silhouette displayed all the time, even when not in sculpting mode"),
+    ("ONLY_SCULPT", "Only Sculpt", "Display silhouette images only in sculpting mode"),
+    ("ONLY_BBRUSH", "Only Bbrush", "Display silhouette images only in Bbrush mode"),
+    ("NOT_DISPLAY", "Not Display", "Never display silhouette images at any time"),
+)
+
+
+def check_display_mode_is_draw(context, display_mode: str) -> bool:
+    is_sculpt = context.mode == "SCULPT"
+    always = display_mode == "ALWAYS_DISPLAY"
+    only_sculpt = (display_mode == "ONLY_SCULPT") and is_sculpt
+    only_bbrush = (display_mode == "ONLY_BBRUSH") and is_sculpt and is_bbruse_mode()
+    return always or only_sculpt or only_bbrush
 
 
 def check_pref() -> bool:
@@ -272,7 +289,7 @@ def get_property_rna_info(bl_rna, property_name: "str") -> "dict|None":
         return data
     return None
 
-
+@cache
 def get_view_navigation_texture(h, w):
     from ..src import view_navigation
     key = (h, w)
@@ -281,6 +298,6 @@ def get_view_navigation_texture(h, w):
     else:
         folder = os.path.dirname(os.path.dirname(__file__))
         default_file_path = os.path.join(folder, "src", "view_navigation", "Default.png")
-        view_navigation.load_vn_image(default_file_path)
+        view_navigation.load_view_navigation_image(default_file_path)
         print(view_navigation.texture_cache.keys())
         return view_navigation.texture_cache[key]

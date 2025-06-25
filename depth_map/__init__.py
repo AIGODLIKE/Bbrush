@@ -4,7 +4,7 @@ import bpy
 from mathutils import Vector
 
 from .gpu_buffer import draw_gpu_buffer, clear_gpu_cache
-from ..utils import get_pref, is_bbruse_mode, get_region_height, get_region_width, refresh_ui
+from ..utils import get_pref, is_bbruse_mode, get_region_height, get_region_width, refresh_ui,check_display_mode_is_draw
 
 handel = None
 
@@ -19,11 +19,7 @@ def check_depth_map_is_draw(context):
     """检查深度图是否需要绘制"""
     pref = get_pref()
     mode = pref.depth_display_mode
-    is_sculpt = context.mode == "SCULPT"
-    always = mode == "ALWAYS_DISPLAY"
-    only_sculpt = (mode == "ONLY_SCULPT") and is_sculpt
-    only_bbrush = (mode == "ONLY_BBRUSH") and is_sculpt and is_bbruse_mode()
-    return always or only_sculpt or only_bbrush
+    return check_display_mode_is_draw(context,mode)
 
 
 def draw_depth():
