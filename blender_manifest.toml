@@ -8,8 +8,8 @@ maintainer = "AIGODLIKE Community(小萌新)"
 name = "Bbrush"
 tagline = "Sculpting using only a pen and keyboard"
 type = "add-on"
-version = "1.3.12"
+version = "1.4.0"
 tags = ["Sculpt", ]
 
 [permissions]
-files = "Keymap File Load"
+files = "Keymap file load, View navigation texture load"
