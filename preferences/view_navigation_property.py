@@ -12,7 +12,7 @@ def get_view_property_info(x):
 
 
 class ViewNavigationProperty:
-    use_navigation_property: bpy.props.BoolProperty(name="Use view pref", default=True)
+    use_navigation_property: bpy.props.BoolProperty(name="Use view pref", default=False)
     view_rotate_method: bpy.props.EnumProperty(
         **{**get_input_property_info("view_rotate_method"), "default": "TRACKBALL"})
     view_rotate_sensitivity_turntable: bpy.props.FloatProperty(
@@ -30,7 +30,7 @@ class ViewNavigationProperty:
 
         box = layout.column().box()
         box.prop(self, "use_navigation_property")
-        
+
         box = box.column()
         box.active = self.use_navigation_property
 
