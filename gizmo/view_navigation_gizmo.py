@@ -25,6 +25,7 @@ class ViewNavigationGizmo(bpy.types.Gizmo):
         "start_rotate",
         "rotate_index",  # (w, h)
         "in_modal",
+        "is_hover",
     )
 
     @classmethod
@@ -46,7 +47,6 @@ class ViewNavigationGizmo(bpy.types.Gizmo):
             area_offset = area_wh - draw_size
             draw_offset = Vector((-ui_width, -header_height)) + Vector(pref.view_navigation_gizmo_offset)
             offset = area_offset + draw_offset
-
             gpu.matrix.translate(offset)
 
             shader = gpu.shader.from_builtin("IMAGE")
@@ -89,9 +89,21 @@ class ViewNavigationGizmo(bpy.types.Gizmo):
                 ):
                     blf.draw(0, str(text))
                     gpu.matrix.translate((0, -20))
+        self.draw_tips(context)
 
-    def draw_select(self, context, select_id):
-        self.draw(context)
+    def draw_tips(self, context):
+        pref = get_pref()
+        if self.is_hover and pref.view_navigation_gizmo_show_tips:
+            with gpu.matrix.push_pop():
+                blf.position(0, 0, 0, 0)
+                gpu.matrix.translate((context.area.width / 2, 0))
+                for text in reversed((
+                        "Bbrush view navigation",
+                        " ",
+                        "If you need to close it, you can adjust it in the addon preference settings",
+                )):
+                    gpu.matrix.translate((0, 10))
+                    blf.draw(0, bpy.app.translations.pgettext_iface(text))
 
     def test_select(self, context, mouse_pos):
         if self.draw_points is None:
@@ -100,18 +112,19 @@ class ViewNavigationGizmo(bpy.types.Gizmo):
         (x1, y1), (x2, y2) = self.draw_points
         x_ok = x1 < x < x2
         y_ok = y1 < y < y2
-        return 0 if x_ok and y_ok else -1
+        is_hover = 0 if x_ok and y_ok else -1
+        self.is_hover = is_hover == 0
+        return is_hover
 
     def setup(self):
-        print("setup")
-        self.in_modal = False
+        self.is_hover = self.in_modal = False
         self.rotate_index = (0, 0)
-        self.start_mouse = Vector((0, 0))
+        self.last_mouse = self.start_mouse = Vector((0, 0))
         self.draw_points = ((0, 0), (0, 0))
 
     def invoke(self, context, event):
-        print("invoke")
         self.in_modal = True
+        self.is_hover = False
         self.start_rotate = context.space_data.region_3d.view_rotation
         self.last_mouse = self.start_mouse = Vector((event.mouse_region_x, event.mouse_region_y))
 
@@ -126,7 +139,6 @@ class ViewNavigationGizmo(bpy.types.Gizmo):
             context.space_data.region_3d.view_rotation = self.start_rotate
 
     def modal(self, context, event, tweak):
-        print("modal")
         start_mouse = self.start_mouse
         mouse = Vector((event.mouse_region_x, event.mouse_region_y))
         move = 20
@@ -191,7 +203,6 @@ class ViewNavigationGizmoGroup(bpy.types.GizmoGroup):
 
     def setup(self, context):
         # 调整焦距控件
-        from .navigation import Navigation
         self.view_navigation_gizmo = gz = self.gizmos.new(ViewNavigationGizmo.bl_idname)
         gz.use_draw_modal = True
 

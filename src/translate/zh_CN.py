@@ -76,7 +76,8 @@ data = {
     "Click in blank area": "在空白处单击",
     "Click in model": "在模型上单击",
     "Bbrush view navigation": "Bbrush 视图导览",
-    "If you need to close it, you can adjust it in the plugin preference settings": "如需关闭可在插件偏好设置内调整",
+    "If you need to close it, you can adjust it in the addon preference settings": "如需关闭可在插件偏好设置内调整",
+    "Show tips": "显示提示",
 
     "mouse_right": "右键",
     "middle": "中键",
