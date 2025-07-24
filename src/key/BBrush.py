@@ -56,6 +56,7 @@ keyconfig_data = [
             ("wm.call_panel", {"type": "RIGHTMOUSE", "value": "CLICK"},
              {"properties": [("name", "VIEW3D_PT_sculpt_context_menu"), ]}),
             ("view3d.rotate", {"type": "RIGHTMOUSE", "value": "CLICK_DRAG"}, None),
+            ("view3d.rotate", {"type": "RIGHTMOUSE", "value": "PRESS", "alt": True, "shift": True}, None),
             ("view3d.move", {"type": "RIGHTMOUSE", "value": "PRESS", "alt": True}, None),
             ("view3d.move", {"type": "MIDDLEMOUSE", "value": "PRESS", "alt": True}, None),
             ("view3d.zoom", {"type": "RIGHTMOUSE", "value": "PRESS", "ctrl": True}, None),
@@ -188,7 +189,6 @@ keyconfig_data = [
          ("sculpt.project_line_gesture", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "any": True},
           {"properties": [], },),
      ], },),
-
 ]
 
 
@@ -197,13 +197,20 @@ def view_switch():
     move = blender_default.km_view3d_move_modal(params)
     zoom = blender_default.km_view3d_zoom_modal(params)
 
+    rotate_items = [item for item in rotate[2]["items"] if item[0] not in ("AXIS_SNAP_ENABLE", "AXIS_SNAP_DISABLE")]
+    rotate[2]["items"] = rotate_items
     rotate[2]["items"].extend([
         ("CONFIRM", {"type": "RIGHTMOUSE", "value": "ANY"}, None),
         ("CONFIRM", {"type": "MIDDLEMOUSE", "value": "ANY"}, None),
         ("CONFIRM", {"type": "LEFTMOUSE", "value": "ANY"}, None),
         ("SWITCH_TO_ZOOM", {"type": "LEFT_CTRL", "value": "ANY"}, None),
         ("AXIS_SNAP_ENABLE", {"type": "LEFT_SHIFT", "value": "PRESS"}, None),
-        ("AXIS_SNAP_DISABLE", {"type": "LEFT_SHIFT", "value": "RELEASE"}, None), ])
+        ("AXIS_SNAP_DISABLE", {"type": "LEFT_SHIFT", "value": "RELEASE"}, None),
+        ("AXIS_SNAP_ENABLE", {"type": "RIGHT_SHIFT", "value": "PRESS"}, None),
+        ("AXIS_SNAP_DISABLE", {"type": "RIGHT_SHIFT", "value": "RELEASE"}, None),
+        # ("SWITCH_TO_MOVE", {"type": "LEFT_ALT", "value": "ANY"}, None),
+    ]
+    )
     move[2]["items"].extend([
         ("CONFIRM", {"type": "RIGHTMOUSE", "value": "ANY"}, None),
         ("CONFIRM", {"type": "MIDDLEMOUSE", "value": "ANY"}, None),
