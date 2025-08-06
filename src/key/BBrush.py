@@ -35,8 +35,13 @@ mask_keys = [
 ]
 update_brush_shelf_keys = [
     ("sculpt.bbursh_update_brush_shelf", {"type": "LEFT_CTRL", "value": "ANY", "any": True}, None),
+    ("sculpt.bbursh_update_brush_shelf", {"type": "RIGHT_CTRL", "value": "ANY", "any": True}, None),
+
     ("sculpt.bbursh_update_brush_shelf", {"type": "LEFT_ALT", "value": "ANY", "any": True}, None),
+    ("sculpt.bbursh_update_brush_shelf", {"type": "RIGHT_ALT", "value": "ANY", "any": True}, None),
+
     ("sculpt.bbursh_update_brush_shelf", {"type": "LEFT_SHIFT", "value": "ANY", "any": True}, None),
+    ("sculpt.bbursh_update_brush_shelf", {"type": "RIGHT_SHIFT", "value": "ANY", "any": True}, None),
 ]
 
 keyconfig_version = (4, 4, 32)
@@ -203,10 +208,14 @@ def view_switch():
         ("CONFIRM", {"type": "RIGHTMOUSE", "value": "ANY"}, None),
         ("CONFIRM", {"type": "MIDDLEMOUSE", "value": "ANY"}, None),
         ("CONFIRM", {"type": "LEFTMOUSE", "value": "ANY"}, None),
+
         ("SWITCH_TO_ZOOM", {"type": "LEFT_CTRL", "value": "ANY"}, None),
+        ("SWITCH_TO_ZOOM", {"type": "RIGHT_CTRL", "value": "ANY"}, None),
+
         ("AXIS_SNAP_ENABLE", {"type": "LEFT_SHIFT", "value": "PRESS"}, None),
-        ("AXIS_SNAP_DISABLE", {"type": "LEFT_SHIFT", "value": "RELEASE"}, None),
         ("AXIS_SNAP_ENABLE", {"type": "RIGHT_SHIFT", "value": "PRESS"}, None),
+
+        ("AXIS_SNAP_DISABLE", {"type": "LEFT_SHIFT", "value": "RELEASE"}, None),
         ("AXIS_SNAP_DISABLE", {"type": "RIGHT_SHIFT", "value": "RELEASE"}, None),
         # ("SWITCH_TO_MOVE", {"type": "LEFT_ALT", "value": "ANY"}, None),
     ]
@@ -215,15 +224,27 @@ def view_switch():
         ("CONFIRM", {"type": "RIGHTMOUSE", "value": "ANY"}, None),
         ("CONFIRM", {"type": "MIDDLEMOUSE", "value": "ANY"}, None),
         ("CONFIRM", {"type": "LEFTMOUSE", "value": "ANY"}, None),
+
         ("SWITCH_TO_ZOOM", {"type": "LEFT_ALT", "value": "ANY"}, None),
-        ("SWITCH_TO_ZOOM", {"type": "LEFT_CTRL", "value": "ANY"}, None), ])
+        ("SWITCH_TO_ZOOM", {"type": "RIGHT_ALT", "value": "ANY"}, None),
+
+        ("SWITCH_TO_ZOOM", {"type": "LEFT_CTRL", "value": "ANY"}, None),
+        ("SWITCH_TO_ZOOM", {"type": "RIGHT_CTRL", "value": "ANY"}, None),
+    ]),
     zoom[2]["items"].extend([
         ("CONFIRM", {"type": "RIGHTMOUSE", "value": "ANY"}, None),
         ("CONFIRM", {"type": "MIDDLEMOUSE", "value": "ANY"}, None),
         ("CONFIRM", {"type": "LEFTMOUSE", "value": "ANY"}, None),
+
         ("SWITCH_TO_ROTATE", {"type": "LEFT_CTRL", "value": "RELEASE"}, None),
+        ("SWITCH_TO_ROTATE", {"type": "RIGHT_CTRL", "value": "RELEASE"}, None),
+
         ("SWITCH_TO_MOVE", {"type": "LEFT_CTRL", "value": "PRESS"}, None),
-        ("SWITCH_TO_MOVE", {"type": "LEFT_ALT", "value": "ANY"}, None), ])
+        ("SWITCH_TO_MOVE", {"type": "RIGHT_CTRL", "value": "PRESS"}, None),
+
+        ("SWITCH_TO_MOVE", {"type": "LEFT_ALT", "value": "ANY"}, None),
+        ("SWITCH_TO_MOVE", {"type": "RIGHT_ALT", "value": "ANY"}, None),
+    ])
 
     keyconfig_data.append(rotate)
     keyconfig_data.append(move)

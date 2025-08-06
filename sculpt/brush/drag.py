@@ -525,7 +525,7 @@ class BrushDrag(bpy.types.Operator, DragBase):
 
         is_left = event.type == "LEFTMOUSE"
         is_esc = event.type == "ESC"
-        is_ctrl = event.type == "LEFT_CTRL"
+        is_ctrl = event.type in ("LEFT_CTRL", "RIGHT_CTRL")
 
         if is_press and is_ctrl:
             self.brush_mode = "MASK" if self.brush_mode == "HIDE" else "HIDE"
