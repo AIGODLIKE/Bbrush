@@ -142,7 +142,7 @@ def draw_gpu_buffer(context, depth_buffer):
         x, y = depth_buffer["text_location"]
         font_id = 0
         blf.position(font_id, x, y, 0)
-        blf.draw(font_id, error_text + f"{x} {y}")
+        blf.draw(font_id, error_text)
         blf.position(font_id, x, y + 20, 0)
         blf.draw(font_id, "Drag Depth Map Error")
 

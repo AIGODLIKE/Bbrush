@@ -47,6 +47,7 @@ def draw_depth():
         filling_data(context)
 
         if draw_error := draw_gpu_buffer(context, depth_buffer_check):
+            print(draw_error)
             depth_buffer_check["draw_error"] = draw_error
         """
         draw_gpu_buffer_new_buffer_funcs(sam_width, sam_height, width, height, sampling)
