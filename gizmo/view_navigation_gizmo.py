@@ -97,6 +97,11 @@ class ViewNavigationGizmo(bpy.types.Gizmo):
             with gpu.matrix.push_pop():
                 blf.position(0, 0, 0, 0)
                 gpu.matrix.translate((context.area.width / 2, 0))
+
+                asset_shelf = get_region_height(context, "ASSET_SHELF")
+                asset_shelf_header = get_region_height(context, "ASSET_SHELF_HEADER")
+                gpu.matrix.translate((0, asset_shelf + asset_shelf_header))
+
                 for text in reversed((
                         "Bbrush view navigation",
                         " ",
