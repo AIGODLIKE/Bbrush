@@ -3,11 +3,11 @@ schema_version = "1.0.0"
 blender_version_min = "4.4.0"
 id = "Bbrush"
 license = ["SPDX:GPL-3.0-or-later", ]
-maintainer = "AIGODLIKE Community(小萌新)"
+maintainer = "ACGGit Community(小萌新)"
 name = "Bbrush"
 tagline = "Sculpting using only a pen and keyboard"
 type = "add-on"
-version = "1.4.5"
+version = "1.4.6"
 tags = ["Sculpt", ]
 
 [permissions]

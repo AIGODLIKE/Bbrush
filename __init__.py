@@ -2,8 +2,8 @@ from . import register_module
 
 bl_info = {
     "name": "Bbrush",
-    "author": "AIGODLIKE Community(小萌新)",
-    "version": (1, 4, 5),
+    "author": "ACGGit Community(小萌新)",
+    "version": (1, 4, 6),
     "blender": (4, 0, 0),
     "location": "Sculpt mode",
     "description": "Sculpting using only a pen and keyboard",
