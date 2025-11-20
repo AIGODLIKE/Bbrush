@@ -327,7 +327,7 @@ class DragBase(DragDraw):
         value = -1 if self.is_reverse else 1
         use_front_faces_only = get_use_front_faces_only(context)
 
-        print("execute", self.shape, in_model, is_move_mouse, value, use_front_faces_only)
+        # print("execute", self.shape, in_model, is_move_mouse, value, use_front_faces_only)
 
         if self.shape == "BOX":
             x1, y1 = self.mouse_start

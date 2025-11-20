@@ -7,6 +7,7 @@ from gpu_extras.batch import batch_for_shader
 
 from ..utils import get_pref
 
+
 def get_coord(st=(-1, -1), interval=(2, 2)):
     """输入一个起始坐标,反回一个坐标列表,三角面连接顺序是(0, 1, 2), (2, 0, 3)
     从左下到右上
@@ -25,25 +26,34 @@ def get_coord(st=(-1, -1), interval=(2, 2)):
 
 
 @cache
-def depth_shader():
-    vertex_shader = """
-        uniform mat4 ModelViewProjectionMatrix;
-        in vec2 pos;
-        in vec2 texCoordIn;
-        out vec2 texCoord;
+def shader_50():
+    """Blender gpu 5.0 api"""
+    tex_coord_out = gpu.types.GPUStageInterfaceInfo("w")
+    tex_coord_out.flat('VEC2', "texCoord")
 
+    frag_color_out = gpu.types.GPUStageInterfaceInfo("frag_color")
+    frag_color_out.flat('VEC4', "FragColor")
+
+    shader_info = gpu.types.GPUShaderCreateInfo()
+    shader_info.push_constant('MAT4', "ModelViewProjectionMatrix")
+    shader_info.vertex_in(0, 'VEC2', "pos")
+    shader_info.vertex_in(1, 'VEC2', "texCoordIn")
+
+    shader_info.sampler(0, "FLOAT_2D", "tex")
+
+    shader_info.vertex_source("""
+        out vec2 texCoord;
         void main()
         {
             texCoord = texCoordIn;
             gl_Position = ModelViewProjectionMatrix * vec4(pos.xy, 0.0f, 1.0f);
         }
-    """
+        """)
 
-    fragment_shader = """
-        uniform sampler2D tex;
-        in vec2 texCoord;
+    shader_info.fragment_source("""
         out vec4 FragColor;
 
+        in vec2 texCoord;
         void main()
         {
             FragColor = texture(tex, texCoord);
@@ -52,11 +62,47 @@ def depth_shader():
             else
                 FragColor.xyz = vec3(1.0f,1.0f,1.0f);
             FragColor.w = 1;
-
         }
-    """
+        """)
 
-    shader = gpu.types.GPUShader(vertex_shader, fragment_shader)
+    shader = gpu.shader.create_from_info(shader_info)
+    return shader
+
+
+@cache
+def depth_shader():
+    if bpy.app.version[:2] >= (5, 0):
+        shader = shader_50()
+    else:
+        vertex_shader = """
+            uniform mat4 ModelViewProjectionMatrix;
+            in vec2 pos;
+            in vec2 texCoordIn;
+            out vec2 texCoord;
+            void main()
+            {
+                texCoord = texCoordIn;
+                gl_Position = ModelViewProjectionMatrix * vec4(pos.xy, 0.0f, 1.0f);
+            }
+        """
+
+        fragment_shader = """
+            uniform sampler2D tex;
+            in vec2 texCoord;
+            out vec4 FragColor;
+            
+            void main()
+            {
+                FragColor = texture(tex, texCoord);
+                if (FragColor.x != 1.0f)
+                    FragColor.xyz = vec3(0.0f,0.0f,0.0f);
+                else
+                    FragColor.xyz = vec3(1.0f,1.0f,1.0f);
+                FragColor.w = 1;
+            }
+        """
+        shader = gpu.types.GPUShader(vertex_shader, fragment_shader)
+
     batch = batch_for_shader(
         shader, "TRIS",
         {
@@ -135,6 +181,9 @@ def draw_gpu_buffer(context, depth_buffer):
                     context.region.width,
                     context.region.height)  # 使用自定义着色器绘制,将会快很多
             except Exception as e:
+                import traceback
+                traceback.print_exc()
+                traceback.print_stack()
                 return e.args
     else:
         error_text = depth_buffer["draw_error"]
@@ -142,7 +191,7 @@ def draw_gpu_buffer(context, depth_buffer):
         x, y = depth_buffer["text_location"]
         font_id = 0
         blf.position(font_id, x, y, 0)
-        blf.draw(font_id, error_text)
+        blf.draw(font_id, str(error_text))
         blf.position(font_id, x, y + 20, 0)
         blf.draw(font_id, "Drag Depth Map Error")
 

@@ -289,6 +289,7 @@ def get_property_rna_info(bl_rna, property_name: "str") -> "dict|None":
         return data
     return None
 
+
 @cache
 def get_view_navigation_texture(h, w):
     from ..src import view_navigation
