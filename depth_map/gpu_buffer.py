@@ -6,7 +6,7 @@ import gpu
 from gpu_extras.batch import batch_for_shader
 
 from ..utils import get_pref
-
+from ..adapter import is_5_0_up_version
 
 def get_coord(st=(-1, -1), interval=(2, 2)):
     """输入一个起始坐标,反回一个坐标列表,三角面连接顺序是(0, 1, 2), (2, 0, 3)
@@ -71,7 +71,7 @@ def shader_50():
 
 @cache
 def depth_shader():
-    if bpy.app.version[:2] >= (5, 0):
+    if is_5_0_up_version:
         shader = shader_50()
     else:
         vertex_shader = """

@@ -2,6 +2,7 @@ import bpy
 
 is_3_6_up_version = bpy.app.version >= (3, 6, 0)
 is_4_1_up_version = bpy.app.version >= (4, 1, 0)
+is_5_0_up_version = bpy.app.version >= (5, 0, 0)
 
 
 def sculpt_invert_hide_face():

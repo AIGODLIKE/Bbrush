@@ -5,7 +5,7 @@ from gpu_extras.batch import batch_for_shader
 
 from ..utils import get_pref, get_region_height, get_region_width
 from ..utils.navigation import *
-
+from ..adapter import is_5_0_up_version
 """
 上下两个方向需要考虑旋转
 带轴的旋转改修改为以活动轴作为中心左右角度和上下角度
@@ -49,7 +49,8 @@ class ViewNavigationGizmo(bpy.types.Gizmo):
             offset = area_offset + draw_offset
             gpu.matrix.translate(offset)
 
-            shader = gpu.shader.from_builtin("IMAGE")
+            shader_name ="IMAGE_SCENE_LINEAR_TO_REC709_SRGB" if is_5_0_up_version else "IMAGE"
+            shader = gpu.shader.from_builtin(shader_name)
             batch = batch_for_shader(
                 shader, "TRI_FAN",
                 {
