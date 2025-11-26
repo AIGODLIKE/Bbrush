@@ -1,12 +1,21 @@
 import bpy
 import gpu
+
 from ..utils import DISPLAY_ITEMS
 
-class DepthMap:
+default_depth_display_mode = "NOT_DISPLAY"
 
+try:
+    if gpu.platform.device_type_get() != "AMD":
+        default_depth_display_mode = "ONLY_SCULPT"
+except Exception:
+    ...
+
+
+class DepthMap:
     depth_display_mode: bpy.props.EnumProperty(
         name="Silhouette Display Mode",
-        default="ONLY_SCULPT" if gpu.platform.device_type_get() != "AMD" else "NOT_DISPLAY",
+        default=default_depth_display_mode,
         items=DISPLAY_ITEMS
     )
 
