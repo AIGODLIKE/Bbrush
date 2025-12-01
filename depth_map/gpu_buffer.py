@@ -29,20 +29,18 @@ def get_coord(st=(-1, -1), interval=(2, 2)):
 def shader_50():
     """Blender gpu 5.0 api"""
     tex_coord_out = gpu.types.GPUStageInterfaceInfo("w")
-    tex_coord_out.flat('VEC2', "texCoord")
-
-    frag_color_out = gpu.types.GPUStageInterfaceInfo("frag_color")
-    frag_color_out.flat('VEC4', "FragColor")
+    tex_coord_out.smooth('VEC2', "texCoord")
 
     shader_info = gpu.types.GPUShaderCreateInfo()
     shader_info.push_constant('MAT4', "ModelViewProjectionMatrix")
     shader_info.vertex_in(0, 'VEC2', "pos")
     shader_info.vertex_in(1, 'VEC2', "texCoordIn")
-
+    shader_info.vertex_out(tex_coord_out)
     shader_info.sampler(0, "FLOAT_2D", "tex")
 
+    shader_info.fragment_out(0, 'VEC4', "FragColor")
+
     shader_info.vertex_source("""
-        out vec2 texCoord;
         void main()
         {
             texCoord = texCoordIn;
@@ -51,9 +49,6 @@ def shader_50():
         """)
 
     shader_info.fragment_source("""
-        out vec4 FragColor;
-
-        in vec2 texCoord;
         void main()
         {
             FragColor = texture(tex, texCoord);
