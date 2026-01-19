@@ -60,10 +60,10 @@ class BrushKeymap:
     @staticmethod
     def restore_key(context):
         global last_key_path
-
         active_keyconfig = context.preferences.keymap.active_keyconfig
         if DEBUG_KEYMAP:
             print("restore_key", active_keyconfig, last_key_path)
+        print("restore_key asef 重置", last_key_path, active_keyconfig)
         if active_keyconfig == "BBrush":
             bpy.ops.wm.keyconfig_preset_remove("EXEC_DEFAULT", name="BBrush", remove_name=True)
         if last_key_path:
@@ -74,7 +74,7 @@ class BrushKeymap:
                     print("brush_key_path", brush_key_path)
                     print("active_keyconfig", context.window_manager.keyconfigs.active.name)
             except Exception as e:
-                print("Error", e.args)
+                print("restore_key Error", e.args)
 
 
 def try_restore_keymap():
@@ -83,6 +83,7 @@ def try_restore_keymap():
     尝试修复"""
     context = bpy.context
     from ..utils import is_bbruse_mode
+    print("try_restore_keymap www", not is_bbruse_mode())
     if not is_bbruse_mode():
         if context.window_manager.keyconfigs.active.name == "BBrush":
             bpy.ops.wm.keyconfig_preset_remove("EXEC_DEFAULT", name="BBrush", remove_name=True)

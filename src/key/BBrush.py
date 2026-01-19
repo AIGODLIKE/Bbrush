@@ -198,6 +198,7 @@ keyconfig_data = [
 
 
 def view_switch():
+    print("view_switch", "这里是加载Bbrush的快捷键")
     rotate = blender_default.km_view3d_rotate_modal(params)
     move = blender_default.km_view3d_move_modal(params)
     zoom = blender_default.km_view3d_zoom_modal(params)
