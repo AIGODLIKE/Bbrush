@@ -19,7 +19,6 @@ class BrushClick(bpy.types.Operator):
 
         if DEBUG_CLICK:
             print(self.bl_idname, is_in_modal, brush_runtime.brush_mode)
-
         if brush_runtime.brush_mode == "MASK":
             if is_in_modal:
                 if event.alt and event.ctrl:

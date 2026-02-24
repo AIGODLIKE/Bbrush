@@ -115,7 +115,8 @@ class MoveEvent:
             self.mouse_move = self.mouse_move_start = Vector((0, 0))
             self.is_move = False
 
-            getattr(self, f"update_{self.shape.lower()}_shape")(context, event)
+            if func := getattr(self, f"update_{self.shape.lower()}_shape", None):
+                func(context, event)
 
     def move_event(self, context, event):
         is_space = event.type == "SPACE"
@@ -174,7 +175,7 @@ class DragDraw(MoveEvent):
             for batch, shader in self.shaders.items():
                 shader.uniform_float("color", self.color)
                 batch.draw(shader)
-            if draw_func := getattr(self, f"draw_{self.shape.lower()}"):
+            if draw_func := getattr(self, f"draw_{self.shape.lower()}", None):
                 draw_func()
 
     def draw_box(self):
@@ -383,6 +384,7 @@ def mouse_offset_compensation(context, event):
         now_mouse = Vector((event.mouse_x, event.mouse_y))
         left = brush_runtime.left_mouse
         offset_mouse = (left - now_mouse) * pref.drag_offset_compensation + left
+        print("mouse_offset_compensation", offset_mouse)
         context.window.cursor_warp(int(offset_mouse.x), int(offset_mouse.y))
 
 
@@ -476,38 +478,50 @@ class BrushDrag(bpy.types.Operator, DragBase):
         if self.__class__.draw_handle is not None:
             return {"FINISHED"}
 
+        pass_list = (
+            "builtin_brush.Mask",  # 旧版本名称
+            "builtin_brush.mask",
+            "builtin.line_mask",
+        )
+
+        is_pass_brush = active_tool and active_tool.idname in pass_list
+        support_brushes_list = (
+            "builtin.box_mask",
+            "builtin.box_hide",
+            "builtin.lasso_mask",
+            "builtin.lasso_hide",
+            "builtin.polyline_mask",
+            "builtin.polyline_hide",
+
+            # 自定义笔刷
+            "builtin.circular_mask",
+            "builtin.circular_hide",
+            "builtin.ellipse_mask",
+            "builtin.ellipse_hide",
+        )
+        is_support_brushes = active_tool and active_tool.idname in support_brushes_list
+
         if check_mouse_in_depth_map_area(event):  # 缩放深度图
             bpy.ops.sculpt.bbrush_depth_scale("INVOKE_DEFAULT")
             return {"FINISHED"}
-        elif check_mouse_in_shortcut_key_area(event) and BrushShortcutKeyScale.poll(context): # 缩放快捷键
+        elif check_mouse_in_shortcut_key_area(event) and BrushShortcutKeyScale.poll(context):  # 缩放快捷键
             bpy.ops.sculpt.bbrush_shortcut_key_scale("INVOKE_DEFAULT")
             return {"FINISHED"}
-        elif active_tool and active_tool.idname in (
-                "builtin.box_mask",
-                "builtin.box_hide",
-                "builtin.lasso_mask",
-                "builtin.lasso_hide",
-                "builtin.polyline_mask",
-                "builtin.polyline_hide",
-
-                # 自定义笔刷
-                "builtin.circular_mask",
-                "builtin.circular_hide",
-                "builtin.ellipse_mask",
-                "builtin.ellipse_hide",
-        ):
+        elif is_support_brushes:
             return self.start_modal(context, event)
+        elif is_pass_brush:
+            return {"PASS_THROUGH"}
         elif not is_in_modal:
-            if brush_runtime and brush_runtime.brush_mode != "SCULPT":  # 不是雕刻并且不在模型上
-                return self.start_modal(context, event)
+            # if brush_runtime and brush_runtime.brush_mode != "SCULPT":  # 不是雕刻并且不在模型上
+            #     return self.start_modal(context, event)
+            # else:
+            if event.alt:
+                bpy.ops.view3d.move("INVOKE_DEFAULT")  # 平移视图
+            elif event.ctrl:
+                bpy.ops.view3d.zoom("INVOKE_DEFAULT")  #
             else:
-                if event.alt:
-                    bpy.ops.view3d.move("INVOKE_DEFAULT")  # 平移视图
-                elif event.ctrl:
-                    bpy.ops.view3d.zoom("INVOKE_DEFAULT")  #
-                else:
-                    bpy.ops.view3d.rotate("INVOKE_DEFAULT")  # 旋转视图
-                return {"FINISHED"}
+                bpy.ops.view3d.rotate("INVOKE_DEFAULT")  # 旋转视图
+            return {"FINISHED"}
 
         mouse_offset_compensation(context, event)
 
@@ -547,7 +561,8 @@ class BrushDrag(bpy.types.Operator, DragBase):
         elif self.move_event(context, event):
             refresh_ui(context)
         else:
-            getattr(self, f"update_{self.shape.lower()}_shape")(context, event)
+            if func := getattr(self, f"update_{self.shape.lower()}_shape", None):
+                func(context, event)
 
         refresh_ui(context)
         return {"RUNNING_MODAL"}

@@ -3,6 +3,7 @@ from functools import cache
 
 import bpy
 from bl_ui.space_toolsystem_common import ToolSelectPanelHelper
+from bpy_extras.view3d_utils import region_2d_to_origin_3d, region_2d_to_vector_3d
 from mathutils import Vector
 
 from .line_to_convex_shell import line_to_convex_shell
@@ -101,6 +102,7 @@ def get_brush_shape(brush) -> str:
             "builtin.polyline_mask",
             "builtin.polyline_hide",
             "builtin.polyline_trim",
+            "builtin.line_mask",
     ):
         return "POLYLINE"
     elif brush in (
@@ -119,6 +121,7 @@ def get_brush_shape(brush) -> str:
             "builtin.lasso_trim",
     ):
         return "LASSO"
+    print("brush not match shape", brush)
     return "NONE"
 
 
@@ -302,3 +305,20 @@ def get_view_navigation_texture(h, w):
         view_navigation.load_view_navigation_image(default_file_path)
         # print(view_navigation.texture_cache.keys())
         return view_navigation.texture_cache[key]
+
+
+def object_ray_cast(obj, context, mouse):
+    region = context.region
+    region_data = context.region_data
+    depsgraph = context.evaluated_depsgraph_get()
+
+    mx = obj.matrix_world
+    mxi = mx.inverted_safe()
+
+    origin_3d = region_2d_to_origin_3d(region, region_data, mouse)
+    direction_3d = region_2d_to_vector_3d(region, region_data, mouse)
+
+    ray_origin = mxi @ origin_3d
+    ray_direction = mxi.to_3x3() @ direction_3d
+
+    return obj.ray_cast(depsgraph=depsgraph, origin=ray_origin, direction=ray_direction)
