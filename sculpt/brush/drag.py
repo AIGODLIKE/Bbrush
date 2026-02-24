@@ -476,11 +476,11 @@ class BrushDrag(bpy.types.Operator, DragBase):
         if self.__class__.draw_handle is not None:
             return {"FINISHED"}
 
-        if check_mouse_in_depth_map_area(event):
-            bpy.ops.sculpt.bbrush_depth_scale("INVOKE_DEFAULT")  # 缩放深度图
+        if check_mouse_in_depth_map_area(event):  # 缩放深度图
+            bpy.ops.sculpt.bbrush_depth_scale("INVOKE_DEFAULT")
             return {"FINISHED"}
-        elif check_mouse_in_shortcut_key_area(event) and BrushShortcutKeyScale.poll(context):
-            bpy.ops.sculpt.bbrush_shortcut_key_scale("INVOKE_DEFAULT")  # 缩放快捷键
+        elif check_mouse_in_shortcut_key_area(event) and BrushShortcutKeyScale.poll(context): # 缩放快捷键
+            bpy.ops.sculpt.bbrush_shortcut_key_scale("INVOKE_DEFAULT")
             return {"FINISHED"}
         elif active_tool and active_tool.idname in (
                 "builtin.box_mask",

@@ -1,3 +1,5 @@
+import time
+
 import bpy
 from mathutils import Vector
 
@@ -8,7 +10,7 @@ from .shortcut_key import ShortcutKey
 from .update_brush_shelf import UpdateBrushShelf
 from .view_property import ViewProperty
 from ..debug import DEBUG_LEFT_MOUSE, DEBUG_MODE_TOGGLE
-from ..utils import get_pref, refresh_ui, is_bbruse_mode, check_pref
+from ..utils import get_pref, refresh_ui, is_bbruse_mode, check_pref, check_mouse_in_model
 
 """
 通过运行时切换
@@ -38,7 +40,6 @@ class BbrushStart(bpy.types.Operator):
 
         self.start(context, event)
         return {"FINISHED"}
-
 
     @staticmethod
     def start(context, event):
@@ -112,7 +113,60 @@ class FixBbrushError(bpy.types.Operator):
         layout.operator(cls.bl_idname, text="", icon="EVENT_F")
 
 
-class LeftMouse(bpy.types.Operator):
+class ManuallyManageEvents:
+    """由于5.0版本的拖动事件触发不灵敏,所以需要手动管理
+    """
+
+    start_mouse = None
+    start_time = None
+
+    def new_version_usage_method(self, context, event):
+        context.window_manager.modal_handler_add(self)
+        self.start_time = time.time()
+        self.start_mouse = Vector((event.mouse_x, event.mouse_y))
+        return {'RUNNING_MODAL'}
+
+    def modal(self, context, event):
+        global brush_runtime
+
+        run_time = time.time() - self.start_time
+        is_left_mouse = event.type == "LEFTMOUSE"
+        is_release = event.value == "RELEASE"
+        is_press = event.value == "PRESS"
+
+        now_mouse = Vector((event.mouse_x, event.mouse_y))
+        is_move = event.type == "MOUSEMOVE" or now_mouse != self.start_mouse
+
+        print("mme", run_time, event.value, event.type, now_mouse)
+
+        if is_release:  # is_left_mouse and
+            bpy.ops.sculpt.bbrush_click("INVOKE_DEFAULT")
+            return {"FINISHED"}
+        elif is_move:  # 不能使用PASSTHROUGH,需要手动指定事件
+            brush_runtime.left_mouse = Vector((event.mouse_x, event.mouse_y))
+            is_in_modal = check_mouse_in_model(context, event)
+
+            if event.shift and not is_in_modal:
+                bpy.ops.view3d.view_roll("INVOKE_DEFAULT", type="ANGLE")  # 倾斜视图
+                return {"FINISHED"}
+            if is_in_modal:
+                if event.alt:
+                    brush_mode = "INVERT"
+                elif event.shift:
+                    brush_mode = "SMOOTH"
+                else:
+                    brush_mode = "NORMAL"
+                try:
+                    bpy.ops.sculpt.brush_stroke("INVOKE_DEFAULT", mode=brush_mode)
+                    return {"FINISHED"}
+                except:
+                    pass
+            bpy.ops.sculpt.bbrush_drag("INVOKE_DEFAULT")
+            return {"FINISHED"}
+        return {"RUNNING_MODAL"}
+
+
+class LeftMouse(bpy.types.Operator, ManuallyManageEvents):
     bl_idname = "sculpt.bbrush_leftmouse"
     bl_label = "Sculpt"
     bl_description = "LeftMouse"
@@ -125,6 +179,22 @@ class LeftMouse(bpy.types.Operator):
     def invoke(self, context, event):
         global brush_runtime
 
+        is_up_5_0 = bpy.app.version >= (5, 0, 0)
+
+        # CLICK_DRAG 在 5.0以上版本中拖动事件不易被触发
+        if DEBUG_LEFT_MOUSE:
+            print("left mouse",
+                  "\t", event.value, event.type,
+                  "\t", event.value_prev, event.type_prev,
+                  "\t", f"up 5.0 {is_up_5_0}"
+                  )
+        if is_up_5_0:
+            return self.new_version_usage_method(context, event)
+        else:
+            return self.old_version_usage_method(context, event)
+
+    @staticmethod
+    def old_version_usage_method(context, event):
         is_leftmouse = event.type == "LEFTMOUSE"
         is_release = event.value == "RELEASE"
         is_press = event.value == "PRESS"
@@ -136,11 +206,7 @@ class LeftMouse(bpy.types.Operator):
             refresh_depth_map()
         if is_release and is_leftmouse:
             bpy.ops.sculpt.bbrush_click("INVOKE_DEFAULT")
-            LeftMouse.is_run = None
-
-        if DEBUG_LEFT_MOUSE:
-            print("left mouse", "\t", event.value, event.type, "\t", event.value_prev, event.type_prev)
-        return {"FINISHED", "PASS_THROUGH"}
+        return {"PASS_THROUGH"}
 
 
 def refresh_depth_map():

@@ -53,6 +53,8 @@ keyconfig_data = [
             ("sculpt.bbrush_depth_move", {"type": "RIGHTMOUSE", "value": "CLICK_DRAG"}, None),
             ("sculpt.bbrush_shortcut_key_move", {"type": "RIGHTMOUSE", "value": "CLICK_DRAG"}, None),
 
+            # ("sculpt.bbrush_leftmouse", {"type": "LEFTMOUSE", "value": "CLICK",  "any": True}, None),
+            # ("sculpt.bbrush_drag", {"type": "LEFTMOUSE", "value": "CLICK_DRAG",  "any": True}, None),
             ("sculpt.bbrush_leftmouse", {"type": "LEFTMOUSE", "value": "ANY", "any": True}, None),
             ("sculpt.bbrush_smooth", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "shift": True}, None),
             ("sculpt.bbrush_click", {"type": "LEFTMOUSE", "value": "CLICK", "any": True}, None),

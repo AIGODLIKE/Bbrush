@@ -74,7 +74,6 @@ def get_area_ray_cast(context, x, y, w, h):
         return data['is_in_model']
     return False
 
-
 def draw_text(x,
               y,
               text="Hello Word",
