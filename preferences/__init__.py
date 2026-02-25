@@ -6,7 +6,6 @@ from .topbar import TopBar
 from .view_navigation_gizmo import ViewNavigationGizmo
 from .view_navigation_property import ViewNavigationProperty
 from .. import __package__ as base_name
-from .. import sculpt
 
 
 class Preferences(
@@ -21,13 +20,17 @@ class Preferences(
 ):
     bl_idname = base_name
 
+    def update_always_bbrush_mode(self, context):
+        from ..register_module import try_toggle_bbrush_mode
+        try_toggle_bbrush_mode()
+
     always_use_bbrush_sculpt_mode: bpy.props.BoolProperty(
         name="Always use Bbrush sculpting mode",
         description=
         "If entering sculpting mode, Bbrush mode will automatically activate; "
         "if exiting sculpting mode, Bbrush mode will deactivate",
         default=False,
-        update=lambda self, context: sculpt.try_toggle_bbrush_mode()
+        update=update_always_bbrush_mode
     )
 
     depth_ray_size: bpy.props.IntProperty(

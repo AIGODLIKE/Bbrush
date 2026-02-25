@@ -3,7 +3,7 @@ from bpy.app.handlers import persistent
 
 from . import depth_map, preferences, topbar, sculpt, src, gizmo
 from .src import view_navigation
-from .utils import register_submodule_factory, get_pref, is_bbruse_mode
+from .utils import register_submodule_factory, get_pref, is_bbruse_mode, check_pref
 
 model_tuple = (
     src,
@@ -18,6 +18,22 @@ register_module, unregister_module = register_submodule_factory(model_tuple)
 
 owner = object()
 
+
+def try_toggle_bbrush_mode(is_start=False):
+    """在用户切换物体的模式时
+    在启动Blender时
+    在开启强制Bbrush模式时
+
+    使用此方法"""
+    is_bbruse = is_bbruse_mode()
+
+    if bpy.context.mode == "SCULPT":
+        if check_pref() and get_pref().always_use_bbrush_sculpt_mode and not is_bbruse:
+            bpy.ops.brush.bbrush_start("INVOKE_DEFAULT")
+    elif is_bbruse:
+        bpy.ops.brush.bbrush_exit("INVOKE_DEFAULT", exit_always=False)
+    else:
+        ...
 
 def start_update_bbrush_mode():
     """在启动Blender的时候"""

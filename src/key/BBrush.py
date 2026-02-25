@@ -46,21 +46,12 @@ keyconfig_version = (4, 4, 32)
 keyconfig_data = [
     ("Sculpt", {"space_type": "EMPTY", "region_type": "WINDOW"}, {
         "items": [
-            # ("object.transfer_mode", {"type": "LEFTMOUSE", "value": "CLICK", "alt": True}, None),
-
-            # ("sculpt.bbrush_left_mouse", {"type": "LEFTMOUSE", "value": "CLICK",  "any": True}, None),
-            # ("sculpt.bbrush_drag", {"type": "LEFTMOUSE", "value": "CLICK_DRAG",  "any": True}, None),
             ("sculpt.bbrush_left_mouse", {"type": "LEFTMOUSE", "value": "ANY", "any": True}, None),
-            # ("sculpt.bbrush_smooth", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "shift": True}, None),
-            ("sculpt.bbrush_click", {"type": "LEFTMOUSE", "value": "CLICK", "any": True}, None),
-            ("sculpt.bbrush_drag", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "any": True}, None),
 
             ("sculpt.bbrush_shortcut_key_move", {"type": "RIGHTMOUSE", "value": "ANY", "any": True}, None),
             ("sculpt.bbrush_depth_move", {"type": "RIGHTMOUSE", "value": "ANY", "any": True}, None),
             ("sculpt.bbrush_right_mouse", {"type": "RIGHTMOUSE", "value": "ANY", "any": True}, None),
 
-            # ("wm.call_panel", {"type": "RIGHTMOUSE", "value": "CLICK"},
-            #  {"properties": [("name", "VIEW3D_PT_sculpt_context_menu"), ]}),
             ("view3d.rotate", {"type": "RIGHTMOUSE", "value": "CLICK_DRAG"}, None),
             ("view3d.rotate", {"type": "RIGHTMOUSE", "value": "ANY", "alt": True, "shift": True}, None),
             ("view3d.move", {"type": "RIGHTMOUSE", "value": "ANY", "alt": True}, None),
@@ -68,18 +59,6 @@ keyconfig_data = [
 
             ("view3d.move", {"type": "MIDDLEMOUSE", "value": "ANY", "alt": True}, None),
             ("view3d.zoom", {"type": "MIDDLEMOUSE", "value": "ANY", "ctrl": True}, None),
-
-            # ("sculpt.brush_stroke", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "alt": True},
-            #  {"properties": [("mode", "INVERT"), ]}),
-            # ("sculpt.brush_stroke", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "shift": True},
-            #  {"properties": [("mode", "SMOOTH"), ]}),
-            # ("sculpt.brush_stroke", {"type": "LEFTMOUSE", "value": "CLICK_DRAG"},
-            #  {"properties": [("mode", "NORMAL"), ]}),
-
-            # ("sculpt.brush_stroke", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "ctrl": True},
-            #  {"properties": [("mode", "NORMAL"), ]}),
-            # ("sculpt.brush_stroke", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "ctrl": True, "alt": True},
-            #  {"properties": [("mode", "INVERT"), ]}),
 
             *mask_keys,
             *update_brush_shelf_keys,
@@ -94,12 +73,12 @@ keyconfig_data = [
     ("3D View Tool: Sculpt, Box Mask",
      {"space_type": "VIEW_3D", "region_type": "WINDOW"},
      {"items": [
-         ("sculpt.bbrush_drag", {"type": "LEFTMOUSE", "value": "ANY", "any": True}, None),
+         ("sculpt.bbrush_shape", {"type": "LEFTMOUSE", "value": "ANY", "any": True}, None),
      ], },),
     ("3D View Tool: Sculpt, Lasso Mask",
      {"space_type": "VIEW_3D", "region_type": "WINDOW"},
      {"items": [
-         ("sculpt.bbrush_drag", {"type": "LEFTMOUSE", "value": "ANY", "any": True}, None),
+         ("sculpt.bbrush_shape", {"type": "LEFTMOUSE", "value": "ANY", "any": True}, None),
 
          ("paint.mask_lasso_gesture",
           {"type": "LEFTMOUSE", "value": "ANY", "ctrl": True, "alt": True},
@@ -119,7 +98,7 @@ keyconfig_data = [
     ("3D View Tool: Sculpt, Polyline Mask",
      {"space_type": "VIEW_3D", "region_type": "WINDOW"},
      {"items": [
-         ("sculpt.bbrush_drag", {"type": "LEFTMOUSE", "value": "ANY", "any": True}, None),
+         ("sculpt.bbrush_shape", {"type": "LEFTMOUSE", "value": "ANY", "any": True}, None),
          # ("paint.mask_polyline_gesture", {"type": "LEFTMOUSE", "value": "PRESS", "ctrl": True, "alt": True},
          #  {"properties": [("value", 0), ], },),
          # ("paint.mask_polyline_gesture", {"type": "LEFTMOUSE", "value": "PRESS", "ctrl": True},
@@ -130,14 +109,14 @@ keyconfig_data = [
     ("3D View Tool: Sculpt, Box Hide", {"space_type": "VIEW_3D", "region_type": "WINDOW"},
      {"items": [
          ("sculpt.bbrush_click", {"type": "LEFTMOUSE", "value": "CLICK", "any": True}, None),
-         ("sculpt.bbrush_drag", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "any": True}, None),
+         ("sculpt.bbrush_shape", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "any": True}, None),
 
          ("paint.hide_show_all", {"type": "LEFTMOUSE", "value": "CLICK", "ctrl": True, "shift": True},
           {"properties": [("action", "SHOW"), ], },),
      ], },),
     ("3D View Tool: Sculpt, Lasso Hide", {"space_type": "VIEW_3D", "region_type": "WINDOW"},
      {"items": [
-         ("sculpt.bbrush_drag", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "any": True}, None),
+         ("sculpt.bbrush_shape", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "any": True}, None),
 
          # ("paint.hide_show_lasso_gesture", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "ctrl": True, "shift": True},
          #  {"properties": [("action", "HIDE"), ], },),
@@ -160,7 +139,7 @@ keyconfig_data = [
      ], },),
     ("3D View Tool: Sculpt, Polyline Hide", {"space_type": "VIEW_3D", "region_type": "WINDOW"},
      {"items": [
-         ("sculpt.bbrush_drag", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "any": True}, None),
+         ("sculpt.bbrush_shape", {"type": "LEFTMOUSE", "value": "CLICK_DRAG", "any": True}, None),
 
          # ("paint.hide_show_polyline_gesture", {"type": "LEFTMOUSE", "value": "PRESS", "ctrl": True, "shift": True},
          #  {"properties": [("action", "HIDE"), ("area", "Inside"), ], },),
@@ -210,6 +189,9 @@ def view_switch():
         ("CONFIRM", {"type": "RIGHTMOUSE", "value": "ANY"}, None),
         ("CONFIRM", {"type": "MIDDLEMOUSE", "value": "ANY"}, None),
         ("CONFIRM", {"type": "LEFTMOUSE", "value": "ANY"}, None),
+        ("CONFIRM", {"type": "RIGHTMOUSE", "value": "RELEASE"}, None),
+        ("CONFIRM", {"type": "MIDDLEMOUSE", "value": "RELEASE"}, None),
+        ("CONFIRM", {"type": "LEFTMOUSE", "value": "RELEASE"}, None),
 
         ("SWITCH_TO_ZOOM", {"type": "LEFT_CTRL", "value": "ANY"}, None),
         ("SWITCH_TO_ZOOM", {"type": "RIGHT_CTRL", "value": "ANY"}, None),
@@ -226,6 +208,9 @@ def view_switch():
         ("CONFIRM", {"type": "RIGHTMOUSE", "value": "ANY"}, None),
         ("CONFIRM", {"type": "MIDDLEMOUSE", "value": "ANY"}, None),
         ("CONFIRM", {"type": "LEFTMOUSE", "value": "ANY"}, None),
+        ("CONFIRM", {"type": "RIGHTMOUSE", "value": "RELEASE"}, None),
+        ("CONFIRM", {"type": "MIDDLEMOUSE", "value": "RELEASE"}, None),
+        ("CONFIRM", {"type": "LEFTMOUSE", "value": "RELEASE"}, None),
 
         ("SWITCH_TO_ZOOM", {"type": "LEFT_ALT", "value": "ANY"}, None),
         ("SWITCH_TO_ZOOM", {"type": "RIGHT_ALT", "value": "ANY"}, None),
@@ -237,6 +222,9 @@ def view_switch():
         ("CONFIRM", {"type": "RIGHTMOUSE", "value": "ANY"}, None),
         ("CONFIRM", {"type": "MIDDLEMOUSE", "value": "ANY"}, None),
         ("CONFIRM", {"type": "LEFTMOUSE", "value": "ANY"}, None),
+        ("CONFIRM", {"type": "RIGHTMOUSE", "value": "RELEASE"}, None),
+        ("CONFIRM", {"type": "MIDDLEMOUSE", "value": "RELEASE"}, None),
+        ("CONFIRM", {"type": "LEFTMOUSE", "value": "RELEASE"}, None),
 
         ("SWITCH_TO_ROTATE", {"type": "LEFT_CTRL", "value": "RELEASE"}, None),
         ("SWITCH_TO_ROTATE", {"type": "RIGHT_CTRL", "value": "RELEASE"}, None),

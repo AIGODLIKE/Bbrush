@@ -86,7 +86,7 @@ def get_circular(x, y, segments=64):
     return vert
 
 
-drag_runtime: "BrushDrag|None" = None
+drag_runtime: "BrushShape|None" = None
 
 
 class MoveEvent:
@@ -388,12 +388,16 @@ def mouse_offset_compensation(context, event):
         context.window.cursor_warp(int(offset_mouse.x), int(offset_mouse.y))
 
 
-class BrushDrag(bpy.types.Operator, DragBase):
-    bl_idname = "sculpt.bbrush_drag"
-    bl_label = "Drag"
+class BrushShape(bpy.types.Operator, DragBase):
+    bl_idname = "sculpt.bbrush_shape"
+    bl_label = "Shape"
     bl_options = {"REGISTER"}
 
     click_time = None
+
+    @classmethod
+    def poll(cls, context):
+        return is_bbruse_mode()
 
     def update_box_shape(self, context, event):
         self.mouse = Vector((event.mouse_region_x, event.mouse_region_y))
@@ -462,13 +466,8 @@ class BrushDrag(bpy.types.Operator, DragBase):
 
         return {'RUNNING_MODAL'}
 
-    @classmethod
-    def poll(cls, context):
-        return is_bbruse_mode()
-
     def invoke(self, context, event):
         from .shortcut_key import BrushShortcutKeyScale
-        from .. import brush_runtime
         is_in_modal = check_mouse_in_model(context, event)
         active_tool = ToolSelectPanelHelper.tool_active_from_context(bpy.context)
 
@@ -515,20 +514,13 @@ class BrushDrag(bpy.types.Operator, DragBase):
             # if brush_runtime and brush_runtime.brush_mode != "SCULPT":  # 不是雕刻并且不在模型上
             #     return self.start_modal(context, event)
             # else:
-            if event.alt:
-                bpy.ops.view3d.move("INVOKE_DEFAULT")  # 平移视图
-            elif event.ctrl:
-                bpy.ops.view3d.zoom("INVOKE_DEFAULT")  #
-            else:
-                bpy.ops.view3d.rotate("INVOKE_DEFAULT")  # 旋转视图
             return {"FINISHED"}
 
         mouse_offset_compensation(context, event)
-
         return {"PASS_THROUGH"}
 
     def modal(self, context, event):
-        """        拖动的时候不在模型上拖,执行其它操作        """
+        """拖动的时候不在模型上拖,执行其它操作"""
         # print("drag_event", self.shape, self.is_reverse, len(self.mouse_route), len(self.mouse_route_convex_shell),
         #       event.value, event.type)
 
