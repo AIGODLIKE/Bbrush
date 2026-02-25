@@ -59,6 +59,7 @@ class BbrushStart(bpy.types.Operator):
 
         UpdateBrushShelf.start_brush_shelf(context)
         UpdateBrushShelf.update_brush_shelf(context, event)
+        UpdateBrushShelf.update_brush_shelf(context, event)
 
         BrushKeymap.start_key(context)
         ShortcutKey.start_shortcut_key()

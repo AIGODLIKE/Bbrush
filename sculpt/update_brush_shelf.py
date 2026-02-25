@@ -46,6 +46,9 @@ def append_brush(brush):
             brush_shelf["HIDE"].insert(4, brush)
             brush_shelf["HIDE"].insert(5, None)
         else:
+            if idname == "builtin.lasso_hide":
+                brush_shelf["HIDE"].append(other.circular_hide)
+                brush_shelf["HIDE"].append(other.ellipse_hide)
             brush_shelf["HIDE"].append(brush)
     else:
         brush_shelf["SCULPT"].append(brush)
@@ -65,6 +68,24 @@ def tool_ops(tools):
                 tool_ops(tool(bpy.context))
         else:
             brush_shelf["SCULPT"].append(tool)
+
+
+def reorder_hide():
+    trim_list = []
+    hide_list = []
+    for tool in brush_shelf["HIDE"].copy():
+        if isinstance(tool, ToolDef):
+            if "trim" in tool.idname:
+                trim_list.append(tool)
+            else:
+                hide_list.append(tool)
+    brush_shelf["HIDE"] = [
+        # other.circular_hide,
+        # other.ellipse_hide,
+        *hide_list,
+        None,
+        *trim_list,
+    ]
 
 
 BRUSH_SHELF_MODE = {
@@ -171,10 +192,7 @@ class UpdateBrushShelf(bpy.types.Operator):
             other.ellipse_mask,
         ))
 
-        brush_shelf["HIDE"].extend((
-            other.circular_hide,
-            other.ellipse_hide,
-        ))
+        reorder_hide()
 
         if DEBUG_UPDATE_BRUSH_SHELF:
             print("start_brush_shelf", brush_shelf.keys())
