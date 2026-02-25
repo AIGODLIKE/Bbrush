@@ -196,7 +196,8 @@ def check_mouse_in_model(context, event) -> bool:
     使用gpu深度图快速测式
     """
     from .gpu import get_mouse_location_ray_cast
-    return get_mouse_location_ray_cast(context, event)
+    x, y = (event.mouse_region_x, event.mouse_region_y)
+    return get_mouse_location_ray_cast(context, x, y)
 
 
 def check_area_in_model(context, x, y, w, h) -> bool:
@@ -227,6 +228,14 @@ def check_mouse_in_shortcut_key_area(event) -> bool:
             brush_runtime.shortcut_key_points and
             mouse_in_area_point_in(event, brush_runtime.shortcut_key_points)
     )
+
+
+def check_modal_operators(bl_idname: str) -> bool:
+    """检查操作符模态是否在运行"""
+    for modal in bpy.context.window.modal_operators:
+        if modal and modal.bl_idname == bl_idname:
+            return True
+    return False
 
 
 def is_bbruse_mode() -> bool:

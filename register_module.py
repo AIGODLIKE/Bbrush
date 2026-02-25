@@ -35,15 +35,16 @@ def try_toggle_bbrush_mode(is_start=False):
     else:
         ...
 
+
 def start_update_bbrush_mode():
     """在启动Blender的时候"""
-    sculpt.try_toggle_bbrush_mode()
+    try_toggle_bbrush_mode()
     view_navigation.register()
 
 
 def object_mode_update_bbrush_mode():
     """在切换模式的时候"""
-    sculpt.try_toggle_bbrush_mode()
+    try_toggle_bbrush_mode()
 
 
 def load_subscribe():
@@ -57,6 +58,7 @@ def load_subscribe():
 
 
 def refresh_subscribe():
+    """刷新订阅"""
     bpy.msgbus.clear_by_owner(owner)
     load_subscribe()
 
@@ -76,7 +78,7 @@ def bbrush_timer():
 @persistent
 def load_post(args):
     refresh_subscribe()
-    sculpt.try_toggle_bbrush_mode()
+    try_toggle_bbrush_mode()
 
 
 @persistent

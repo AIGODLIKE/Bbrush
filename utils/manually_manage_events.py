@@ -16,11 +16,12 @@ class ManuallyManageEvents:
         self.start_time = time.time()
         self.start_mouse = Vector((event.mouse_x, event.mouse_y))
 
+
     @property
     def event_running_time(self) -> float:
         return time.time() - self.start_time
 
-    def is_move(self, event) -> bool:
+    def check_is_moving(self, event) -> bool:
         now_mouse = Vector((event.mouse_x, event.mouse_y))
         is_move = event.type == "MOUSEMOVE" or now_mouse != self.start_mouse
         return is_move

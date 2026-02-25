@@ -38,7 +38,7 @@ class Preferences(
         description="Check if the mouse is placed over the model, mouse cursor range size", default=100, min=10,
         max=300)
 
-    enabled_drag_offset_compensation: bpy.props.BoolProperty(name="Enabled drag offset compensation", default=True)
+    enabled_drag_offset_compensation: bpy.props.BoolProperty(name="Enabled drag offset compensation", default=False)
     drag_offset_compensation: bpy.props.FloatProperty(
         name="Drag offset compensation",
         description="Compensate for mouse position movement during drawing",

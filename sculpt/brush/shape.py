@@ -9,7 +9,7 @@ from gpu_extras.batch import batch_for_shader
 from mathutils import Vector
 
 from ...adapter import sculpt_invert_hide_face
-from ...debug import DEBUG_DRAG
+from ...debug import DEBUG_SHAPE
 from ...utils import (
     check_mouse_in_model,
     check_mouse_in_depth_map_area,
@@ -376,28 +376,7 @@ class DragBase(DragDraw):
         return {"FINISHED"}
 
 
-def mouse_offset_compensation(context, event):
-    """偏移补偿         在鼠标放在模型边缘的时候会出现不跟手的情况 对其进行优化"""
-    pref = get_pref()
-    if pref.enabled_drag_offset_compensation:
-        from .. import brush_runtime
-        now_mouse = Vector((event.mouse_x, event.mouse_y))
-        left = brush_runtime.left_mouse
-        offset_mouse = (left - now_mouse) * pref.drag_offset_compensation + left
-        print("mouse_offset_compensation", offset_mouse)
-        context.window.cursor_warp(int(offset_mouse.x), int(offset_mouse.y))
-
-
-class BrushShape(bpy.types.Operator, DragBase):
-    bl_idname = "sculpt.bbrush_shape"
-    bl_label = "Shape"
-    bl_options = {"REGISTER"}
-
-    click_time = None
-
-    @classmethod
-    def poll(cls, context):
-        return is_bbruse_mode()
+class ShapeUpdate(DragBase):
 
     def update_box_shape(self, context, event):
         self.mouse = Vector((event.mouse_region_x, event.mouse_region_y))
@@ -455,6 +434,43 @@ class BrushShape(bpy.types.Operator, DragBase):
         self.mouse_route_convex_shell = self.mouse_route = draw_data
         self.preview_area(draw_data)
 
+    def polyline_update(self, context, event) -> "set|None":
+        is_press = event.value == "PRESS"
+
+        is_left = event.type == "LEFTMOUSE"
+        is_right = event.type == "RIGHTMOUSE"
+
+        click_time = bpy.context.preferences.inputs.mouse_double_click_time
+        if is_press and is_left:
+            mouse = Vector((event.mouse_region_x, event.mouse_region_y))
+            last_mouse = self.mouse_route[-1]
+            if (click_time / 1000) > (time.time() - self.click_time) and mouse == last_mouse:  # 双击确定
+                self.exit(context, event)
+                return self.execute(context)
+
+            if mouse not in self.mouse_route:
+                self.mouse_route.append(mouse)
+            self.click_time = time.time()
+        elif is_press and is_right:
+            if len(self.mouse_route) > 1:
+                self.mouse_route.pop()
+            else:
+                self.exit(context, event)
+                return {'CANCELLED'}
+        return None
+
+
+class BrushShape(bpy.types.Operator, ShapeUpdate):
+    bl_idname = "sculpt.bbrush_shape"
+    bl_label = "Shape"
+    bl_options = {"REGISTER"}
+
+    click_time = None
+
+    @classmethod
+    def poll(cls, context):
+        return is_bbruse_mode()
+
     def start_modal(self, context, event):
         global drag_runtime
         if drag_runtime is not None:
@@ -467,23 +483,24 @@ class BrushShape(bpy.types.Operator, DragBase):
         return {'RUNNING_MODAL'}
 
     def invoke(self, context, event):
-        from .shortcut_key import BrushShortcutKeyScale
         is_in_modal = check_mouse_in_model(context, event)
         active_tool = ToolSelectPanelHelper.tool_active_from_context(bpy.context)
 
-        if DEBUG_DRAG:
+        if DEBUG_SHAPE:
             print(self.bl_idname, is_in_modal, self.brush_mode, active_tool.idname)
 
         if self.__class__.draw_handle is not None:
             return {"FINISHED"}
 
         pass_list = (
-            "builtin_brush.Mask",  # 旧版本名称
-            "builtin_brush.mask",
             "builtin.line_mask",
         )
 
         is_pass_brush = active_tool and active_tool.idname in pass_list
+        is_mask_box = active_tool and active_tool.idname in (
+            "builtin_brush.Mask",  # 旧版本名称
+            "builtin_brush.mask",
+        )
         support_brushes_list = (
             "builtin.box_mask",
             "builtin.box_hide",
@@ -500,23 +517,15 @@ class BrushShape(bpy.types.Operator, DragBase):
         )
         is_support_brushes = active_tool and active_tool.idname in support_brushes_list
 
-        if check_mouse_in_depth_map_area(event):  # 缩放深度图
-            bpy.ops.sculpt.bbrush_depth_scale("INVOKE_DEFAULT")
-            return {"FINISHED"}
-        elif check_mouse_in_shortcut_key_area(event) and BrushShortcutKeyScale.poll(context):  # 缩放快捷键
-            bpy.ops.sculpt.bbrush_shortcut_key_scale("INVOKE_DEFAULT")
-            return {"FINISHED"}
-        elif is_support_brushes:
+        if is_support_brushes:
+            return self.start_modal(context, event)
+        elif is_mask_box:
             return self.start_modal(context, event)
         elif is_pass_brush:
             return {"PASS_THROUGH"}
         elif not is_in_modal:
-            # if brush_runtime and brush_runtime.brush_mode != "SCULPT":  # 不是雕刻并且不在模型上
-            #     return self.start_modal(context, event)
-            # else:
             return {"FINISHED"}
 
-        mouse_offset_compensation(context, event)
         return {"PASS_THROUGH"}
 
     def modal(self, context, event):
@@ -558,28 +567,3 @@ class BrushShape(bpy.types.Operator, DragBase):
 
         refresh_ui(context)
         return {"RUNNING_MODAL"}
-
-    def polyline_update(self, context, event) -> "set|None":
-        is_press = event.value == "PRESS"
-
-        is_left = event.type == "LEFTMOUSE"
-        is_right = event.type == "RIGHTMOUSE"
-
-        click_time = bpy.context.preferences.inputs.mouse_double_click_time
-        if is_press and is_left:
-            mouse = Vector((event.mouse_region_x, event.mouse_region_y))
-            last_mouse = self.mouse_route[-1]
-            if (click_time / 1000) > (time.time() - self.click_time) and mouse == last_mouse:  # 双击确定
-                self.exit(context, event)
-                return self.execute(context)
-
-            if mouse not in self.mouse_route:
-                self.mouse_route.append(mouse)
-            self.click_time = time.time()
-        elif is_press and is_right:
-            if len(self.mouse_route) > 1:
-                self.mouse_route.pop()
-            else:
-                self.exit(context, event)
-                return {'CANCELLED'}
-        return None

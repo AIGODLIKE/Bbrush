@@ -123,6 +123,16 @@ def refresh_depth_map():
     clear_gpu_cache()
 
 
+def view3d_event(event):
+    """视图操作"""
+    if event.alt:
+        bpy.ops.view3d.move("INVOKE_DEFAULT")  # 平移视图
+    elif event.ctrl:
+        bpy.ops.view3d.zoom("INVOKE_DEFAULT")  # 缩放视图
+    else:
+        bpy.ops.view3d.rotate("INVOKE_DEFAULT")  # 旋转视图
+
+
 class_list = [
     BbrushStart,
     BbrushExit,
