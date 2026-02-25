@@ -1,7 +1,8 @@
 import bpy
+from bl_ui.space_toolsystem_common import ToolSelectPanelHelper
 from mathutils import Vector
 
-from .brush import BrushShortcutKeyScale
+from .brush import BrushShortcutKeyScale, BrushShape
 from ..debug import DEBUG_LEFT_MOUSE
 from ..utils import object_ray_cast, check_mouse_in_model, is_bbruse_mode, get_pref, check_modal_operators, \
     check_mouse_in_depth_map_area, check_mouse_in_shortcut_key_area
@@ -23,6 +24,12 @@ class LeftMouse(bpy.types.Operator, ManuallyManageEvents):
         # CLICK_DRAG 在 5.0以上版本中拖动事件不易被触发
         """
         from . import brush_runtime
+        from . import UpdateBrushShelf
+
+        brush_runtime.left_mouse = Vector((event.mouse_x, event.mouse_y))
+
+        UpdateBrushShelf.update_brush_shelf(context, event)
+        active_tool = ToolSelectPanelHelper.tool_active_from_context(bpy.context)
 
         if check_mouse_in_depth_map_area(event):  # 缩放深度图
             bpy.ops.sculpt.bbrush_depth_scale("INVOKE_DEFAULT")
@@ -31,9 +38,36 @@ class LeftMouse(bpy.types.Operator, ManuallyManageEvents):
             bpy.ops.sculpt.bbrush_shortcut_key_scale("INVOKE_DEFAULT")
             return {"FINISHED"}
 
+        elif active_tool and active_tool.idname == "builtin_brush.draw_face_sets":
+            return self.brush_stroke(context, event)
+        elif active_tool and "face_set" in active_tool.idname:
+            # ("builtin.lasso_face_set",
+            #  "builtin_brush.draw_face_sets",
+            #  "builtin.line_face_set",
+            #  "builtin.polyline_face_set",
+            # "builtin.face_set_edit"
+            #  "builtin.box_face_set",)
+            return {"PASS_THROUGH"}
+        elif active_tool and active_tool.idname in (
+                "builtin.mask_by_color",
+                "builtin.color_filter",
+                "builtin.mesh_filter",
+                "builtin.cloth_filter",
+
+                "builtin.move",
+                "builtin.rotate",
+                "builtin.scale",
+                "builtin.transform",
+
+                "builtin.annotate",
+                "builtin.annotate_line",
+                "builtin.annotate_polygon",
+                "builtin.annotate_eraser",
+        ):
+            return {"PASS_THROUGH"}
+
         self.start_manually_manage_events(event)
 
-        brush_runtime.left_mouse = Vector((event.mouse_x, event.mouse_y))
         in_run = check_modal_operators(self.bl_idname)
         if DEBUG_LEFT_MOUSE:
             print("left mouse",
@@ -46,12 +80,19 @@ class LeftMouse(bpy.types.Operator, ManuallyManageEvents):
         return {'RUNNING_MODAL'}
 
     def modal(self, context, event):
+        from . import UpdateBrushShelf
+        UpdateBrushShelf.update_brush_shelf(context, event)
 
         is_release = event.value == "RELEASE"
 
         is_moving = self.check_is_moving(event)
         is_in_modal = check_mouse_in_model(context, event)
         is_in_active_modal = check_mouse_in_active_modal(context, event)
+        active_tool = ToolSelectPanelHelper.tool_active_from_context(bpy.context)
+        is_mask_box = active_tool and active_tool.idname in (
+            "builtin_brush.Mask",  # 旧版本名称
+            "builtin_brush.mask",
+        )
 
         if is_release:  # 单击
             print("is_release", is_in_active_modal, is_in_modal)
@@ -65,15 +106,31 @@ class LeftMouse(bpy.types.Operator, ManuallyManageEvents):
 
         elif is_moving:  # 拖动不能使用PASSTHROUGH,需要手动指定事件
             only_shift = event.shift and not event.alt and not event.ctrl
-
             print("is_move", only_shift, is_in_modal)
 
-            if is_in_modal and is_in_active_modal:
-                mouse_offset_compensation(context, event)
-                try:
-                    execute_brush_stroke(event)
-                finally:  # 反直觉写法
-                    return {"FINISHED"}
+            if active_tool and active_tool.idname == "builtin.line_mask":
+                # 3D View Tool: Sculpt, Line Mask
+                value = 0 if event.alt else 1
+                bpy.ops.paint.mask_line_gesture('INVOKE_DEFAULT', value=value)
+            elif active_tool and active_tool.idname == "builtin.line_hide":
+                action = "SHOW" if event.alt else "HIDE"
+                bpy.ops.paint.hide_show_line_gesture("INVOKE_DEFAULT", xstart=0, action=action)
+            elif active_tool and active_tool.idname == "builtin.line_project":
+                bpy.ops.sculpt.project_line_gesture("INVOKE_DEFAULT")
+
+            elif active_tool and active_tool.idname == "builtin.box_trim":
+                bpy.ops.sculpt.trim_box_gesture("INVOKE_DEFAULT")
+            elif active_tool and active_tool.idname == "builtin.lasso_trim":
+                bpy.ops.sculpt.trim_lasso_gesture("INVOKE_DEFAULT")
+            elif active_tool and active_tool.idname == "builtin.polyline_trim":
+                bpy.ops.sculpt.trim_polyline_gesture("INVOKE_DEFAULT")
+            elif active_tool and active_tool.idname == "builtin.line_trim":
+                bpy.ops.sculpt.trim_line_gesture("INVOKE_DEFAULT")
+
+            elif active_tool and BrushShape.check_brush_supper(active_tool.idname):  # 优先查询支持的形状笔刷
+                bpy.ops.sculpt.bbrush_shape("INVOKE_DEFAULT")
+            elif is_in_modal and is_in_active_modal:
+                return self.brush_stroke(context, event)
             else:  # 鼠标不在模型上
                 if only_shift:
                     bpy.ops.view3d.view_roll("INVOKE_DEFAULT", type="ANGLE")  # 倾斜视图
@@ -82,8 +139,16 @@ class LeftMouse(bpy.types.Operator, ManuallyManageEvents):
                 else:
                     from . import view3d_event
                     view3d_event(event)
-                return {"FINISHED"}
+            return {"FINISHED"}
         return {"RUNNING_MODAL"}
+
+    @staticmethod
+    def brush_stroke(context, event):
+        mouse_offset_compensation(context, event)
+        try:
+            execute_brush_stroke(event)
+        finally:  # 反直觉写法
+            return {"FINISHED"}
 
 
 def check_mouse_in_active_modal(context, event) -> bool:

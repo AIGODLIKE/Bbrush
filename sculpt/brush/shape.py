@@ -290,11 +290,11 @@ class DragBase(DragDraw):
 
     def exit(self, context, event):
         global drag_runtime
-        drag_runtime = None
 
         self.unregister_draw()
         self.move_confirm(context, event)
         refresh_ui(context)
+        drag_runtime = None
 
     def get_shape_in_model_up(self, context):
         data = np.array(self.mouse_route, dtype=np.float32)
@@ -479,8 +479,26 @@ class BrushShape(bpy.types.Operator, ShapeUpdate):
         self.click_time = time.time()
         self.start_drag_event(context, event)
         context.window_manager.modal_handler_add(self)
-
         return {'RUNNING_MODAL'}
+
+    @classmethod
+    def check_brush_supper(cls, brush_name: str) -> bool:
+        """检查是不是型状支持的笔刷"""
+        support_brushes_list = (
+            "builtin.box_mask",
+            "builtin.box_hide",
+            "builtin.lasso_mask",
+            "builtin.lasso_hide",
+            "builtin.polyline_mask",
+            "builtin.polyline_hide",
+
+            # 自定义笔刷
+            "builtin.circular_mask",
+            "builtin.circular_hide",
+            "builtin.ellipse_mask",
+            "builtin.ellipse_hide",
+        )
+        return brush_name in support_brushes_list
 
     def invoke(self, context, event):
         is_in_modal = check_mouse_in_model(context, event)
@@ -501,21 +519,7 @@ class BrushShape(bpy.types.Operator, ShapeUpdate):
             "builtin_brush.Mask",  # 旧版本名称
             "builtin_brush.mask",
         )
-        support_brushes_list = (
-            "builtin.box_mask",
-            "builtin.box_hide",
-            "builtin.lasso_mask",
-            "builtin.lasso_hide",
-            "builtin.polyline_mask",
-            "builtin.polyline_hide",
-
-            # 自定义笔刷
-            "builtin.circular_mask",
-            "builtin.circular_hide",
-            "builtin.ellipse_mask",
-            "builtin.ellipse_hide",
-        )
-        is_support_brushes = active_tool and active_tool.idname in support_brushes_list
+        is_support_brushes = active_tool and self.check_brush_supper(active_tool.idname)
 
         if is_support_brushes:
             return self.start_modal(context, event)
@@ -530,8 +534,8 @@ class BrushShape(bpy.types.Operator, ShapeUpdate):
 
     def modal(self, context, event):
         """拖动的时候不在模型上拖,执行其它操作"""
-        # print("drag_event", self.shape, self.is_reverse, len(self.mouse_route), len(self.mouse_route_convex_shell),
-        #       event.value, event.type)
+        print("drag_event", self.shape, self.is_reverse, len(self.mouse_route), len(self.mouse_route_convex_shell),
+              event.value, event.type)
 
         self.is_reverse = event.alt
 
@@ -567,3 +571,4 @@ class BrushShape(bpy.types.Operator, ShapeUpdate):
 
         refresh_ui(context)
         return {"RUNNING_MODAL"}
+

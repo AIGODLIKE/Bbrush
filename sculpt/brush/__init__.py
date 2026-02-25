@@ -4,13 +4,11 @@ from .click import BrushClick
 from .depth import BrushDepthScale, BrushDepthMove
 from .shape import BrushShape
 from .shortcut_key import BrushShortcutKeyMove, BrushShortcutKeyScale
-from .smooth import BrushSmooth
 
 # 通过行为来区分手势内容
 brush = [
     BrushShape,
     BrushClick,
-    BrushSmooth,
 
     BrushDepthScale,
     BrushDepthMove,
