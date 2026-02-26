@@ -87,23 +87,25 @@ class LeftMouse(bpy.types.Operator, ManuallyManageEvents):
 
         is_moving = self.check_is_moving(event)
         is_in_modal = check_mouse_in_model(context, event)
-        is_in_active_modal = check_mouse_in_active_modal(context, event)  # 不能精确判断
+        # is_in_active_modal = check_mouse_in_active_modal(context, event)  # 不能精确判断，如果物体有修改器,会影响检测
         active_tool = ToolSelectPanelHelper.tool_active_from_context(bpy.context)
 
         if is_release:  # 单击
-            print("is_release", is_in_active_modal, is_in_modal)
-            if is_in_modal and not is_in_active_modal:  # 点在了其它模型上
-                try:
-                    bpy.ops.object.transfer_mode("INVOKE_DEFAULT")
-                finally:
-                    return {"FINISHED"}  # 反直觉写法
-            bpy.ops.sculpt.bbrush_click("INVOKE_DEFAULT")
-            return {"FINISHED"}
-
+            if DEBUG_LEFT_MOUSE:
+                print("is_release", is_in_modal)
+            # if is_in_modal:  # 点在了其它模型上and not is_in_active_modal
+            try:
+                res = bpy.ops.object.transfer_mode("INVOKE_DEFAULT")  # object.transfer_mode 使用的c端gpu buffer检测
+                if "CANCELLED" in res:
+                    bpy.ops.sculpt.bbrush_click("INVOKE_DEFAULT")
+            finally:
+                return {"FINISHED"}  # 反直觉写法
         elif is_moving:  # 拖动不能使用PASSTHROUGH,需要手动指定事件
-            only_shift = event.shift and not event.alt and not event.ctrl
-            print("is_move", is_in_active_modal, is_in_modal)
+            if DEBUG_LEFT_MOUSE:
+                print("is_move", is_in_modal)
 
+            only_shift = event.shift and not event.alt and not event.ctrl
+            
             if active_tool and active_tool.idname == "builtin.line_mask":
                 # 3D View Tool: Sculpt, Line Mask
                 value = 0 if event.alt else 1
@@ -125,7 +127,7 @@ class LeftMouse(bpy.types.Operator, ManuallyManageEvents):
 
             elif active_tool and BrushShape.check_brush_supper(active_tool.idname):  # 优先查询支持的形状笔刷
                 bpy.ops.sculpt.bbrush_shape("INVOKE_DEFAULT")
-            elif is_in_modal and is_in_active_modal:
+            elif is_in_modal:  # and is_in_active_modal #
                 return self.brush_stroke(context, event)
             else:  # 鼠标不在模型上
                 if only_shift:
@@ -148,10 +150,17 @@ class LeftMouse(bpy.types.Operator, ManuallyManageEvents):
 
 
 def check_mouse_in_active_modal(context, event) -> bool:
-    """检查鼠标是否在活动模型上"""
+    """检查鼠标是否在活动模型上
+    """
     obj = context.sculpt_object
+    if not obj:
+        return False
     mouse = (event.mouse_region_x, event.mouse_region_y)
-    result, location, normal, index = object_ray_cast(obj, context, mouse)
+
+    depsgraph = context.evaluated_depsgraph_get()
+    object_eval = obj.evaluated_get(depsgraph)
+
+    result, location, normal, index = object_ray_cast(object_eval, context, mouse)
     return result
 
 
