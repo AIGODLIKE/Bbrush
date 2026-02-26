@@ -10,7 +10,9 @@ def sculpt_invert_hide_face():
     放置雕刻操作符
     统一各版本操作符不同带来的bug
     """
-    if is_4_1_up_version:
+    if is_5_0_up_version:
+        bpy.ops.paint.visibility_invert()
+    elif is_4_1_up_version:
         bpy.ops.paint.visibility_invert()
     elif is_3_6_up_version:
         bpy.ops.sculpt.face_set_invert_visibility()

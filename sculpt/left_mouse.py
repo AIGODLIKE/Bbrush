@@ -87,12 +87,8 @@ class LeftMouse(bpy.types.Operator, ManuallyManageEvents):
 
         is_moving = self.check_is_moving(event)
         is_in_modal = check_mouse_in_model(context, event)
-        is_in_active_modal = check_mouse_in_active_modal(context, event)
+        is_in_active_modal = check_mouse_in_active_modal(context, event)  # 不能精确判断
         active_tool = ToolSelectPanelHelper.tool_active_from_context(bpy.context)
-        is_mask_box = active_tool and active_tool.idname in (
-            "builtin_brush.Mask",  # 旧版本名称
-            "builtin_brush.mask",
-        )
 
         if is_release:  # 单击
             print("is_release", is_in_active_modal, is_in_modal)
@@ -106,7 +102,7 @@ class LeftMouse(bpy.types.Operator, ManuallyManageEvents):
 
         elif is_moving:  # 拖动不能使用PASSTHROUGH,需要手动指定事件
             only_shift = event.shift and not event.alt and not event.ctrl
-            print("is_move", only_shift, is_in_modal)
+            print("is_move", is_in_active_modal, is_in_modal)
 
             if active_tool and active_tool.idname == "builtin.line_mask":
                 # 3D View Tool: Sculpt, Line Mask
@@ -134,7 +130,7 @@ class LeftMouse(bpy.types.Operator, ManuallyManageEvents):
             else:  # 鼠标不在模型上
                 if only_shift:
                     bpy.ops.view3d.view_roll("INVOKE_DEFAULT", type="ANGLE")  # 倾斜视图
-                elif event.ctrl:  # 使用ctrl 或ctrl shift 的笔刷
+                elif event.ctrl:  # 使用ctrl 或 ctrl shift 的笔刷
                     bpy.ops.sculpt.bbrush_shape("INVOKE_DEFAULT")
                 else:
                     from . import view3d_event
