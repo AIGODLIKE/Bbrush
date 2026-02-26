@@ -93,19 +93,22 @@ class LeftMouse(bpy.types.Operator, ManuallyManageEvents):
         if is_release:  # 单击
             if DEBUG_LEFT_MOUSE:
                 print("is_release", is_in_modal)
-            # if is_in_modal:  # 点在了其它模型上and not is_in_active_modal
-            try:
-                res = bpy.ops.object.transfer_mode("INVOKE_DEFAULT")  # object.transfer_mode 使用的c端gpu buffer检测
-                if "CANCELLED" in res:
-                    bpy.ops.sculpt.bbrush_click("INVOKE_DEFAULT")
-            finally:
+            if is_in_modal:  # 点在了其它模型上and not is_in_active_modal
+                try:
+                    res = bpy.ops.object.transfer_mode("INVOKE_DEFAULT")  # object.transfer_mode 使用的c端gpu buffer检测
+                    if "CANCELLED" in res:
+                        bpy.ops.sculpt.bbrush_click("INVOKE_DEFAULT")
+                finally:
+                    return {"FINISHED"}  # 反直觉写法
+            else:
+                bpy.ops.sculpt.bbrush_click("INVOKE_DEFAULT")
                 return {"FINISHED"}  # 反直觉写法
         elif is_moving:  # 拖动不能使用PASSTHROUGH,需要手动指定事件
             if DEBUG_LEFT_MOUSE:
                 print("is_move", is_in_modal)
 
             only_shift = event.shift and not event.alt and not event.ctrl
-            
+
             if active_tool and active_tool.idname == "builtin.line_mask":
                 # 3D View Tool: Sculpt, Line Mask
                 value = 0 if event.alt else 1
