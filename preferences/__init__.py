@@ -29,13 +29,15 @@ class Preferences(
         description=
         "If entering sculpting mode, Bbrush mode will automatically activate; "
         "if exiting sculpting mode, Bbrush mode will deactivate",
-        default=False,
+        default=True,
         update=update_always_bbrush_mode
     )
 
     depth_ray_size: bpy.props.IntProperty(
         name="Depth ray check size(px)",
-        description="Check if the mouse is placed over the model, mouse cursor range size", default=100, min=10,
+        description="Check if the mouse is placed over the model, mouse cursor range size",
+        default=50,
+        min=10,
         max=300)
 
     enabled_drag_offset_compensation: bpy.props.BoolProperty(name="Enabled drag offset compensation", default=False)
