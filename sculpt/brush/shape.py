@@ -9,7 +9,7 @@ from gpu_extras.batch import batch_for_shader
 from mathutils import Vector
 
 from ...adapter import sculpt_invert_hide_face
-from ...debug import DEBUG_DRAG
+from ...debug import DEBUG_SHAPE
 from ...utils import (
     check_mouse_in_model,
     check_mouse_in_depth_map_area,
@@ -86,7 +86,7 @@ def get_circular(x, y, segments=64):
     return vert
 
 
-drag_runtime: "BrushDrag|None" = None
+drag_runtime: "BrushShape|None" = None
 
 
 class MoveEvent:
@@ -115,7 +115,8 @@ class MoveEvent:
             self.mouse_move = self.mouse_move_start = Vector((0, 0))
             self.is_move = False
 
-            getattr(self, f"update_{self.shape.lower()}_shape")(context, event)
+            if func := getattr(self, f"update_{self.shape.lower()}_shape", None):
+                func(context, event)
 
     def move_event(self, context, event):
         is_space = event.type == "SPACE"
@@ -174,7 +175,7 @@ class DragDraw(MoveEvent):
             for batch, shader in self.shaders.items():
                 shader.uniform_float("color", self.color)
                 batch.draw(shader)
-            if draw_func := getattr(self, f"draw_{self.shape.lower()}"):
+            if draw_func := getattr(self, f"draw_{self.shape.lower()}", None):
                 draw_func()
 
     def draw_box(self):
@@ -289,11 +290,11 @@ class DragBase(DragDraw):
 
     def exit(self, context, event):
         global drag_runtime
-        drag_runtime = None
 
         self.unregister_draw()
         self.move_confirm(context, event)
         refresh_ui(context)
+        drag_runtime = None
 
     def get_shape_in_model_up(self, context):
         data = np.array(self.mouse_route, dtype=np.float32)
@@ -375,23 +376,7 @@ class DragBase(DragDraw):
         return {"FINISHED"}
 
 
-def mouse_offset_compensation(context, event):
-    """偏移补偿         在鼠标放在模型边缘的时候会出现不跟手的情况 对其进行优化"""
-    pref = get_pref()
-    if pref.enabled_drag_offset_compensation:
-        from .. import brush_runtime
-        now_mouse = Vector((event.mouse_x, event.mouse_y))
-        left = brush_runtime.left_mouse
-        offset_mouse = (left - now_mouse) * pref.drag_offset_compensation + left
-        context.window.cursor_warp(int(offset_mouse.x), int(offset_mouse.y))
-
-
-class BrushDrag(bpy.types.Operator, DragBase):
-    bl_idname = "sculpt.bbrush_drag"
-    bl_label = "Drag"
-    bl_options = {"REGISTER"}
-
-    click_time = None
+class ShapeUpdate(DragBase):
 
     def update_box_shape(self, context, event):
         self.mouse = Vector((event.mouse_region_x, event.mouse_region_y))
@@ -449,6 +434,43 @@ class BrushDrag(bpy.types.Operator, DragBase):
         self.mouse_route_convex_shell = self.mouse_route = draw_data
         self.preview_area(draw_data)
 
+    def polyline_update(self, context, event) -> "set|None":
+        is_press = event.value == "PRESS"
+
+        is_left = event.type == "LEFTMOUSE"
+        is_right = event.type == "RIGHTMOUSE"
+
+        click_time = bpy.context.preferences.inputs.mouse_double_click_time
+        if is_press and is_left:
+            mouse = Vector((event.mouse_region_x, event.mouse_region_y))
+            last_mouse = self.mouse_route[-1]
+            if (click_time / 1000) > (time.time() - self.click_time) and mouse == last_mouse:  # 双击确定
+                self.exit(context, event)
+                return self.execute(context)
+
+            if mouse not in self.mouse_route:
+                self.mouse_route.append(mouse)
+            self.click_time = time.time()
+        elif is_press and is_right:
+            if len(self.mouse_route) > 1:
+                self.mouse_route.pop()
+            else:
+                self.exit(context, event)
+                return {'CANCELLED'}
+        return None
+
+
+class BrushShape(bpy.types.Operator, ShapeUpdate):
+    bl_idname = "sculpt.bbrush_shape"
+    bl_label = "Shape"
+    bl_options = {"REGISTER"}
+
+    click_time = None
+
+    @classmethod
+    def poll(cls, context):
+        return is_bbruse_mode()
+
     def start_modal(self, context, event):
         global drag_runtime
         if drag_runtime is not None:
@@ -457,66 +479,63 @@ class BrushDrag(bpy.types.Operator, DragBase):
         self.click_time = time.time()
         self.start_drag_event(context, event)
         context.window_manager.modal_handler_add(self)
-
         return {'RUNNING_MODAL'}
 
     @classmethod
-    def poll(cls, context):
-        return is_bbruse_mode()
+    def check_brush_supper(cls, brush_name: str) -> bool:
+        """检查是不是型状支持的笔刷"""
+        support_brushes_list = (
+            "builtin.box_mask",
+            "builtin.box_hide",
+            "builtin.lasso_mask",
+            "builtin.lasso_hide",
+            "builtin.polyline_mask",
+            "builtin.polyline_hide",
+
+            # 自定义笔刷
+            "builtin.circular_mask",
+            "builtin.circular_hide",
+            "builtin.ellipse_mask",
+            "builtin.ellipse_hide",
+        )
+        return brush_name in support_brushes_list
 
     def invoke(self, context, event):
-        from .shortcut_key import BrushShortcutKeyScale
-        from .. import brush_runtime
         is_in_modal = check_mouse_in_model(context, event)
         active_tool = ToolSelectPanelHelper.tool_active_from_context(bpy.context)
 
-        if DEBUG_DRAG:
+        if DEBUG_SHAPE:
             print(self.bl_idname, is_in_modal, self.brush_mode, active_tool.idname)
 
         if self.__class__.draw_handle is not None:
             return {"FINISHED"}
 
-        if check_mouse_in_depth_map_area(event):
-            bpy.ops.sculpt.bbrush_depth_scale("INVOKE_DEFAULT")  # 缩放深度图
-            return {"FINISHED"}
-        elif check_mouse_in_shortcut_key_area(event) and BrushShortcutKeyScale.poll(context):
-            bpy.ops.sculpt.bbrush_shortcut_key_scale("INVOKE_DEFAULT")  # 缩放快捷键
-            return {"FINISHED"}
-        elif active_tool and active_tool.idname in (
-                "builtin.box_mask",
-                "builtin.box_hide",
-                "builtin.lasso_mask",
-                "builtin.lasso_hide",
-                "builtin.polyline_mask",
-                "builtin.polyline_hide",
+        pass_list = (
+            "builtin.line_mask",
+        )
 
-                # 自定义笔刷
-                "builtin.circular_mask",
-                "builtin.circular_hide",
-                "builtin.ellipse_mask",
-                "builtin.ellipse_hide",
-        ):
+        is_pass_brush = active_tool and active_tool.idname in pass_list
+        is_mask_box = active_tool and active_tool.idname in (
+            "builtin_brush.Mask",  # 旧版本名称
+            "builtin_brush.mask",
+        )
+        is_support_brushes = active_tool and self.check_brush_supper(active_tool.idname)
+
+        if is_support_brushes:
             return self.start_modal(context, event)
+        elif is_mask_box:
+            return self.start_modal(context, event)
+        elif is_pass_brush:
+            return {"PASS_THROUGH"}
         elif not is_in_modal:
-            if brush_runtime and brush_runtime.brush_mode != "SCULPT":  # 不是雕刻并且不在模型上
-                return self.start_modal(context, event)
-            else:
-                if event.alt:
-                    bpy.ops.view3d.move("INVOKE_DEFAULT")  # 平移视图
-                elif event.ctrl:
-                    bpy.ops.view3d.zoom("INVOKE_DEFAULT")  #
-                else:
-                    bpy.ops.view3d.rotate("INVOKE_DEFAULT")  # 旋转视图
-                return {"FINISHED"}
-
-        mouse_offset_compensation(context, event)
+            return {"FINISHED"}
 
         return {"PASS_THROUGH"}
 
     def modal(self, context, event):
-        """        拖动的时候不在模型上拖,执行其它操作        """
-        # print("drag_event", self.shape, self.is_reverse, len(self.mouse_route), len(self.mouse_route_convex_shell),
-        #       event.value, event.type)
+        """拖动的时候不在模型上拖,执行其它操作"""
+        print("drag_event", self.shape, self.is_reverse, len(self.mouse_route), len(self.mouse_route_convex_shell),
+              event.value, event.type)
 
         self.is_reverse = event.alt
 
@@ -547,32 +566,9 @@ class BrushDrag(bpy.types.Operator, DragBase):
         elif self.move_event(context, event):
             refresh_ui(context)
         else:
-            getattr(self, f"update_{self.shape.lower()}_shape")(context, event)
+            if func := getattr(self, f"update_{self.shape.lower()}_shape", None):
+                func(context, event)
 
         refresh_ui(context)
         return {"RUNNING_MODAL"}
 
-    def polyline_update(self, context, event) -> "set|None":
-        is_press = event.value == "PRESS"
-
-        is_left = event.type == "LEFTMOUSE"
-        is_right = event.type == "RIGHTMOUSE"
-
-        click_time = bpy.context.preferences.inputs.mouse_double_click_time
-        if is_press and is_left:
-            mouse = Vector((event.mouse_region_x, event.mouse_region_y))
-            last_mouse = self.mouse_route[-1]
-            if (click_time / 1000) > (time.time() - self.click_time) and mouse == last_mouse:  # 双击确定
-                self.exit(context, event)
-                return self.execute(context)
-
-            if mouse not in self.mouse_route:
-                self.mouse_route.append(mouse)
-            self.click_time = time.time()
-        elif is_press and is_right:
-            if len(self.mouse_route) > 1:
-                self.mouse_route.pop()
-            else:
-                self.exit(context, event)
-                return {'CANCELLED'}
-        return None

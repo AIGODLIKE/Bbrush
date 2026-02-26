@@ -40,8 +40,7 @@ def gpu_depth_ray_cast(x, y, data):
     data['is_in_model'] = (min_depth != (0 or 1))
 
 
-def get_mouse_location_ray_cast(context, event):
-    x, y = (event.mouse_region_x, event.mouse_region_y)
+def get_mouse_location_ray_cast(context, x, y):
     view3d = context.space_data
     show_xray = view3d.shading.show_xray
     view3d.shading.show_xray = False
@@ -56,6 +55,9 @@ def get_mouse_location_ray_cast(context, event):
 
 def get_area_ray_cast(context, x, y, w, h):
     data = {}
+
+    if w == 0 or h == 0:  # 没有绘制一个正确的区域
+        return get_mouse_location_ray_cast(context, x, y)
 
     def get_ray_cast():
         buffer = get_gpu_buffer((x, y), wh=(w, h), centered=False)

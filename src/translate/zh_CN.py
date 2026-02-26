@@ -72,7 +72,7 @@ data = {
     "ctrl + Down arrow or ctrl + Num/": "ctrl+方向下 或 ctrl+Num/",
     "Paint on the model": "在模型上绘制",
     "+alt Paint on the model": "+alt 在模型上绘制",
-    "Drag in blank area": "在空白处单击",
+    "Drag in blank area": "在空白处拖动",
     "Click in blank area": "在空白处单击",
     "Click in model": "在模型上单击",
     "Bbrush view navigation": "Bbrush 视图导览",

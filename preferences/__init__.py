@@ -6,7 +6,6 @@ from .topbar import TopBar
 from .view_navigation_gizmo import ViewNavigationGizmo
 from .view_navigation_property import ViewNavigationProperty
 from .. import __package__ as base_name
-from .. import sculpt
 
 
 class Preferences(
@@ -21,21 +20,27 @@ class Preferences(
 ):
     bl_idname = base_name
 
+    def update_always_bbrush_mode(self, context):
+        from ..register_module import try_toggle_bbrush_mode
+        try_toggle_bbrush_mode()
+
     always_use_bbrush_sculpt_mode: bpy.props.BoolProperty(
         name="Always use Bbrush sculpting mode",
         description=
         "If entering sculpting mode, Bbrush mode will automatically activate; "
         "if exiting sculpting mode, Bbrush mode will deactivate",
-        default=False,
-        update=lambda self, context: sculpt.try_toggle_bbrush_mode()
+        default=True,
+        update=update_always_bbrush_mode
     )
 
     depth_ray_size: bpy.props.IntProperty(
         name="Depth ray check size(px)",
-        description="Check if the mouse is placed over the model, mouse cursor range size", default=100, min=10,
+        description="Check if the mouse is placed over the model, mouse cursor range size",
+        default=50,
+        min=10,
         max=300)
 
-    enabled_drag_offset_compensation: bpy.props.BoolProperty(name="Enabled drag offset compensation", default=True)
+    enabled_drag_offset_compensation: bpy.props.BoolProperty(name="Enabled drag offset compensation", default=False)
     drag_offset_compensation: bpy.props.FloatProperty(
         name="Drag offset compensation",
         description="Compensate for mouse position movement during drawing",
