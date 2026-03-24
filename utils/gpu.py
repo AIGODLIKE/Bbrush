@@ -4,6 +4,25 @@ import gpu
 import numpy as np
 from gpu_extras.batch import batch_for_shader
 
+# 区域内「非背景」深度像素占比 ≥ 此值（0–1）时判定为命中几何体。
+# Blender 5.1+ 栅格会写入深度缓冲，不宜再用单点 min 深度判断。
+DEPTH_CONTENT_RATIO_THRESHOLD = 0.08
+
+
+def _depth_content_ratio(numpy_buffer, *, near_eps=1e-5, far_eps=1e-4):
+    """返回扁平深度数组中视为有几何深度的像素比例（0–1）。"""
+    d = np.asarray(numpy_buffer, dtype=np.float32).ravel()
+    if d.size == 0:
+        return 0.0
+    valid = (d > near_eps) & (d < (1.0 - far_eps))
+    return float(np.mean(valid))
+
+
+def _depth_buffer_indicates_model(numpy_buffer):
+    cr = _depth_content_ratio(numpy_buffer)
+    print("check depth_content_ratio", cr)
+    return cr >= DEPTH_CONTENT_RATIO_THRESHOLD
+
 
 def get_gpu_buffer(xy, wh=(1, 1), centered=False):
     """ 用于获取当前视图的GPU BUFFER
@@ -31,13 +50,12 @@ def get_gpu_buffer(xy, wh=(1, 1), centered=False):
 
 
 def gpu_depth_ray_cast(x, y, data):
-    """获取深度图是否有不含0 1 的像素点"""
+    """按区域内有效深度像素占比判断是否命中模型（见 DEPTH_CONTENT_RATIO_THRESHOLD）。"""
     from . import get_pref
     size = get_pref().depth_ray_size
     _buffer = get_gpu_buffer((x, y), wh=(size, size), centered=True)
     numpy_buffer = np.asarray(_buffer, dtype=np.float32).ravel()
-    min_depth = np.min(numpy_buffer)
-    data['is_in_model'] = (min_depth != (0 or 1))
+    data['is_in_model'] = _depth_buffer_indicates_model(numpy_buffer)
 
 
 def get_mouse_location_ray_cast(context, x, y):
@@ -50,7 +68,7 @@ def get_mouse_location_ray_cast(context, x, y):
     bpy.ops.wm.redraw_timer(type='DRAW', iterations=1)
     space.draw_handler_remove(handler, 'WINDOW')
     view3d.shading.show_xray = show_xray
-    return data['is_in_model']
+    return data.get('is_in_model', False)
 
 
 def get_area_ray_cast(context, x, y, w, h):
@@ -62,8 +80,7 @@ def get_area_ray_cast(context, x, y, w, h):
     def get_ray_cast():
         buffer = get_gpu_buffer((x, y), wh=(w, h), centered=False)
         numpy_buffer = np.asarray(buffer, dtype=np.float32).ravel()
-        min_depth = np.min(numpy_buffer)
-        data['is_in_model'] = (min_depth != (0 or 1))
+        data['is_in_model'] = _depth_buffer_indicates_model(numpy_buffer)
 
     view3d = context.space_data
     show_xray = view3d.shading.show_xray
@@ -72,9 +89,7 @@ def get_area_ray_cast(context, x, y, w, h):
     bpy.ops.wm.redraw_timer(type='DRAW', iterations=1)
     bpy.types.SpaceView3D.draw_handler_remove(handler, 'WINDOW')
     view3d.shading.show_xray = show_xray
-    if 'is_in_model' in data:
-        return data['is_in_model']
-    return False
+    return data.get('is_in_model', False)
 
 
 def draw_text(x,
