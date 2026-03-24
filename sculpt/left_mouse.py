@@ -41,12 +41,14 @@ class LeftMouse(bpy.types.Operator, ManuallyManageEvents):
         elif active_tool and active_tool.idname == "builtin_brush.draw_face_sets":
             return self.brush_stroke(context, event)
         elif active_tool and "face_set" in active_tool.idname:
-            # ("builtin.lasso_face_set",
-            #  "builtin_brush.draw_face_sets",
-            #  "builtin.line_face_set",
-            #  "builtin.polyline_face_set",
-            # "builtin.face_set_edit"
-            #  "builtin.box_face_set",)
+            """
+            "builtin.lasso_face_set",
+            "builtin_brush.draw_face_sets",
+            "builtin.line_face_set",
+            "builtin.polyline_face_set",
+            "builtin.face_set_edit",
+            "builtin.box_face_set",
+            """
             return {"PASS_THROUGH"}
         elif active_tool and active_tool.idname in (
                 "builtin.mask_by_color",
@@ -168,13 +170,29 @@ def check_mouse_in_active_modal(context, event) -> bool:
 
 
 def execute_brush_stroke(event):
-    if event.alt:
-        brush_mode = "INVERT"
-    elif event.shift:
-        brush_mode = "SMOOTH"
+    """https://docs.blender.org/api/5.0/bpy.ops.sculpt.html#bpy.ops.sculpt.brush_stroke
+    https://docs.blender.org/api/5.1/bpy.ops.sculpt.html#bpy.ops.sculpt.brush_stroke
+    在5.1中笔触操作被修改了"""
+    args = {}
+    if bpy.app.version >= (5, 1, 0):
+        if event.alt:
+            args["mode"] = "INVERT"
+            args["brush_toggle"] = "None"
+        elif event.shift:
+            args["mode"] = "NORMAL"
+            args["brush_toggle"] = "SMOOTH"
+        else:
+            args["mode"] = "NORMAL"
+            args["brush_toggle"] = "None"
+        # bpy.ops.sculpt.brush_stroke("INVOKE_DEFAULT", mode=args["mode"], brush_toggle=args["brush_toggle"])
     else:
-        brush_mode = "NORMAL"
-    bpy.ops.sculpt.brush_stroke("INVOKE_DEFAULT", mode=brush_mode)
+        if event.alt:
+            args["mode"] = "INVERT"
+        elif event.shift:
+            args["mode"] = "SMOOTH"
+        else:
+            args["mode"] = "NORMAL"
+    bpy.ops.sculpt.brush_stroke("INVOKE_DEFAULT", **args)
 
 
 def mouse_offset_compensation(context, event):

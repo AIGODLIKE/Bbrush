@@ -12,14 +12,11 @@ from ...adapter import sculpt_invert_hide_face
 from ...debug import DEBUG_SHAPE
 from ...utils import (
     check_mouse_in_model,
-    check_mouse_in_depth_map_area,
-    check_mouse_in_shortcut_key_area,
     check_area_in_model,
     get_brush_shape,
     get_active_tool,
     refresh_ui,
     line_to_convex_shell,
-    get_pref,
     is_bbruse_mode,
 )
 from ...utils.gpu import draw_text, draw_line, draw_smooth_line
@@ -282,11 +279,16 @@ class DragBase(DragDraw):
         from .. import brush_runtime
         (active_tool, WorkSpaceTool, index) = get_active_tool(context)
         self.active_tool = active_tool
-        self.shape = get_brush_shape(active_tool.idname)
-        self.brush_mode = brush_runtime.brush_mode
-        self.register_draw()
-        self.start_draw(context, event)
-        self.start_move()
+        if active_tool:
+            self.shape = get_brush_shape(active_tool.idname)
+            self.brush_mode = brush_runtime.brush_mode
+            self.register_draw()
+            self.start_draw(context, event)
+            self.start_move()
+            return True
+        else:
+            self.exit(context, event)
+            return False
 
     def exit(self, context, event):
         global drag_runtime
@@ -477,13 +479,16 @@ class BrushShape(bpy.types.Operator, ShapeUpdate):
             return {"CANCELLED"}
         drag_runtime = self
         self.click_time = time.time()
-        self.start_drag_event(context, event)
-        context.window_manager.modal_handler_add(self)
-        return {'RUNNING_MODAL'}
+        if self.start_drag_event(context, event):
+            context.window_manager.modal_handler_add(self)
+            return {'RUNNING_MODAL'}
+        else:
+            self.report({"ERROR"}, "未找到笔刷")
+            return {"CANCELLED"}
 
     @classmethod
     def check_brush_supper(cls, brush_name: str) -> bool:
-        """检查是不是型状支持的笔刷"""
+        """检查是不是形状支持的笔刷"""
         support_brushes_list = (
             "builtin.box_mask",
             "builtin.box_hide",
@@ -571,4 +576,3 @@ class BrushShape(bpy.types.Operator, ShapeUpdate):
 
         refresh_ui(context)
         return {"RUNNING_MODAL"}
-
