@@ -3,7 +3,7 @@ from . import register_module
 bl_info = {
     "name": "Bbrush",
     "author": "ACGGit Community(小萌新)",
-    "version": (1, 4, 9),
+    "version": (1, 4, 10),
     "blender": (4, 0, 0),
     "location": "Sculpt mode",
     "description": "Sculpting using only a pen and keyboard",

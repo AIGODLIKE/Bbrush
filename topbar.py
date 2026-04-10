@@ -34,7 +34,7 @@ def top_bar_draw(self, context):
         operator = BbrushExit.bl_idname if is_bbrush_mode else BbrushStart.bl_idname
 
         sub_row.operator(operator, text=get_top_bar_text(pref, is_bbrush_mode), icon="SCULPTMODE_HLT")
-        
+
         if not is_bbrush_mode:
             FixBbrushError.draw_button(row)
             row.separator()
