@@ -147,5 +147,11 @@ data = {
     "Update Brush Shelf": "更新笔刷架",
     "Refresh FPS": "刷新FPS",
     "View navigation scale": "视图导览缩放",
-    "View navigation offset": "视图导览偏移"
+    "View navigation offset": "视图导览偏移",
+
+    "Mouse move threshold (px)": "鼠标移动判定阈值 (px)",
+    "Minimum cursor travel (screen pixels) from press position to count as a move; 0 = any non-zero movement":
+        "从按下位置起光标在屏幕上移动的像素达到该值才视为移动；0 表示任意非零距离即视为移动",
+
+    "Debug": "调试",
 }

@@ -2,6 +2,8 @@ import time
 
 from mathutils import Vector
 
+from . import get_pref
+
 
 class ManuallyManageEvents:
     """由于5.0版本的拖动事件触发不灵敏,所以需要手动管理
@@ -22,6 +24,11 @@ class ManuallyManageEvents:
         return time.time() - self.start_time
 
     def check_is_moving(self, event) -> bool:
+        if self.start_mouse is None:
+            return False
         now_mouse = Vector((event.mouse_x, event.mouse_y))
-        is_move = event.type == "MOUSEMOVE" or now_mouse != self.start_mouse
-        return is_move
+        dist = (now_mouse - self.start_mouse).length
+        threshold = get_pref().mouse_move_threshold_px
+        if threshold <= 0:
+            return dist > 0.0
+        return dist >= float(threshold)

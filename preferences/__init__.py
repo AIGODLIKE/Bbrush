@@ -40,6 +40,14 @@ class Preferences(
         min=10,
         max=300)
 
+    mouse_move_threshold_px: bpy.props.IntProperty(
+        name="Mouse move threshold (px)",
+        description="Minimum cursor travel (screen pixels) from press position to count as a move; 0 = any non-zero movement",
+        default=5,
+        min=0,
+        max=20,
+    )
+
     enabled_drag_offset_compensation: bpy.props.BoolProperty(name="Enabled drag offset compensation", default=False)
     drag_offset_compensation: bpy.props.FloatProperty(
         name="Drag offset compensation",
@@ -69,6 +77,7 @@ class Preferences(
         box.prop(self, "refresh_fps")
         box.prop(self, "always_use_bbrush_sculpt_mode")
         box.prop(self, "depth_ray_size")
+        box.prop(self, "mouse_move_threshold_px")
 
         box.prop(self, "enabled_drag_offset_compensation")
         box.prop(self, "drag_offset_compensation")
