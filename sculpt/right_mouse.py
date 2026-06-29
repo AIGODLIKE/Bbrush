@@ -40,6 +40,6 @@ class RightMouse(bpy.types.Operator, ManuallyManageEvents):
             finally:  # 反直觉写法
                 return {"FINISHED"}
         elif is_moving:  # 不能使用PASSTHROUGH,需要手动指定事件
-            view3d_event(event)
+            view3d_event(context, event)
             return {"FINISHED"}
         return {"RUNNING_MODAL"}
