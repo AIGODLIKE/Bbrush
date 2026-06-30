@@ -27,12 +27,16 @@ def check_display_mode_is_draw(context, display_mode: str) -> bool:
 
 
 def check_pref() -> bool:
-    return base_name in bpy.context.preferences.addons
+    addon = bpy.context.preferences.addons.get(base_name)
+    return addon is not None and addon.preferences is not None
 
 
 def get_pref():
     """获取偏好设置"""
-    return bpy.context.preferences.addons[base_name].preferences
+    addon = bpy.context.preferences.addons.get(base_name)
+    if addon is None:
+        return None
+    return addon.preferences
 
 
 def get_region(region_type, context=None) -> "None|bpy.types.Region":

@@ -5,7 +5,7 @@ from mathutils import Vector
 
 from .gpu_buffer import draw_gpu_buffer, clear_gpu_cache
 from ..debug import DEBUG_DEPTH_MAP
-from ..utils import get_pref, is_bbruse_mode, get_region_height, get_region_width, check_display_mode_is_draw
+from ..utils import check_pref, get_pref, is_bbruse_mode, get_region_height, get_region_width, check_display_mode_is_draw
 
 handel = None
 
@@ -18,12 +18,21 @@ depth_buffer_check = {
 
 def check_depth_map_is_draw(context):
     """检查深度图是否需要绘制"""
+    if not check_pref():
+        return False
     pref = get_pref()
+    if pref is None:
+        return False
     mode = pref.depth_display_mode
     return check_display_mode_is_draw(context, mode)
 
 
 def draw_depth():
+    if not check_pref():
+        return
+    pref = get_pref()
+    if pref is None:
+        return
     if DEBUG_DEPTH_MAP:
         start_time = time.time()
     global depth_buffer_check

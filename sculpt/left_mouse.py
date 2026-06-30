@@ -136,12 +136,17 @@ class LeftMouse(bpy.types.Operator, ManuallyManageEvents):
                 return self.brush_stroke(context, event)
             else:  # 鼠标不在模型上
                 if only_shift:
-                    bpy.ops.view3d.view_roll("INVOKE_DEFAULT", type="ANGLE")  # 倾斜视图
+                    rv3d = context.region_data
+                    if rv3d is not None and not rv3d.lock_rotation:
+                        try:
+                            bpy.ops.view3d.view_roll("INVOKE_DEFAULT", type="ANGLE")  # 倾斜视图
+                        except RuntimeError:
+                            pass
                 elif event.ctrl:  # 使用ctrl 或 ctrl shift 的笔刷
                     bpy.ops.sculpt.bbrush_shape("INVOKE_DEFAULT")
                 else:
                     from . import view3d_event
-                    view3d_event(event)
+                    view3d_event(context, event)
             return {"FINISHED"}
         return {"RUNNING_MODAL"}
 

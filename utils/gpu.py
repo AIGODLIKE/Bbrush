@@ -9,6 +9,17 @@ from gpu_extras.batch import batch_for_shader
 DEPTH_CONTENT_RATIO_THRESHOLD = 0.08
 
 
+def apply_gpu_texture_filter(gpu_tex) -> None:
+    """Blender 5.1+ enable mipmap/linear filtering for smoother UI texture scaling."""
+    try:
+        if bpy.app.version < (5, 1):
+            return
+        gpu_tex.mipmap_mode(use_mipmap=True, use_filter=True)
+        gpu_tex.anisotropic_filter(True)
+    except Exception:
+        return
+
+
 def _depth_content_ratio(numpy_buffer, *, near_eps=1e-5, far_eps=1e-4):
     """返回扁平深度数组中视为有几何深度的像素比例（0–1）。"""
     d = np.asarray(numpy_buffer, dtype=np.float32).ravel()
@@ -22,6 +33,17 @@ def _depth_buffer_indicates_model(numpy_buffer):
     cr = _depth_content_ratio(numpy_buffer)
     print("check depth_content_ratio", cr)
     return cr >= DEPTH_CONTENT_RATIO_THRESHOLD
+
+
+def _clamp_read_rect(x, y, w, h):
+    fb_w, fb_h = gpu.state.scissor_get()[2:]
+    if fb_w <= 0 or fb_h <= 0:
+        return 0, 0, 0, 0
+    x = max(0, int(x))
+    y = max(0, int(y))
+    w = max(0, min(int(w), fb_w - x))
+    h = max(0, min(int(h), fb_h - y))
+    return x, y, w, h
 
 
 def get_gpu_buffer(xy, wh=(1, 1), centered=False):
@@ -45,6 +67,10 @@ def get_gpu_buffer(xy, wh=(1, 1), centered=False):
         x -= w // 2
         y -= h // 2
 
+    x, y, w, h = _clamp_read_rect(x, y, w, h)
+    if w <= 0 or h <= 0:
+        return np.zeros(0, dtype=np.float32)
+
     depth_buffer = gpu.state.active_framebuffer_get().read_depth(x, y, w, h)
     return depth_buffer
 
@@ -52,10 +78,17 @@ def get_gpu_buffer(xy, wh=(1, 1), centered=False):
 def gpu_depth_ray_cast(x, y, data):
     """按区域内有效深度像素占比判断是否命中模型（见 DEPTH_CONTENT_RATIO_THRESHOLD）。"""
     from . import get_pref
-    size = get_pref().depth_ray_size
-    _buffer = get_gpu_buffer((x, y), wh=(size, size), centered=True)
-    numpy_buffer = np.asarray(_buffer, dtype=np.float32).ravel()
-    data['is_in_model'] = _depth_buffer_indicates_model(numpy_buffer)
+    pref = get_pref()
+    if pref is None:
+        data["is_in_model"] = False
+        return
+    size = pref.depth_ray_size
+    try:
+        _buffer = get_gpu_buffer((x, y), wh=(size, size), centered=True)
+        numpy_buffer = np.asarray(_buffer, dtype=np.float32).ravel()
+        data["is_in_model"] = _depth_buffer_indicates_model(numpy_buffer)
+    except ValueError:
+        data["is_in_model"] = False
 
 
 def get_mouse_location_ray_cast(context, x, y):

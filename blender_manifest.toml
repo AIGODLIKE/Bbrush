@@ -7,8 +7,10 @@ maintainer = "ACGGit Community(小萌新)"
 name = "Bbrush"
 tagline = "Sculpting using only a pen and keyboard"
 type = "add-on"
-version = "1.4.10"
+version = "1.5.0"
 tags = ["Sculpt", ]
+website = "https://github.com/AIGODLIKE/Bbrush"
+support = "https://github.com/AIGODLIKE/Bbrush/issues"
 
 [permissions]
-files = "Keymap file load, View navigation texture load"
+files = "View navigation texture load"

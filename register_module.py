@@ -3,15 +3,15 @@ from bpy.app.handlers import persistent
 
 from . import depth_map, preferences, topbar, sculpt, src, gizmo
 from .src import view_navigation
-from .utils import register_submodule_factory, get_pref, is_bbruse_mode, check_pref
+from .utils import register_submodule_factory, get_pref, is_bbruse_mode
 
 model_tuple = (
+    preferences,
     src,
-    gizmo,
-    topbar,
     sculpt,
     depth_map,
-    preferences,
+    gizmo,
+    topbar,
 )
 
 register_module, unregister_module = register_submodule_factory(model_tuple)
@@ -28,10 +28,11 @@ def try_toggle_bbrush_mode(is_start=False):
     is_bbruse = is_bbruse_mode()
 
     if bpy.context.mode == "SCULPT":
-        if check_pref() and get_pref().always_use_bbrush_sculpt_mode and not is_bbruse:
-            bpy.ops.brush.bbrush_start("INVOKE_DEFAULT")
+        pref = get_pref()
+        if pref is not None and pref.always_use_bbrush_sculpt_mode and not is_bbruse:
+            bpy.ops.sculpt.bbrush_start("INVOKE_DEFAULT")
     elif is_bbruse:
-        bpy.ops.brush.bbrush_exit("INVOKE_DEFAULT", exit_always=False)
+        bpy.ops.sculpt.bbrush_exit("INVOKE_DEFAULT", exit_always=False)
     else:
         ...
 
@@ -63,18 +64,6 @@ def refresh_subscribe():
     load_subscribe()
 
 
-def bbrush_timer():
-    pref = get_pref()
-
-    if not is_bbruse_mode():
-        sculpt.keymap.try_restore_keymap()
-        sculpt.shortcut_key.try_setop_shortcut_key()
-        sculpt.view_property.try_restore_view_property()
-        sculpt.update_brush_shelf.try_restore_brush_shelf()
-
-    return pref.refresh_interval
-
-
 @persistent
 def load_post(args):
     refresh_subscribe()
@@ -94,7 +83,6 @@ def register():
     bpy.app.handlers.depsgraph_update_post.append(depsgraph_update_post)
 
     bpy.app.timers.register(start_update_bbrush_mode, first_interval=1, persistent=True)
-    bpy.app.timers.register(bbrush_timer, first_interval=1, persistent=True)
 
 
 def unregister():
@@ -105,8 +93,6 @@ def unregister():
 
     if bpy.app.timers.is_registered(object_mode_update_bbrush_mode):
         bpy.app.timers.unregister(object_mode_update_bbrush_mode)
-    if bpy.app.timers.is_registered(bbrush_timer):
-        bpy.app.timers.unregister(bbrush_timer)
     bpy.app.handlers.load_post.remove(load_post)
     bpy.app.handlers.depsgraph_update_post.remove(depsgraph_update_post)
 

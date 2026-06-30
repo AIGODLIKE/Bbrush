@@ -1,7 +1,7 @@
 import bpy
 
 from .brush import BrushShortcutKeyScale
-from ..utils import check_mouse_in_depth_map_area, check_mouse_in_shortcut_key_area
+from ..utils import check_mouse_in_depth_map_area, check_mouse_in_shortcut_key_area, is_bbruse_mode
 from ..utils.manually_manage_events import ManuallyManageEvents
 
 
@@ -9,6 +9,11 @@ class RightMouse(bpy.types.Operator, ManuallyManageEvents):
     bl_idname = "sculpt.bbrush_right_mouse"
     bl_label = "Sculpt"
     bl_description = "RightMouse"
+    bl_options = {"REGISTER"}
+
+    @classmethod
+    def poll(cls, context):
+        return is_bbruse_mode()
 
     def invoke(self, context, event):
 
@@ -40,6 +45,6 @@ class RightMouse(bpy.types.Operator, ManuallyManageEvents):
             finally:  # 反直觉写法
                 return {"FINISHED"}
         elif is_moving:  # 不能使用PASSTHROUGH,需要手动指定事件
-            view3d_event(event)
+            view3d_event(context, event)
             return {"FINISHED"}
         return {"RUNNING_MODAL"}

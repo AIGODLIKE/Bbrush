@@ -2,7 +2,7 @@ import bpy
 from mathutils import Vector
 
 from . import brush
-from .keymap import BrushKeymap
+from . import addon_keymap
 from .left_mouse import LeftMouse
 from .right_mouse import RightMouse
 from .shortcut_key import ShortcutKey
@@ -55,7 +55,7 @@ class BrushRuntime:
 
 
 class BbrushStart(bpy.types.Operator):
-    bl_idname = "brush.bbrush_start"
+    bl_idname = "sculpt.bbrush_start"
     bl_label = "Bbrush Start"
 
     def invoke(self, context, event):
@@ -83,7 +83,6 @@ class BbrushStart(bpy.types.Operator):
         UpdateBrushShelf.update_brush_shelf(context, event)
         UpdateBrushShelf.update_brush_shelf(context, event)
 
-        BrushKeymap.start_key(context)
         ShortcutKey.start_shortcut_key()
         ViewProperty.start_view_property(context)
         refresh_ui(context)
@@ -92,7 +91,7 @@ class BbrushStart(bpy.types.Operator):
             v3d.overlay.show_floor = False
 
 class BbrushExit(bpy.types.Operator):
-    bl_idname = "brush.bbrush_exit"
+    bl_idname = "sculpt.bbrush_exit"
     bl_label = "Bbrush Exit"
 
     exit_always: bpy.props.BoolProperty(default=False)
@@ -120,7 +119,6 @@ class BbrushExit(bpy.types.Operator):
             print("exit bbrush")
 
         ShortcutKey.stop_shortcut_key()
-        BrushKeymap.restore_key(context)
         UpdateBrushShelf.restore_brush_shelf()
         ViewProperty.restore_view_property(context, un_reg)
 
@@ -148,14 +146,21 @@ def refresh_depth_map():
     clear_gpu_cache()
 
 
-def view3d_event(event):
+def view3d_event(context, event):
     """视图操作"""
-    if event.alt:
-        bpy.ops.view3d.move("INVOKE_DEFAULT")  # 平移视图
-    elif event.ctrl:
-        bpy.ops.view3d.zoom("INVOKE_DEFAULT")  # 缩放视图
-    else:
-        bpy.ops.view3d.rotate("INVOKE_DEFAULT")  # 旋转视图
+    rv3d = getattr(context, "region_data", None)
+    if rv3d is None or getattr(context, "space_data", None) is None:
+        return
+
+    try:
+        if event.alt:
+            bpy.ops.view3d.move("INVOKE_DEFAULT")  # 平移视图
+        elif event.ctrl:
+            bpy.ops.view3d.zoom("INVOKE_DEFAULT")  # 缩放视图
+        elif not rv3d.lock_rotation:
+            bpy.ops.view3d.rotate("INVOKE_DEFAULT")  # 旋转视图
+    except RuntimeError:
+        pass
 
 
 class_list = [
@@ -173,8 +178,10 @@ register_class, unregister_class = bpy.utils.register_classes_factory(class_list
 def register():
     brush.register()
     register_class()
+    addon_keymap.register()
 
 
 def unregister():
+    addon_keymap.unregister()
     brush.unregister()
     unregister_class()
