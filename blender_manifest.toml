@@ -9,6 +9,8 @@ tagline = "Sculpting using only a pen and keyboard"
 type = "add-on"
 version = "1.5.0"
 tags = ["Sculpt", ]
+website = "https://github.com/AIGODLIKE/Bbrush"
+support = "https://github.com/AIGODLIKE/Bbrush/issues"
 
 [permissions]
 files = "View navigation texture load"
