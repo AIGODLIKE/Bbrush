@@ -58,7 +58,7 @@ SHORTCUT_KEYS = {
 
 
 class ShortcutKey:
-    """绘制快捷键"""
+    """Draw shortcut key help overlay."""
 
     font_info = {
         "font_id": 0,

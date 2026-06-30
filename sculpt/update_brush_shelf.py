@@ -7,7 +7,7 @@ from .brush import other
 from ..debug import DEBUG_UPDATE_BRUSH_SHELF
 from ..utils import refresh_ui, get_active_tool, is_bbruse_mode
 
-active_brush_toolbar = {  # 记录活动笔刷的名称
+active_brush_toolbar = {  # Active brush id per shelf mode
     "SCULPT": "builtin.brush",
     "MASK": "builtin_brush.mask",
     "HIDE": "builtin.box_hide",
@@ -15,7 +15,7 @@ active_brush_toolbar = {  # 记录活动笔刷的名称
 brush_shelf = {}
 
 mask_brush = (
-    "builtin_brush.Mask",  # 旧版本名称
+    "builtin_brush.Mask",  # Legacy idname
     "builtin_brush.mask",
     "builtin.box_mask",
     "builtin.lasso_mask",
@@ -130,14 +130,14 @@ class UpdateBrushShelf(bpy.types.Operator):
 
     @classmethod
     def update_brush_shelf(cls, context, event):
-        """更新笔刷资产架"""
+        """Update sculpt tool shelf for current modifier key combo."""
         if context.space_data is None:
-            # 可能在切换窗口
+            # space_data may be None while switching windows
             # return
             ...
 
         key = (event.ctrl, event.alt, event.shift)
-        mode = BRUSH_SHELF_MODE[key]  # 使用组合键来确认是否需要更新笔刷工具架
+        mode = BRUSH_SHELF_MODE[key]  # Shelf mode from ctrl/alt/shift
 
         if DEBUG_UPDATE_BRUSH_SHELF:
             print(cls.bl_idname, "\t", mode, "\t", event.type, event.value)
@@ -166,7 +166,7 @@ class UpdateBrushShelf(bpy.types.Operator):
 
     @staticmethod
     def restore_brush_shelf():
-        """恢复笔刷工具架"""
+        """Restore default sculpt tool shelf."""
         global brush_shelf
         if DEBUG_UPDATE_BRUSH_SHELF:
             # import traceback
@@ -179,7 +179,7 @@ class UpdateBrushShelf(bpy.types.Operator):
 
     @staticmethod
     def start_brush_shelf(context):
-        """初始化工具架"""
+        """Build custom shelf layouts from the default sculpt tools."""
         global brush_shelf
 
         origin_brush_toolbar = ToolSelectPanelHelper._tool_class_from_space_type("VIEW_3D")._tools["SCULPT"].copy()

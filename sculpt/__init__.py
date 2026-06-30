@@ -12,19 +12,18 @@ from ..debug import DEBUG_MODE_TOGGLE
 from ..utils import get_pref, refresh_ui
 
 """
-通过运行时切换
-
-快捷键 keymap
-更新笔刷栏
-绘制快捷键
-视图偏好设置属性
+Runtime toggles:
+- addon keymap
+- brush shelf updates
+- shortcut key overlay
+- view preference properties
 """
 
 brush_runtime: "BrushRuntime|None" = None
 
 
 def _first_space_view3d(context):
-    """从当前上下文或屏幕中解析一个 SpaceView3D（operator 非 3D 区域调用时 space_data 可能为 None）。"""
+    """Resolve a SpaceView3D when operator context is not a 3D region."""
     sd = getattr(context, "space_data", None)
     if sd is not None and getattr(sd, "type", None) == "VIEW_3D":
         return sd
@@ -46,9 +45,9 @@ def _first_space_view3d(context):
 
 
 class BrushRuntime:
-    left_mouse = Vector((0, 0))  # 偏移䃼尝用
+    left_mouse = Vector((0, 0))  # Drag offset compensation anchor
 
-    shortcut_key_points = []  # 快捷键绘制区域判断用
+    shortcut_key_points = []  # Hit-test bounds for shortcut overlay
 
     # SCULPT,SMOOTH,HIDE,MASK,ORIGINAL
     brush_mode = "NONE"
@@ -64,7 +63,7 @@ class BbrushStart(bpy.types.Operator):
         if DEBUG_MODE_TOGGLE:
             print(self.bl_idname)
 
-        # 确保只有一个运行时
+        # Only one runtime instance at a time
         if brush_runtime is not None:
             return {"CANCELLED"}
 
@@ -109,7 +108,7 @@ class BbrushExit(bpy.types.Operator):
     def exit(context, un_reg=False):
         """
         :param context:
-        :param un_reg: 是注销操作
+        :param un_reg: True when unregistering the addon
         :return:
         """
         global brush_runtime
@@ -147,18 +146,18 @@ def refresh_depth_map():
 
 
 def view3d_event(context, event):
-    """视图操作"""
+    """View navigation from modifier keys (pan/zoom/rotate)."""
     rv3d = getattr(context, "region_data", None)
     if rv3d is None or getattr(context, "space_data", None) is None:
         return
 
     try:
         if event.alt:
-            bpy.ops.view3d.move("INVOKE_DEFAULT")  # 平移视图
+            bpy.ops.view3d.move("INVOKE_DEFAULT")  # Pan view
         elif event.ctrl:
-            bpy.ops.view3d.zoom("INVOKE_DEFAULT")  # 缩放视图
+            bpy.ops.view3d.zoom("INVOKE_DEFAULT")  # Zoom view
         elif not rv3d.lock_rotation:
-            bpy.ops.view3d.rotate("INVOKE_DEFAULT")  # 旋转视图
+            bpy.ops.view3d.rotate("INVOKE_DEFAULT")  # Rotate view
     except RuntimeError:
         pass
 

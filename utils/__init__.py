@@ -32,7 +32,7 @@ def check_pref() -> bool:
 
 
 def get_pref():
-    """获取偏好设置"""
+    """Return addon preferences."""
     addon = bpy.context.preferences.addons.get(base_name)
     if addon is None:
         return None
@@ -92,9 +92,7 @@ def get_active_tool(context) -> "(bpy.types.Tool, bpy.types.WorkSpaceTool, int)"
 
 
 def get_brush_shape(brush) -> str:
-    """通过笔刷id获取形状
-    ELLIPSE,BOX,POLYLINE,LASSO,CIRCULAR
-    """
+    """Map brush id to shape: ELLIPSE, BOX, POLYLINE, LASSO, CIRCULAR."""
     if brush in (
             "builtin_brush.mask",
             "builtin.box_mask",
@@ -130,7 +128,7 @@ def get_brush_shape(brush) -> str:
 
 
 def register_submodule_factory(submodule_tuple):
-    """注册子模块"""
+    """Register/unregister factory for submodule tuples."""
 
     def register():
         for mod in submodule_tuple:
@@ -144,8 +142,7 @@ def register_submodule_factory(submodule_tuple):
 
 
 def all_operator_listen() -> list[str]:
-    """反回所有操作符列表
-    """
+    """Return all registered operator idnames."""
     from _bpy import ops
     submodules = set()
     for id_name in ops.dir():
@@ -156,11 +153,11 @@ def all_operator_listen() -> list[str]:
 
 
 def mouse_in_area_point_in(event, area_point):
-    """输入一个event和xy的最大最小值,反回一个鼠标是否在此区域内的布尔值,如果在里面就反回True
+    """Return True if event mouse position is inside area_point bounds.
 
     Args:
-        event (bpy.types.Event): 输入操作符event
-        area_point ((x,x),(y,y)): 输入x和y的坐标
+        event: Operator event.
+        area_point: ((x_min, x_max), (y_min, y_max)).
     """
     x = area_point[0]
     y = area_point[1]
@@ -171,9 +168,7 @@ def mouse_in_area_point_in(event, area_point):
 
 
 def find_mouse_in_area(context, event) -> "bpy.types.Area|None":
-    """查找在鼠标上的区域
-    就是鼠标活动区域
-    """
+    """Return the screen area under the mouse cursor."""
     mouse = Vector((event.mouse_x, event.mouse_y)).freeze()
     for area in context.screen.areas:
         xy = Vector((area.x, area.y)).freeze()
@@ -184,34 +179,32 @@ def find_mouse_in_area(context, event) -> "bpy.types.Area|None":
 
 
 def check_mouse_in_3d_area(context, event) -> bool:
-    """检查鼠标是否在3D Area"""
+    """Return True if the mouse is over a 3D View area."""
     if area := find_mouse_in_area(context, event):
         return area.type == "VIEW_3D"
     return False
 
 
 def check_operator(operator: str) -> bool:
-    """检查操作符是否注册"""
+    """Return True if the operator idname is registered."""
     return operator in all_operator_listen()
 
 
 def check_mouse_in_model(context, event) -> bool:
-    """检查鼠标是否在模型上
-    使用gpu深度图快速测式
-    """
+    """Return True if the mouse hits model geometry (GPU depth ray cast)."""
     from .gpu import get_mouse_location_ray_cast
     x, y = (event.mouse_region_x, event.mouse_region_y)
     return get_mouse_location_ray_cast(context, x, y)
 
 
 def check_area_in_model(context, x, y, w, h) -> bool:
-    """检查区域是否在模型上"""
+    """Return True if the rectangular region hits model geometry."""
     from .gpu import get_area_ray_cast
     return get_area_ray_cast(context, x, y, w, h)
 
 
 def check_brush_is_annotate(brush_name: str) -> bool:
-    """检查笔刷是否为注释"""
+    """Return True if brush_name is an annotate tool."""
     return brush_name in ('builtin.annotate',
                           'builtin.annotate_line',
                           'builtin.annotate_polygon',
@@ -219,13 +212,13 @@ def check_brush_is_annotate(brush_name: str) -> bool:
 
 
 def check_mouse_in_depth_map_area(event) -> bool:
-    """检查鼠标是否在深度图上"""
+    """Return True if the mouse is over the depth map widget."""
     from ..depth_map import depth_buffer_check
     return ("area_points" in depth_buffer_check) and mouse_in_area_point_in(event, depth_buffer_check["area_points"])
 
 
 def check_mouse_in_shortcut_key_area(event) -> bool:
-    """检查鼠标是否在快捷键上"""
+    """Return True if the mouse is over the shortcut key overlay."""
     from ..sculpt import brush_runtime
     return (
             brush_runtime and
@@ -235,7 +228,7 @@ def check_mouse_in_shortcut_key_area(event) -> bool:
 
 
 def check_modal_operators(bl_idname: str) -> bool:
-    """检查操作符模态是否在运行"""
+    """Return True if a modal operator with bl_idname is running."""
     for modal in bpy.context.window.modal_operators:
         if modal and modal.bl_idname == bl_idname:
             return True
@@ -243,15 +236,13 @@ def check_modal_operators(bl_idname: str) -> bool:
 
 
 def is_bbruse_mode() -> bool:
-    """检查是否在BBrush模式"""
+    """Return True when Bbrush sculpt runtime is active."""
     from ..sculpt import brush_runtime
     return brush_runtime is not None
 
 
 def refresh_ui(context):
-    """刷新UI
-    # bpy.ops.wm.redraw_timer(type='DRAW', iterations=1)
-    """
+    """Tag view3d UI regions for redraw."""
     if context.area:
         context.area.tag_redraw()
     if context.region:
@@ -265,7 +256,7 @@ def refresh_ui(context):
 
 
 def get_property_rna_info(bl_rna, property_name: "str") -> "dict|None":
-    """通过rna 获取属性的所有参数"""
+    """Return RNA metadata dict for a property on bl_rna."""
     if property_name in bl_rna.properties:
         prop = bl_rna.properties[property_name]
 

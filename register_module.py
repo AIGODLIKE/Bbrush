@@ -20,11 +20,7 @@ owner = object()
 
 
 def try_toggle_bbrush_mode(is_start=False):
-    """在用户切换物体的模式时
-    在启动Blender时
-    在开启强制Bbrush模式时
-
-    使用此方法"""
+    """Toggle Bbrush mode on sculpt enter/exit, Blender startup, or forced mode."""
     is_bbruse = is_bbruse_mode()
 
     if bpy.context.mode == "SCULPT":
@@ -38,13 +34,13 @@ def try_toggle_bbrush_mode(is_start=False):
 
 
 def start_update_bbrush_mode():
-    """在启动Blender的时候"""
+    """Called when Blender starts."""
     try_toggle_bbrush_mode()
     view_navigation.register()
 
 
 def object_mode_update_bbrush_mode():
-    """在切换模式的时候"""
+    """Called when object mode changes."""
     try_toggle_bbrush_mode()
 
 
@@ -59,7 +55,7 @@ def load_subscribe():
 
 
 def refresh_subscribe():
-    """刷新订阅"""
+    """Refresh RNA message bus subscriptions."""
     bpy.msgbus.clear_by_owner(owner)
     load_subscribe()
 

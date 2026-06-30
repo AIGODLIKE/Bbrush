@@ -36,18 +36,14 @@ def get_all_intersect_pos(pos):
 
 
 def to_left(startpoint, endpoint, co) -> bool:
-    """测试co是否在 start_point->end_point 向量的左侧
-
-    startpoint, endpoint 的z都为0  因为是 2d左边转换的
-    """
+    """Return True if co is left of the directed segment startpoint -> endpoint (2D, z=0)."""
     line1 = (endpoint - startpoint).to_3d()
     line2 = (co - startpoint).to_3d()
     return line1.cross(line2)[-1] > 0
 
 
 def find_closet(point_list, src_point):
-    """从 点列表中查找 距离 src_point 最近的点
-    """
+    """Return the closest point in point_list to src_point."""
     min_dist = 9999999999999
     find_point = None
     for v in point_list:
@@ -61,7 +57,7 @@ def find_closet(point_list, src_point):
 
 
 def line_to_convex_shell(pos, link=False):
-    """提取多边形的外边框"""
+    """Extract the outer boundary polygon from a self-intersecting polyline."""
     # [v1, v2, v3, v1]
     pos = to_vector(pos)
     pos_neibor = {
@@ -78,19 +74,19 @@ def line_to_convex_shell(pos, link=False):
     from_point = pos[from_idx]
     origin_point = from_point
 
-    # 查找 假设 查找到的都是端点线段
+    # Assume hull walk follows endpoint segments
     end1_idx, end2_idx = pos_neibor[from_point]
-    # 保证 end1_idx 为下一个起始点
+    # Pick end1_idx as the next start vertex
     if to_left(from_point, pos[end1_idx], pos[end2_idx]):
         end1_idx = end2_idx
 
-    # 记录当前的 连线是哪个
+    # Current edge pair index
     pair = (end1_idx, from_idx) if end1_idx < from_idx else \
         (from_idx, end1_idx)
 
-    # 如果 第一次循环 的to_point 不为 端点
+    # First step: if target is not an endpoint, pick nearest left intersection
     if len(int_dict['line'][pair]) > 2:
-        # 取左边点的最近交点
+        # Nearest intersection on the left side
         find_point = find_closet(int_dict['line'][pair], from_point)
         to_point = find_point
         try:
@@ -107,7 +103,7 @@ def line_to_convex_shell(pos, link=False):
     while True:
         circle.append(from_point)
         if (len(int_dict['line'][pair]) == 2) or (-1 < from_idx < len(pos)):
-            # 如果为端点    查找端点对应的连线
+            # Endpoint: follow the adjacent edge
             from_point = to_point
             end1_idx, end2_idx = pos_neibor[from_point]
 
@@ -117,39 +113,39 @@ def line_to_convex_shell(pos, link=False):
                 (from_idx, end2_idx)
 
             pair = (pair2 if pair1 == pair else pair1)
-            #   判断当前线段是否存在交点，如果有则取 最近点，否则取端点
+            # Intersection on edge vs endpoint vertex
             find_point = find_closet(int_dict['line'][pair], from_point)
             if len(int_dict['line'][pair]) > 2:
-                #   为交点
+                # Intersection point
                 to_point = find_point
                 from_idx = -9999
             else:
-                #   为端点
+                # Endpoint vertex
                 from_idx = pair[0] if pair[1] == from_idx else pair[1]
                 to_point = pos[from_idx]
         else:
-            #   不为端点 1.查找start_point对应线段上的所有交点   [(0, 1), (2, 3), None]
+            # Non-endpoint: collect intersections on the active edge pair
             pair1, pair2 = int_dict['intersect'][to_point]
             pair = (pair2 if pair1 == pair else pair1)
 
-            #   2.对以上端点 与 line做ToLeft测试   线上的点
+            # Keep points left of the current segment
             left_point = []
             for v in int_dict['line'][pair]:
                 if to_left(from_point, to_point, v):
-                    #   在左边
+                    # On the left
                     left_point.append(v)
-            #   取左边点的最近交点
+            # Nearest left intersection ahead
             find_point = find_closet(left_point, to_point)
             from_point, to_point = to_point, find_point
             try:
                 from_idx = pos.index(find_point)
             except IndexError as e:
                 from_idx = -9999
-        #   退出条件
+        # Loop closed back to origin
         if to_point == origin_point:
             circle.append(from_point)
             circle.append(origin_point)
-            #   找到循环路径
+            # Closed boundary found
             break
         counter += 1
         if counter > len(pos) * 12:
@@ -160,8 +156,7 @@ def line_to_convex_shell(pos, link=False):
 
 
 def circle_test(circle, new_obj=False):
-    """绘制图案测试
-    """
+    """Debug helper: build a mesh from the boundary loop."""
     if 'sss' in bpy.data.meshes:
         bpy.data.meshes.remove(bpy.data.meshes['sss'])
     me = bpy.data.meshes.new("sss")

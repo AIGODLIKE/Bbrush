@@ -5,7 +5,7 @@ from .depth import BrushDepthScale, BrushDepthMove
 from .shape import BrushShape
 from .shortcut_key import BrushShortcutKeyMove, BrushShortcutKeyScale
 
-# 通过行为来区分手势内容
+# Distinguish gestures by brush behavior
 brush = [
     BrushShape,
     BrushClick,

@@ -42,9 +42,9 @@ class RightMouse(bpy.types.Operator, ManuallyManageEvents):
         if is_release:
             try:
                 bpy.ops.wm.call_panel("INVOKE_DEFAULT", name="VIEW3D_PT_sculpt_context_menu")
-            finally:  # 反直觉写法
+            finally:  # Always finish after context menu
                 return {"FINISHED"}
-        elif is_moving:  # 不能使用PASSTHROUGH,需要手动指定事件
+        elif is_moving:  # Drag: cannot use PASS_THROUGH; dispatch explicitly
             view3d_event(context, event)
             return {"FINISHED"}
         return {"RUNNING_MODAL"}

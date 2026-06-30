@@ -6,10 +6,7 @@ is_5_0_up_version = bpy.app.version >= (5, 0, 0)
 
 
 def sculpt_invert_hide_face():
-    """反转可见面
-    放置雕刻操作符
-    统一各版本操作符不同带来的bug
-    """
+    """Invert visible faces; version-specific sculpt operator wrapper."""
     if is_5_0_up_version:
         bpy.ops.paint.visibility_invert()
     elif is_4_1_up_version:
@@ -21,8 +18,7 @@ def sculpt_invert_hide_face():
 
 
 def operator_invoke_confirm(self, event, context, title, message) -> set:
-    """4.1版本以上需要多传参数
-    更改了显示模式,新版本将显示两个按钮"""
+    """Blender 4.1+ invoke_confirm requires title and message kwargs."""
     if bpy.app.version >= (4, 1, 0):
         return context.window_manager.invoke_confirm(
             **{

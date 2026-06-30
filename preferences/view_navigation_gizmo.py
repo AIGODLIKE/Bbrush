@@ -29,5 +29,5 @@ class ViewNavigationGizmo:
         box.prop(self, "view_navigation_gizmo_show_tips")
 
     def check_depth_map_is_draw(self, context):
-        """检查深度图是否需要绘制"""
+        """Return True when the view navigation gizmo should draw."""
         return check_display_mode_is_draw(context, self.view_navigation_gizmo_display_mode)

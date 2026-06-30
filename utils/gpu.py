@@ -4,8 +4,8 @@ import gpu
 import numpy as np
 from gpu_extras.batch import batch_for_shader
 
-# 区域内「非背景」深度像素占比 ≥ 此值（0–1）时判定为命中几何体。
-# Blender 5.1+ 栅格会写入深度缓冲，不宜再用单点 min 深度判断。
+# Hit geometry when non-background depth pixel ratio in the region is >= this value (0-1).
+# Blender 5.1+ raster writes depth buffers; single-point min depth is unreliable.
 DEPTH_CONTENT_RATIO_THRESHOLD = 0.08
 
 
@@ -21,7 +21,7 @@ def apply_gpu_texture_filter(gpu_tex) -> None:
 
 
 def _depth_content_ratio(numpy_buffer, *, near_eps=1e-5, far_eps=1e-4):
-    """返回扁平深度数组中视为有几何深度的像素比例（0–1）。"""
+    """Return ratio of flat depth samples considered geometry (0-1)."""
     d = np.asarray(numpy_buffer, dtype=np.float32).ravel()
     if d.size == 0:
         return 0.0
@@ -47,14 +47,12 @@ def _clamp_read_rect(x, y, w, h):
 
 
 def get_gpu_buffer(xy, wh=(1, 1), centered=False):
-    """ 用于获取当前视图的GPU BUFFER
-    :params xy: 获取的左下角坐标,带X 和Y信息
-    :type xy: list or set or tuple
-    :params wh: 获取的宽度和高度信息
-    :type wh: list or set or tuple
-    :params centered: 是否按中心获取BUFFER
-    :type centered: bool
-    :return bpy.gpu.Buffer: 返回活动的GPU BUFFER
+    """Read depth from the active viewport framebuffer.
+
+    :param xy: Bottom-left corner (x, y).
+    :param wh: Width and height of the read region.
+    :param centered: When True, center the region on ``xy``.
+    :return: Depth buffer from ``read_depth``.
     """
 
     if isinstance(wh, (int, float)):
@@ -76,7 +74,7 @@ def get_gpu_buffer(xy, wh=(1, 1), centered=False):
 
 
 def gpu_depth_ray_cast(x, y, data):
-    """按区域内有效深度像素占比判断是否命中模型（见 DEPTH_CONTENT_RATIO_THRESHOLD）。"""
+    """POST_PIXEL handler: hit test via depth pixel ratio (see DEPTH_CONTENT_RATIO_THRESHOLD)."""
     from . import get_pref
     pref = get_pref()
     if pref is None:
@@ -107,7 +105,7 @@ def get_mouse_location_ray_cast(context, x, y):
 def get_area_ray_cast(context, x, y, w, h):
     data = {}
 
-    if w == 0 or h == 0:  # 没有绘制一个正确的区域
+    if w == 0 or h == 0:  # Invalid draw region
         return get_mouse_location_ray_cast(context, x, y)
 
     def get_ray_cast():

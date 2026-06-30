@@ -87,7 +87,7 @@ drag_runtime: "BrushShape|None" = None
 
 
 class MoveEvent:
-    is_move = None  # 移动笔刷
+    is_move = None  # Brush drag in progress
     mouse_move_start = None
     mouse_move = None
 
@@ -139,10 +139,10 @@ class DragDraw(MoveEvent):
 
     mouse_start = None
     mouse = None
-    mouse_route = None  # 鼠标路径
+    mouse_route = None  # Mouse polyline for shape tools
     mouse_route_convex_shell = None
 
-    is_reverse = None  # alt 反向
+    is_reverse = None  # Alt inverts mask/hide
 
     indices = ((0, 1, 2), (2, 1, 3))
     segments = 64
@@ -242,7 +242,7 @@ class DragDraw(MoveEvent):
         self.shaders.clear()
 
     def preview_area(self, lines):
-        """旧版本使用算法来找边线"""
+        """Legacy boundary extraction for preview mesh."""
         start_v = None
         last_v = None
         bm = bmesh.new()
@@ -311,7 +311,7 @@ class DragBase(DragDraw):
         return check_area_in_model(context, x, y, w, h)
 
     def check_brush_in_model(self, context) -> bool:
-        """检查绘制的笔刷是否画在了模型上"""
+        """Return True if the stroke hits model geometry."""
         if self.shape == "BOX":
             x1, y1 = self.mouse_start
             x2, y2 = self.mouse
@@ -446,7 +446,7 @@ class ShapeUpdate(DragBase):
         if is_press and is_left:
             mouse = Vector((event.mouse_region_x, event.mouse_region_y))
             last_mouse = self.mouse_route[-1]
-            if (click_time / 1000) > (time.time() - self.click_time) and mouse == last_mouse:  # 双击确定
+            if (click_time / 1000) > (time.time() - self.click_time) and mouse == last_mouse:  # Double-click to finish
                 self.exit(context, event)
                 return self.execute(context)
 
@@ -488,7 +488,7 @@ class BrushShape(bpy.types.Operator, ShapeUpdate):
 
     @classmethod
     def check_brush_supper(cls, brush_name: str) -> bool:
-        """检查是不是形状支持的笔刷"""
+        """Return True if brush_name supports shape gesture drawing."""
         support_brushes_list = (
             "builtin.box_mask",
             "builtin.box_hide",
@@ -497,7 +497,7 @@ class BrushShape(bpy.types.Operator, ShapeUpdate):
             "builtin.polyline_mask",
             "builtin.polyline_hide",
 
-            # 自定义笔刷
+            # Custom brushes
             "builtin.circular_mask",
             "builtin.circular_hide",
             "builtin.ellipse_mask",
@@ -521,7 +521,7 @@ class BrushShape(bpy.types.Operator, ShapeUpdate):
 
         is_pass_brush = active_tool and active_tool.idname in pass_list
         is_mask_box = active_tool and active_tool.idname in (
-            "builtin_brush.Mask",  # 旧版本名称
+            "builtin_brush.Mask",  # Legacy idname
             "builtin_brush.mask",
         )
         is_support_brushes = active_tool and self.check_brush_supper(active_tool.idname)
@@ -538,7 +538,7 @@ class BrushShape(bpy.types.Operator, ShapeUpdate):
         return {"PASS_THROUGH"}
 
     def modal(self, context, event):
-        """拖动的时候不在模型上拖,执行其它操作"""
+        """Modal while dragging off-model or finishing the gesture."""
         print("drag_event", self.shape, self.is_reverse, len(self.mouse_route), len(self.mouse_route_convex_shell),
               event.value, event.type)
 

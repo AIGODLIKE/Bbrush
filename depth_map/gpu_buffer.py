@@ -34,7 +34,7 @@ def _silhouette_cache_key(context, width, height):
 
 
 def get_coord(st=(-1, -1), interval=(2, 2)):
-    """输入一个起始坐标,反回一个坐标列表,三角面连接顺序是(0, 1, 2), (0, 2, 3)"""
+    """Return quad corner coords; triangle order (0, 1, 2), (0, 2, 3)."""
     x = st[0]
     y = st[1]
     int_x = interval[0]

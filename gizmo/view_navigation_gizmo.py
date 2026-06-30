@@ -8,9 +8,8 @@ from ..utils.gpu import apply_gpu_texture_filter
 from ..utils.navigation import *
 from ..adapter import is_5_0_up_version
 """
-上下两个方向需要考虑旋转
-带轴的旋转改修改为以活动轴作为中心左右角度和上下角度
-来对每个轴进行区分
+Vertical/horizontal navigation axes need rotation handling.
+Axis-aware rotation should use the active axis as the pivot for horizontal/vertical angles.
 """
 
 
@@ -212,11 +211,11 @@ class ViewNavigationGizmoGroup(bpy.types.GizmoGroup):
         return pref.check_depth_map_is_draw(context)
 
     def draw_prepare(self, context):
-        """context.area.tag_redraw() #在这里刷新会影响绘制速度"""
+        """context.area.tag_redraw() here would hurt draw performance."""
         self.view_navigation_gizmo.refresh_rotate_index(context)
 
     def setup(self, context):
-        # 调整焦距控件
+        # Lens/dolly gizmo setup
         self.view_navigation_gizmo = gz = self.gizmos.new(ViewNavigationGizmo.bl_idname)
         gz.use_draw_modal = True
 

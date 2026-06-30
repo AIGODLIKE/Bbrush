@@ -17,7 +17,7 @@ depth_buffer_check = {
 
 
 def check_depth_map_is_draw(context):
-    """检查深度图是否需要绘制"""
+    """Return True when the depth map overlay should draw."""
     if not check_pref():
         return False
     pref = get_pref()
@@ -88,7 +88,7 @@ def filling_data(context):
 
     location = depth_offset + area_offset + Vector((0, height - draw_height))
 
-    # 限制位置
+    # Clamp widget position inside the region
     ui_width = get_region_width(context, "UI")
     asset_shelf_height = get_region_height(context, "ASSET_SHELF") + get_region_height(context, "ASSET_SHELF_HEADER")
     limit_x = max(tools_width, min(width - ui_width - draw_width, location.x))
@@ -98,23 +98,22 @@ def filling_data(context):
     x1, y1 = limitation
     x2, y2 = limitation + draw_size
 
-    # 添加坐标 存起来笔刷的操作符判断鼠标有没有放在深度图上使用
+    # Store bounds for depth-map hit testing in brush operators
     depth_buffer_check["area_points"] = (x1, x2), (y1, y2)
     depth_buffer_check["draw_box"] = x1, x2, y1, y2
     depth_buffer_check["text_location"] = x1, y1
 
-    # 修改为符合gpu绘制的坐标
+    # Normalized coords for GPU matrix placement
     w = 1 / width * x1
     h = 1 / height * (y1 + draw_height)
     depth_buffer_check["translate"] = w, h, 0
 
 
-update_depth_map_modal_operators_len = 0  # 更新深度图用
+update_depth_map_modal_operators_len = 0  # Tracks modal operator count for depth refresh
 
 
 def update_depth_map_by_modal_operators() -> bool:
-    """在移动缩放这些操作符会向场景的modal_operators添加操作符运行时
-    用这个来进行判断并刷新"""
+    """Return True when view navigation modal operators finish (pan/zoom/rotate)."""
     global update_depth_map_modal_operators_len
     modal_operators_len = len(bpy.context.window.modal_operators)
     if update_depth_map_modal_operators_len != modal_operators_len:

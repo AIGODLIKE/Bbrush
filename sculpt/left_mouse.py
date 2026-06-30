@@ -20,9 +20,7 @@ class LeftMouse(bpy.types.Operator, ManuallyManageEvents):
         return is_bbruse_mode()
 
     def invoke(self, context, event):
-        """由于5.0版本的拖动事件触发不灵敏,所以需要手动管理拖动及点击事件
-        # CLICK_DRAG 在 5.0以上版本中拖动事件不易被触发
-        """
+        """Manual click/drag handling; CLICK_DRAG is unreliable in Blender 5.0+."""
         from . import brush_runtime
         from . import UpdateBrushShelf
 
@@ -31,10 +29,10 @@ class LeftMouse(bpy.types.Operator, ManuallyManageEvents):
         UpdateBrushShelf.update_brush_shelf(context, event)
         active_tool = ToolSelectPanelHelper.tool_active_from_context(bpy.context)
 
-        if check_mouse_in_depth_map_area(event):  # 缩放深度图
+        if check_mouse_in_depth_map_area(event):  # Scale depth map
             bpy.ops.sculpt.bbrush_depth_scale("INVOKE_DEFAULT")
             return {"FINISHED"}
-        elif check_mouse_in_shortcut_key_area(event) and BrushShortcutKeyScale.poll(context):  # 缩放快捷键
+        elif check_mouse_in_shortcut_key_area(event) and BrushShortcutKeyScale.poll(context):  # Scale shortcut overlay
             bpy.ops.sculpt.bbrush_shortcut_key_scale("INVOKE_DEFAULT")
             return {"FINISHED"}
 
@@ -89,23 +87,23 @@ class LeftMouse(bpy.types.Operator, ManuallyManageEvents):
 
         is_moving = self.check_is_moving(event)
         is_in_modal = check_mouse_in_model(context, event)
-        # is_in_active_modal = check_mouse_in_active_modal(context, event)  # 不能精确判断，如果物体有修改器,会影响检测
+        # is_in_active_modal = check_mouse_in_active_modal(context, event)  # Unreliable with modifiers
         active_tool = ToolSelectPanelHelper.tool_active_from_context(bpy.context)
 
-        if is_release:  # 单击
+        if is_release:  # Click release
             if DEBUG_LEFT_MOUSE:
                 print("is_release", is_in_modal)
-            if is_in_modal:  # 点在了其它模型上and not is_in_active_modal
+            if is_in_modal:  # Clicked on another model
                 try:
-                    res = bpy.ops.object.transfer_mode("INVOKE_DEFAULT")  # object.transfer_mode 使用的c端gpu buffer检测
+                    res = bpy.ops.object.transfer_mode("INVOKE_DEFAULT")  # Uses C-side GPU depth hit test
                     if "CANCELLED" in res:
                         bpy.ops.sculpt.bbrush_click("INVOKE_DEFAULT")
                 finally:
-                    return {"FINISHED"}  # 反直觉写法
+                    return {"FINISHED"}  # Always finish from finally/else paths
             else:
                 bpy.ops.sculpt.bbrush_click("INVOKE_DEFAULT")
-                return {"FINISHED"}  # 反直觉写法
-        elif is_moving:  # 拖动不能使用PASSTHROUGH,需要手动指定事件
+                return {"FINISHED"}  # Always finish from finally/else paths
+        elif is_moving:  # Drag: cannot use PASS_THROUGH; dispatch explicitly
             if DEBUG_LEFT_MOUSE:
                 print("is_move", is_in_modal)
 
@@ -130,19 +128,19 @@ class LeftMouse(bpy.types.Operator, ManuallyManageEvents):
             elif active_tool and active_tool.idname == "builtin.line_trim":
                 bpy.ops.sculpt.trim_line_gesture("INVOKE_DEFAULT")
 
-            elif active_tool and BrushShape.check_brush_supper(active_tool.idname):  # 优先查询支持的形状笔刷
+            elif active_tool and BrushShape.check_brush_supper(active_tool.idname):  # Shape-capable brushes first
                 bpy.ops.sculpt.bbrush_shape("INVOKE_DEFAULT")
             elif is_in_modal:  # and is_in_active_modal #
                 return self.brush_stroke(context, event)
-            else:  # 鼠标不在模型上
+            else:  # Mouse not over model
                 if only_shift:
                     rv3d = context.region_data
                     if rv3d is not None and not rv3d.lock_rotation:
                         try:
-                            bpy.ops.view3d.view_roll("INVOKE_DEFAULT", type="ANGLE")  # 倾斜视图
+                            bpy.ops.view3d.view_roll("INVOKE_DEFAULT", type="ANGLE")  # Roll view
                         except RuntimeError:
                             pass
-                elif event.ctrl:  # 使用ctrl 或 ctrl shift 的笔刷
+                elif event.ctrl:  # Ctrl or ctrl+shift brush gestures
                     bpy.ops.sculpt.bbrush_shape("INVOKE_DEFAULT")
                 else:
                     from . import view3d_event
@@ -155,13 +153,12 @@ class LeftMouse(bpy.types.Operator, ManuallyManageEvents):
         mouse_offset_compensation(context, event)
         try:
             execute_brush_stroke(event)
-        finally:  # 反直觉写法
+        finally:  # Always return FINISHED after stroke
             return {"FINISHED"}
 
 
 def check_mouse_in_active_modal(context, event) -> bool:
-    """检查鼠标是否在活动模型上
-    """
+    """Return True if ray cast hits the active sculpt object."""
     obj = context.sculpt_object
     if not obj:
         return False
@@ -177,7 +174,7 @@ def check_mouse_in_active_modal(context, event) -> bool:
 def execute_brush_stroke(event):
     """https://docs.blender.org/api/5.0/bpy.ops.sculpt.html#bpy.ops.sculpt.brush_stroke
     https://docs.blender.org/api/5.1/bpy.ops.sculpt.html#bpy.ops.sculpt.brush_stroke
-    在5.1中笔触操作被修改了"""
+    Invoke sculpt.brush_stroke; API changed in Blender 5.1."""
     args = {}
     if bpy.app.version >= (5, 1, 0):
         if event.alt:
@@ -201,7 +198,7 @@ def execute_brush_stroke(event):
 
 
 def mouse_offset_compensation(context, event):
-    """偏移补偿         在鼠标放在模型边缘的时候会出现不跟手的情况 对其进行优化"""
+    """Compensate cursor drift when starting a stroke near mesh edges."""
     pref = get_pref()
     if pref.enabled_drag_offset_compensation:
         from . import brush_runtime

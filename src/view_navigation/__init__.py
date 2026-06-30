@@ -14,7 +14,7 @@ texture_draw_size = (235, 256)
 
 
 def load_view_navigation_image(image_path: str) -> bool:
-    """反回是否加载正确的布尔值"""
+    """Return True when image load succeeded."""
     global texture_cache, texture_draw_size
     try:
         texture_dict = {}

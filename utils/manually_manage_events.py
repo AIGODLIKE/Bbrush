@@ -6,15 +6,13 @@ from . import get_pref
 
 
 class ManuallyManageEvents:
-    """由于5.0版本的拖动事件触发不灵敏,所以需要手动管理
-    但是这个没有处理长按的状态
-    """
+    """Manual click/drag detection; Blender 5.0+ CLICK_DRAG is unreliable. Long-press not handled."""
 
     start_mouse = None
     start_time = None
 
     def start_manually_manage_events(self,event):
-        # 开始手动管理事件
+        # Start tracking press position/time
         self.start_time = time.time()
         self.start_mouse = Vector((event.mouse_x, event.mouse_y))
 

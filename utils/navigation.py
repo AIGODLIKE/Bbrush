@@ -4,9 +4,7 @@ from mathutils import Vector, Euler, Matrix
 
 
 def get_draw_view_navigation_texture_width_height() -> Vector:
-    """获取绘制纹理的宽高
-    :return: Vector
-    """
+    """Return scaled navigation texture draw size."""
     from . import get_pref
     from ..src.view_navigation import texture_draw_size
     scale = get_pref().view_navigation_gizmo_scale
@@ -15,7 +13,7 @@ def get_draw_view_navigation_texture_width_height() -> Vector:
 
 
 def get_wh_view_rotation(wh):
-    """通过视图纹理的索引获取需要旋转的值"""
+    """Return view rotation quaternion for navigation texture index."""
     w, h = wh
 
     x = radians(45)
@@ -34,11 +32,7 @@ def get_wh_view_rotation(wh):
 
 
 def get_view_matrix(context) -> Matrix:
-    """获取视图的矩阵
-    通过当前视图类型反回对应的矩阵
-    PERSP 透视
-    ORTHO 正交
-    """
+    """Return view rotation matrix (PERSP vs ORTHO)."""
     view_perspective = context.space_data.region_3d.view_perspective
     perspective_matrix = context.space_data.region_3d.perspective_matrix.inverted()
     view_matrix = context.space_data.region_3d.view_matrix.inverted()
@@ -48,18 +42,17 @@ def get_view_matrix(context) -> Matrix:
 
 def get_2d_rotation_axis_xy_angle(context) -> tuple[str, float, float]:
     """
-    通过3D最近轴
-    再将位置转换为2D坐标 2D计算旋转获取
-    轴朝向和角度
+    Nearest world axis from view direction, projected to 2D for signed angles.
+    Returns axis name and x/y panel angles in degrees.
     """
     view_rotation_matrix = get_view_matrix(context)
     view_perspective = context.space_data.region_3d.view_perspective
 
-    origin = view_rotation_matrix @ Vector((0, 0, 0))  # 原点
-    view_v = view_rotation_matrix @ Vector((0, 0, 1))  # 朝向点
-    vector = ((origin - view_v) if view_perspective == "ORTHO" else (view_v - origin)).normalized()  # 最终方向矢量
+    origin = view_rotation_matrix @ Vector((0, 0, 0))  # Origin
+    view_v = view_rotation_matrix @ Vector((0, 0, 1))  # View direction point
+    vector = ((origin - view_v) if view_perspective == "ORTHO" else (view_v - origin)).normalized()  # Final direction
 
-    # 查找最近的轴向点
+    # Nearest axis label
     min_length = 9999
     active = None
     for index, axis in enumerate(("X", "Y", "Z")):
@@ -78,7 +71,7 @@ def get_2d_rotation_axis_xy_angle(context) -> tuple[str, float, float]:
                 active = name
 
     axis_2d_vector = Vector((0, 1))
-    if value := {  # 通过每个轴向转换为2d坐标以进行带有符号的角度计算
+    if value := {  # Per-axis 2D projections for signed angle
         "Z": (Vector((vector.y, vector.z)), Vector((vector.x, vector.z)),),
         "-Z": (Vector((-vector.y, -vector.z)), Vector((vector.x, -vector.z)),),
         "-Y": (Vector((vector.z, -vector.y)), Vector((vector.x, -vector.y)),),
@@ -95,7 +88,7 @@ def get_2d_rotation_axis_xy_angle(context) -> tuple[str, float, float]:
 
 
 def from_2d_get_axis_and_index(context) -> tuple[str, int, int]:
-    """通过轴和2D的角度获取对应的2D坐标系 3*3"""
+    """Map axis and 2D angles to texture grid indices."""
     axis, x_2d, y_2d = get_2d_rotation_axis_xy_angle(context)
 
     if x_2d > 22.5:
@@ -117,7 +110,7 @@ def from_2d_get_axis_and_index(context) -> tuple[str, int, int]:
 
 def get_hw_index_from_2d(context) -> tuple[int, int]:
     """
-    视图矢量 -> 轴向,2D角度 -> 轴向,2D索引 -> 导航纹理索引
+    View vector -> axis, 2D angles -> grid indices -> navigation texture (w, h).
     """
     axis, x_2d_index, y_2d_index = from_2d_get_axis_and_index(context)
     key = (x_2d_index, y_2d_index)
@@ -197,7 +190,7 @@ def get_hw_index_from_2d(context) -> tuple[int, int]:
                 z_angle = degrees(z)
 
                 abs_z_angle = abs(z_angle)
-                if z_angle < 0:  # 负
+                if z_angle < 0:  # Negative Z rotation bucket
                     if abs_z_angle < 22.5:
                         w = 0
                     elif abs_z_angle < 67.5:
