@@ -3,7 +3,7 @@ from bpy.app.handlers import persistent
 
 from . import depth_map, preferences, topbar, sculpt, src, gizmo
 from .src import view_navigation
-from .utils import register_submodule_factory, get_pref, is_bbruse_mode, check_pref
+from .utils import register_submodule_factory, get_pref, is_bbruse_mode
 
 model_tuple = (
     preferences,
@@ -64,19 +64,6 @@ def refresh_subscribe():
     load_subscribe()
 
 
-def bbrush_timer():
-    pref = get_pref()
-    if pref is None:
-        return 1.0
-
-    if not is_bbruse_mode():
-        sculpt.shortcut_key.try_setop_shortcut_key()
-        sculpt.view_property.try_restore_view_property()
-        sculpt.update_brush_shelf.try_restore_brush_shelf()
-
-    return pref.refresh_interval
-
-
 @persistent
 def load_post(args):
     refresh_subscribe()
@@ -96,7 +83,6 @@ def register():
     bpy.app.handlers.depsgraph_update_post.append(depsgraph_update_post)
 
     bpy.app.timers.register(start_update_bbrush_mode, first_interval=1, persistent=True)
-    bpy.app.timers.register(bbrush_timer, first_interval=1, persistent=True)
 
 
 def unregister():
@@ -107,8 +93,6 @@ def unregister():
 
     if bpy.app.timers.is_registered(object_mode_update_bbrush_mode):
         bpy.app.timers.unregister(object_mode_update_bbrush_mode)
-    if bpy.app.timers.is_registered(bbrush_timer):
-        bpy.app.timers.unregister(bbrush_timer)
     bpy.app.handlers.load_post.remove(load_post)
     bpy.app.handlers.depsgraph_update_post.remove(depsgraph_update_post)
 
