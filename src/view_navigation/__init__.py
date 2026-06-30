@@ -3,6 +3,8 @@ import gpu
 import numpy
 import numpy as np
 
+from ...utils.gpu import apply_gpu_texture_filter
+
 # 8 * 5
 texture_cache = {
     # (i,j): texture
@@ -45,6 +47,7 @@ def load_view_navigation_image(image_path: str) -> bool:
                 temp_image.pixels.foreach_set(data.ravel())
 
                 texture_dict[key] = gpu.texture.from_image(temp_image)
+                apply_gpu_texture_filter(texture_dict[key])
 
         for im in [image, temp_image]:
             bpy.data.images.remove(im)

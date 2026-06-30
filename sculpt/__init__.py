@@ -55,7 +55,7 @@ class BrushRuntime:
 
 
 class BbrushStart(bpy.types.Operator):
-    bl_idname = "brush.bbrush_start"
+    bl_idname = "sculpt.bbrush_start"
     bl_label = "Bbrush Start"
 
     def invoke(self, context, event):
@@ -91,7 +91,7 @@ class BbrushStart(bpy.types.Operator):
             v3d.overlay.show_floor = False
 
 class BbrushExit(bpy.types.Operator):
-    bl_idname = "brush.bbrush_exit"
+    bl_idname = "sculpt.bbrush_exit"
     bl_label = "Bbrush Exit"
 
     exit_always: bpy.props.BoolProperty(default=False)

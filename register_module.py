@@ -30,9 +30,9 @@ def try_toggle_bbrush_mode(is_start=False):
     if bpy.context.mode == "SCULPT":
         pref = get_pref()
         if pref is not None and pref.always_use_bbrush_sculpt_mode and not is_bbruse:
-            bpy.ops.brush.bbrush_start("INVOKE_DEFAULT")
+            bpy.ops.sculpt.bbrush_start("INVOKE_DEFAULT")
     elif is_bbruse:
-        bpy.ops.brush.bbrush_exit("INVOKE_DEFAULT", exit_always=False)
+        bpy.ops.sculpt.bbrush_exit("INVOKE_DEFAULT", exit_always=False)
     else:
         ...
 

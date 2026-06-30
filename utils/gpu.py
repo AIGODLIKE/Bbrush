@@ -9,6 +9,17 @@ from gpu_extras.batch import batch_for_shader
 DEPTH_CONTENT_RATIO_THRESHOLD = 0.08
 
 
+def apply_gpu_texture_filter(gpu_tex) -> None:
+    """Blender 5.1+ enable mipmap/linear filtering for smoother UI texture scaling."""
+    try:
+        if bpy.app.version < (5, 1):
+            return
+        gpu_tex.mipmap_mode(use_mipmap=True, use_filter=True)
+        gpu_tex.anisotropic_filter(True)
+    except Exception:
+        return
+
+
 def _depth_content_ratio(numpy_buffer, *, near_eps=1e-5, far_eps=1e-4):
     """返回扁平深度数组中视为有几何深度的像素比例（0–1）。"""
     d = np.asarray(numpy_buffer, dtype=np.float32).ravel()

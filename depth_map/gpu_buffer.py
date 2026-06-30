@@ -6,15 +6,35 @@ import gpu
 from gpu_extras.batch import batch_for_shader
 
 from ..utils import get_pref
+from ..utils.gpu import apply_gpu_texture_filter
 from ..adapter import is_5_0_up_version
 
+# White background, black silhouette. Slight smoothstep for edge softening when GPU linear-filters.
+_SILHOUETTE_FRAG_BODY = """
+    float depth = texture(tex, texCoord).x;
+    float silhouette = smoothstep(0.9995, 1.0, depth);
+    FragColor = vec4(silhouette, silhouette, silhouette, 1.0);
+"""
+
+_silhouette_cache = {
+    "key": None,
+    "texture": None,
+}
+
+
+def _silhouette_cache_key(context, width, height):
+    rv3d = context.space_data.region_3d
+    view_matrix = rv3d.view_matrix
+    return (
+        width,
+        height,
+        tuple(round(v, 5) for row in view_matrix for v in row),
+        len(bpy.context.window.modal_operators),
+    )
+
+
 def get_coord(st=(-1, -1), interval=(2, 2)):
-    """输入一个起始坐标,反回一个坐标列表,三角面连接顺序是(0, 1, 2), (2, 0, 3)
-    从左下到右上
-    Args:
-        st (tuple, optional): 输入的x和y的坐标. Defaults to (0, 0).
-        interval (tuple, optional): 输入对角的相差坐标. Defaults to (2, 2).
-    """
+    """输入一个起始坐标,反回一个坐标列表,三角面连接顺序是(0, 1, 2), (0, 2, 3)"""
     x = st[0]
     y = st[1]
     int_x = interval[0]
@@ -48,16 +68,11 @@ def shader_50():
         }
         """)
 
-    shader_info.fragment_source("""
+    shader_info.fragment_source(f"""
         void main()
-        {
-            FragColor = texture(tex, texCoord);
-            if (FragColor.x != 1.0f)
-                FragColor.xyz = vec3(0.0f,0.0f,0.0f);
-            else
-                FragColor.xyz = vec3(1.0f,1.0f,1.0f);
-            FragColor.w = 1;
-        }
+        {{
+        {_SILHOUETTE_FRAG_BODY}
+        }}
         """)
 
     shader = gpu.shader.create_from_info(shader_info)
@@ -81,20 +96,15 @@ def depth_shader():
             }
         """
 
-        fragment_shader = """
+        fragment_shader = f"""
             uniform sampler2D tex;
             in vec2 texCoord;
             out vec4 FragColor;
-            
+
             void main()
-            {
-                FragColor = texture(tex, texCoord);
-                if (FragColor.x != 1.0f)
-                    FragColor.xyz = vec3(0.0f,0.0f,0.0f);
-                else
-                    FragColor.xyz = vec3(1.0f,1.0f,1.0f);
-                FragColor.w = 1;
-            }
+            {{
+            {_SILHOUETTE_FRAG_BODY}
+            }}
         """
         shader = gpu.types.GPUShader(vertex_shader, fragment_shader)
 
@@ -106,30 +116,31 @@ def depth_shader():
                 (0, 0), (1, 0),
                 (1, 1), (0, 1)),
         },
-        indices=((0, 1, 2), (2, 0, 3))
+        indices=((0, 1, 2), (0, 2, 3))
     )
     batch.program_set(shader)
     shader.bind()
     return shader, batch
 
 
-gpu_cache = {
+def _read_silhouette_texture(context, width, height):
+    global _silhouette_cache
+    key = _silhouette_cache_key(context, width, height)
+    if _silhouette_cache["key"] == key and _silhouette_cache["texture"] is not None:
+        return _silhouette_cache["texture"]
 
-}  # 优化性能
+    depth_buffer = gpu.state.active_framebuffer_get().read_depth(0, 0, width, height)
+    texture = gpu.types.GPUTexture((width, height), format="DEPTH_COMPONENT32F", data=depth_buffer)
+    apply_gpu_texture_filter(texture)
+
+    _silhouette_cache["key"] = key
+    _silhouette_cache["texture"] = texture
+    return texture
 
 
-def draw_shader_old(region_hash, matrix_hash, modal_operators_len, width, height):
+def draw_shader_old(context, width, height):
     shader, batch = depth_shader()
-    key = region_hash, matrix_hash, modal_operators_len, width, height
-
-    if key in gpu_cache:
-        texture = gpu_cache[key]
-    else:
-        depth_buffer = gpu.state.active_framebuffer_get().read_depth(0, 0, width, height)
-        texture = gpu.types.GPUTexture((width, height), format="DEPTH_COMPONENT32F", data=depth_buffer)
-
-        gpu_cache.clear()
-        gpu_cache[key] = texture
+    texture = _read_silhouette_texture(context, width, height)
 
     mv = gpu.matrix.get_model_view_matrix()
     shader.uniform_float("ModelViewProjectionMatrix", mv)
@@ -142,7 +153,6 @@ def draw_box(x1, x2, y1, y2):
     color = [0, 0, 0, 0.5]
 
     vertices = ((x1, y1), (x2, y1), (x1, y2), (x2, y2))
-    # draw area
     shader = gpu.shader.from_builtin('UNIFORM_COLOR')
     batch = batch_for_shader(shader,
                              'TRIS', {"pos": vertices},
@@ -163,18 +173,11 @@ def draw_gpu_buffer(context, depth_buffer):
             gpu.matrix.translate(depth_buffer["translate"])
             gpu.matrix.scale([depth_scale, depth_scale])
             try:
-                region_3d = context.space_data.region_3d
-                view_matrix = region_3d.view_matrix
-                matrix_hash = str(hash(view_matrix.copy().freeze()))
-                region_hash = str(hash(context.region))
-                modal_operators_len = len(bpy.context.window.modal_operators)
-
                 draw_shader_old(
-                    region_hash,
-                    matrix_hash,
-                    modal_operators_len,
+                    context,
                     context.region.width,
-                    context.region.height)  # 使用自定义着色器绘制,将会快很多
+                    context.region.height,
+                )
             except Exception as e:
                 import traceback
                 traceback.print_exc()
@@ -192,5 +195,6 @@ def draw_gpu_buffer(context, depth_buffer):
 
 
 def clear_gpu_cache():
-    global gpu_cache
-    gpu_cache.clear()
+    global _silhouette_cache
+    _silhouette_cache["key"] = None
+    _silhouette_cache["texture"] = None

@@ -4,6 +4,7 @@ import gpu
 from gpu_extras.batch import batch_for_shader
 
 from ..utils import check_pref, get_pref, get_region_height, get_region_width
+from ..utils.gpu import apply_gpu_texture_filter
 from ..utils.navigation import *
 from ..adapter import is_5_0_up_version
 """
@@ -39,6 +40,7 @@ class ViewNavigationGizmo(bpy.types.Gizmo):
             return
         gpu.state.blend_set("ALPHA")
         texture = get_view_navigation_texture(*self.rotate_index)
+        apply_gpu_texture_filter(texture)
         dw, dh = draw_size = get_draw_view_navigation_texture_width_height()
 
         area = context.area
