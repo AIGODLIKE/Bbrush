@@ -2,7 +2,7 @@ import bpy
 from mathutils import Vector
 
 from . import brush
-from .keymap import BrushKeymap
+from . import addon_keymap
 from .left_mouse import LeftMouse
 from .right_mouse import RightMouse
 from .shortcut_key import ShortcutKey
@@ -83,7 +83,6 @@ class BbrushStart(bpy.types.Operator):
         UpdateBrushShelf.update_brush_shelf(context, event)
         UpdateBrushShelf.update_brush_shelf(context, event)
 
-        BrushKeymap.start_key(context)
         ShortcutKey.start_shortcut_key()
         ViewProperty.start_view_property(context)
         refresh_ui(context)
@@ -120,7 +119,6 @@ class BbrushExit(bpy.types.Operator):
             print("exit bbrush")
 
         ShortcutKey.stop_shortcut_key()
-        BrushKeymap.restore_key(context)
         UpdateBrushShelf.restore_brush_shelf()
         ViewProperty.restore_view_property(context, un_reg)
 
@@ -180,8 +178,10 @@ register_class, unregister_class = bpy.utils.register_classes_factory(class_list
 def register():
     brush.register()
     register_class()
+    addon_keymap.register()
 
 
 def unregister():
+    addon_keymap.unregister()
     brush.unregister()
     unregister_class()

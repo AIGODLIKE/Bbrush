@@ -6,12 +6,12 @@ from .src import view_navigation
 from .utils import register_submodule_factory, get_pref, is_bbruse_mode, check_pref
 
 model_tuple = (
+    preferences,
     src,
-    gizmo,
-    topbar,
     sculpt,
     depth_map,
-    preferences,
+    gizmo,
+    topbar,
 )
 
 register_module, unregister_module = register_submodule_factory(model_tuple)
@@ -28,7 +28,8 @@ def try_toggle_bbrush_mode(is_start=False):
     is_bbruse = is_bbruse_mode()
 
     if bpy.context.mode == "SCULPT":
-        if check_pref() and get_pref().always_use_bbrush_sculpt_mode and not is_bbruse:
+        pref = get_pref()
+        if pref is not None and pref.always_use_bbrush_sculpt_mode and not is_bbruse:
             bpy.ops.brush.bbrush_start("INVOKE_DEFAULT")
     elif is_bbruse:
         bpy.ops.brush.bbrush_exit("INVOKE_DEFAULT", exit_always=False)
@@ -65,9 +66,10 @@ def refresh_subscribe():
 
 def bbrush_timer():
     pref = get_pref()
+    if pref is None:
+        return 1.0
 
     if not is_bbruse_mode():
-        sculpt.keymap.try_restore_keymap()
         sculpt.shortcut_key.try_setop_shortcut_key()
         sculpt.view_property.try_restore_view_property()
         sculpt.update_brush_shelf.try_restore_brush_shelf()

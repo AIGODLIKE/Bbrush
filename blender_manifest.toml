@@ -11,4 +11,4 @@ version = "1.4.10"
 tags = ["Sculpt", ]
 
 [permissions]
-files = "Keymap file load, View navigation texture load"
+files = "View navigation texture load"

@@ -3,7 +3,7 @@ import bpy
 import gpu
 from gpu_extras.batch import batch_for_shader
 
-from ..utils import get_pref, get_region_height, get_region_width
+from ..utils import check_pref, get_pref, get_region_height, get_region_width
 from ..utils.navigation import *
 from ..adapter import is_5_0_up_version
 """
@@ -35,6 +35,8 @@ class ViewNavigationGizmo(bpy.types.Gizmo):
     def draw(self, context):
         from ..utils import get_view_navigation_texture
         pref = get_pref()
+        if pref is None:
+            return
         gpu.state.blend_set("ALPHA")
         texture = get_view_navigation_texture(*self.rotate_index)
         dw, dh = draw_size = get_draw_view_navigation_texture_width_height()
@@ -200,7 +202,11 @@ class ViewNavigationGizmoGroup(bpy.types.GizmoGroup):
 
     @classmethod
     def poll(cls, context):
+        if not check_pref():
+            return False
         pref = get_pref()
+        if pref is None:
+            return False
         return pref.check_depth_map_is_draw(context)
 
     def draw_prepare(self, context):

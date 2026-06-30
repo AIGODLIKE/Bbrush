@@ -1,20 +1,24 @@
 import bpy
 
-from .utils import get_pref, is_bbruse_mode
+from .utils import check_pref, get_pref, is_bbruse_mode
 
 
 def get_top_bar_text(pref, is_bbrush_mode):
     text = ""
     if is_bbrush_mode:
         return "ESC"
-    if pref.top_bar_show_text:
+    if pref is not None and pref.top_bar_show_text:
         text = "BBrush"
     return text
 
 
 def top_bar_draw(self, context):
+    if not check_pref():
+        return
     from .sculpt import FixBbrushError, BbrushExit, BbrushStart
     pref = get_pref()
+    if pref is None:
+        return
 
     layout = self.layout
 

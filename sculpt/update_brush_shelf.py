@@ -5,7 +5,7 @@ from bpy.utils.toolsystem import ToolDef
 
 from .brush import other
 from ..debug import DEBUG_UPDATE_BRUSH_SHELF
-from ..utils import refresh_ui, get_active_tool
+from ..utils import refresh_ui, get_active_tool, is_bbruse_mode
 
 active_brush_toolbar = {  # 记录活动笔刷的名称
     "SCULPT": "builtin.brush",
@@ -116,6 +116,10 @@ def set_brush_shelf(shelf_mode):
 class UpdateBrushShelf(bpy.types.Operator):
     bl_idname = "sculpt.bbursh_update_brush_shelf"
     bl_label = "Update Brush Shelf"
+
+    @classmethod
+    def poll(cls, context):
+        return is_bbruse_mode()
 
     def invoke(self, context, event):
         self.update_brush_shelf(context, event)
