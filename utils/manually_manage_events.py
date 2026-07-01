@@ -26,7 +26,8 @@ class ManuallyManageEvents:
             return False
         now_mouse = Vector((event.mouse_x, event.mouse_y))
         dist = (now_mouse - self.start_mouse).length
-        threshold = get_pref().mouse_move_threshold_px
+        pref = get_pref()
+        threshold = pref.mouse_move_threshold_px if pref is not None else 5
         if threshold <= 0:
             return dist > 0.0
         return dist >= float(threshold)

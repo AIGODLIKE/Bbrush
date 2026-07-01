@@ -8,12 +8,25 @@ from ..debug import DEBUG_DEPTH_MAP
 from ..utils import check_pref, get_pref, is_bbruse_mode, get_region_height, get_region_width, check_display_mode_is_draw
 
 handel = None
+_ShortcutKey = None
+_BbrushExit = None
 
 depth_buffer_check = {
     # "wh": ((x1, x2), (y1, y2)),
     # "translate":w, -h, 0
     # "draw_error": "ERROR INFO"
 }
+
+
+def _sculpt_draw_refs():
+    """Load sculpt draw dependencies once (avoids circular import at addon load)."""
+    global _ShortcutKey, _BbrushExit
+    if _ShortcutKey is None:
+        from ..sculpt.shortcut_key import ShortcutKey
+        from ..sculpt import BbrushExit
+        _ShortcutKey = ShortcutKey
+        _BbrushExit = BbrushExit
+    return _ShortcutKey, _BbrushExit
 
 
 def check_depth_map_is_draw(context):
@@ -73,13 +86,11 @@ def draw_depth():
     global depth_buffer_check
     context = bpy.context
 
+    ShortcutKey, BbrushExit = _sculpt_draw_refs()
     try:
-        from ..sculpt import brush_runtime
-        from ..sculpt.shortcut_key import ShortcutKey
         if is_bbruse_mode():
             ShortcutKey.draw_shortcut_key()
     except ReferenceError as e:
-        from ..sculpt import BbrushExit
         BbrushExit.exit(context)
         if pref.debug:
             import traceback
@@ -123,7 +134,6 @@ def filling_data(context):
 
     location = depth_offset + area_offset + Vector((0, height - draw_height))
 
-    # Clamp widget position inside the region
     ui_width = get_region_width(context, "UI")
     asset_shelf_height = get_region_height(context, "ASSET_SHELF") + get_region_height(context, "ASSET_SHELF_HEADER")
     limit_x = max(tools_width, min(width - ui_width - draw_width, location.x))
@@ -133,18 +143,16 @@ def filling_data(context):
     x1, y1 = limitation
     x2, y2 = limitation + draw_size
 
-    # Store bounds for depth-map hit testing in brush operators
     depth_buffer_check["area_points"] = (x1, x2), (y1, y2)
     depth_buffer_check["draw_box"] = x1, x2, y1, y2
     depth_buffer_check["text_location"] = x1, y1
 
-    # Normalized coords for GPU matrix placement
     w = 1 / width * x1
     h = 1 / height * (y1 + draw_height)
     depth_buffer_check["translate"] = w, h, 0
 
 
-update_depth_map_modal_operators_len = 0  # Tracks modal operator count for depth refresh
+update_depth_map_modal_operators_len = 0
 
 
 def update_depth_map_by_modal_operators() -> bool:
@@ -166,4 +174,3 @@ def register():
 def unregister():
     remove_draw_handler()
     clear_gpu_cache()
-

@@ -200,11 +200,3 @@ class UpdateBrushShelf(bpy.types.Operator):
 
         if DEBUG_UPDATE_BRUSH_SHELF:
             print("start_brush_shelf", brush_shelf.keys())
-
-
-def try_restore_brush_shelf():
-    global brush_shelf
-    if "ORIGINAL" in brush_shelf.keys():
-        UpdateBrushShelf.restore_brush_shelf()
-        if DEBUG_UPDATE_BRUSH_SHELF:
-            print("try_restore_brush_shelf ok")

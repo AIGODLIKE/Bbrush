@@ -165,7 +165,8 @@ def draw_box(x1, x2, y1, y2):
 def draw_gpu_buffer(context, depth_buffer):
     gpu.state.depth_mask_set(False)
 
-    depth_scale = get_pref().depth_scale
+    pref = get_pref()
+    depth_scale = pref.depth_scale if pref is not None else 0.3
     if "draw_error" not in depth_buffer:
         with gpu.matrix.push_pop():
             gpu.matrix.scale([2, 2])

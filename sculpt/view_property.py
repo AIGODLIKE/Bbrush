@@ -71,11 +71,3 @@ class ViewProperty:
         view_property_store.clear()
         if save_user_pref:
             bpy.ops.wm.save_userpref()
-
-
-def try_restore_view_property():
-    global view_property_store
-    if len(view_property_store) != 0:
-        ViewProperty.restore_view_property(bpy.context)
-        if DEBUG_VIEW_PREF:
-            print("try_restore_view_property ok")

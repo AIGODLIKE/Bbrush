@@ -12,7 +12,7 @@ from ..utils.manually_manage_events import ManuallyManageEvents
 class LeftMouse(bpy.types.Operator, ManuallyManageEvents):
     bl_idname = "sculpt.bbrush_left_mouse"
     bl_label = "Sculpt"
-    bl_description = "LeftMouse"
+    bl_description = "Left mouse sculpting and view navigation in Bbrush mode"
     bl_options = {"REGISTER"}
 
     @classmethod

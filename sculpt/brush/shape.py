@@ -514,7 +514,8 @@ class BrushShape(bpy.types.Operator, ShapeUpdate):
         active_tool = ToolSelectPanelHelper.tool_active_from_context(bpy.context)
 
         if DEBUG_SHAPE:
-            print(self.bl_idname, is_in_modal, self.brush_mode, active_tool.idname)
+            tool_id = getattr(active_tool, "idname", None)
+            print(self.bl_idname, is_in_modal, self.brush_mode, tool_id)
 
         if self.__class__.draw_handle is not None:
             return {"FINISHED"}

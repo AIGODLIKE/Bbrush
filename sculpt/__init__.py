@@ -9,7 +9,7 @@ from .shortcut_key import ShortcutKey
 from .update_brush_shelf import UpdateBrushShelf
 from .view_property import ViewProperty
 from ..debug import DEBUG_MODE_TOGGLE
-from ..utils import get_pref, refresh_ui
+from ..utils import get_pref, refresh_ui, get_context_mode, is_bbruse_mode
 
 """
 Runtime toggles:
@@ -47,7 +47,7 @@ def _first_space_view3d(context):
 class BrushRuntime:
     left_mouse = Vector((0, 0))  # Drag offset compensation anchor
 
-    shortcut_key_points = []  # Hit-test bounds for shortcut overlay
+    shortcut_key_points = None  # Hit-test bounds for shortcut overlay
 
     show_floor = None  # Saved overlay.show_floor before entering Bbrush
 
@@ -58,6 +58,18 @@ class BrushRuntime:
 class BbrushStart(bpy.types.Operator):
     bl_idname = "sculpt.bbrush_start"
     bl_label = "Bbrush Start"
+    bl_description = "Enter Bbrush sculpting mode with pen-friendly shortcuts"
+    bl_options = {"REGISTER"}
+
+    @classmethod
+    def poll(cls, context):
+        if get_context_mode(context) != "SCULPT":
+            cls.poll_message_set("Available in sculpt mode only")
+            return False
+        if is_bbruse_mode():
+            cls.poll_message_set("Bbrush mode is already active")
+            return False
+        return True
 
     def invoke(self, context, event):
         global brush_runtime
@@ -65,7 +77,6 @@ class BbrushStart(bpy.types.Operator):
         if DEBUG_MODE_TOGGLE:
             print(self.bl_idname)
 
-        # Only one runtime instance at a time
         if brush_runtime is not None:
             return {"CANCELLED"}
 
@@ -84,7 +95,6 @@ class BbrushStart(bpy.types.Operator):
 
         UpdateBrushShelf.start_brush_shelf(context)
         UpdateBrushShelf.update_brush_shelf(context, event)
-        UpdateBrushShelf.update_brush_shelf(context, event)
 
         ShortcutKey.start_shortcut_key()
         ViewProperty.start_view_property(context)
@@ -96,11 +106,21 @@ class BbrushStart(bpy.types.Operator):
 
         refresh_draw_handler(context)
 
+
 class BbrushExit(bpy.types.Operator):
     bl_idname = "sculpt.bbrush_exit"
     bl_label = "Bbrush Exit"
+    bl_description = "Leave Bbrush sculpting mode and restore tool shelf settings"
+    bl_options = {"REGISTER"}
 
     exit_always: bpy.props.BoolProperty(default=False)
+
+    @classmethod
+    def poll(cls, context):
+        if not is_bbruse_mode():
+            cls.poll_message_set("Bbrush mode is not active")
+            return False
+        return True
 
     def execute(self, context):
         if DEBUG_MODE_TOGGLE:
@@ -142,11 +162,18 @@ class BbrushExit(bpy.types.Operator):
 class FixBbrushError(bpy.types.Operator):
     bl_idname = "sculpt.bbrush_fix"
     bl_label = "BBrush fix"
-    bl_description = "Fix Bbrush error"
+    bl_description = "Reset Bbrush runtime state if the mode becomes stuck"
     bl_options = {"REGISTER"}
 
+    @classmethod
+    def poll(cls, context):
+        from ..utils import get_context_mode
+        if get_context_mode(context) != "SCULPT":
+            cls.poll_message_set("Available in sculpt mode only")
+            return False
+        return True
+
     def execute(self, context):
-        global brush_runtime
         BbrushExit.exit(context)
         return {"FINISHED"}
 
@@ -199,4 +226,3 @@ def unregister():
     addon_keymap.unregister()
     brush.unregister()
     unregister_class()
-

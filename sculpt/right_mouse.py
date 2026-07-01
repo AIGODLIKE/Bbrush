@@ -8,7 +8,7 @@ from ..utils.manually_manage_events import ManuallyManageEvents
 class RightMouse(bpy.types.Operator, ManuallyManageEvents):
     bl_idname = "sculpt.bbrush_right_mouse"
     bl_label = "Sculpt"
-    bl_description = "RightMouse"
+    bl_description = "Right mouse view navigation and sculpt context menu in Bbrush mode"
     bl_options = {"REGISTER"}
 
     @classmethod

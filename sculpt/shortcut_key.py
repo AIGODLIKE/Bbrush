@@ -67,9 +67,7 @@ class ShortcutKey:
 
     @staticmethod
     def shortcut_key(mode):
-        if texts := SHORTCUT_KEYS.get(mode):
-            return texts
-        return [{"doc": "EMM Test"}, ]
+        return SHORTCUT_KEYS.get(mode, [])
 
     @staticmethod
     def start_shortcut_key():
@@ -87,6 +85,8 @@ class ShortcutKey:
     def draw_shortcut_key(cls):
         from . import brush_runtime
         pref = get_pref()
+        if pref is None:
+            return
 
         if pref.show_shortcut_keys and brush_runtime is not None and brush_runtime.shortcut_key_points is not None:
             from bpy.app.translations import pgettext_iface as translate
@@ -153,7 +153,3 @@ class ShortcutKey:
             x2 += max_width
 
             brush_runtime.shortcut_key_points = ((x1, x2), (y1, y2))
-
-
-def try_setop_shortcut_key():
-    ...

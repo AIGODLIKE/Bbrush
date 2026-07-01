@@ -208,7 +208,7 @@ class ViewNavigationGizmoGroup(bpy.types.GizmoGroup):
         pref = get_pref()
         if pref is None:
             return False
-        return pref.check_depth_map_is_draw(context)
+        return pref.check_view_navigation_gizmo_is_draw(context)
 
     def draw_prepare(self, context):
         """context.area.tag_redraw() here would hurt draw performance."""
