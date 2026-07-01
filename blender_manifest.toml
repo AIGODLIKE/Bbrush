@@ -21,6 +21,8 @@ paths_exclude_pattern = [
     "/.git/",
     "/.idea/",
     "/.cursor/",
+    "/.editorconfig",
+    "/.Bbrush/",
     "/debug.py",
     "/README.md",
     "/*.zip",

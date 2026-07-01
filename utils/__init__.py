@@ -60,29 +60,23 @@ def get_region(region_type, context=None) -> "None|bpy.types.Region":
     enum in ["WINDOW", "HEADER", "CHANNELS", "TEMPORARY", "UI", "TOOLS", "TOOL_PROPS",
         "PREVIEW", "HUD", "NAVIGATION_BAR", "EXECUTE", "FOOTER", "TOOL_HEADER", "XR"]]
     region_types = set(region.type for area in bpy.context.screen.areas for region in area.regions)
-    {
-    'WINDOW',
-     'ASSET_SHELF',
-     'TOOL_HEADER',
-     'ASSET_SHELF_HEADER',
-     'HUD',
-     'UI',
-     'NAVIGATION_BAR',
-     'TOOLS',
-     'EXECUTE',
-     'HEADER',
-     'CHANNELS'
-     }
     """
-    area = bpy.context.area if context is None else context.area
+    context = context or bpy.context
+    area = getattr(context, "area", None)
+    if area is None:
+        return None
     for region in area.regions:
         if region.type == region_type:
             return region
     return None
 
 
-def get_toolbar_width(region_type="TOOLS"):
-    for i in bpy.context.area.regions:
+def get_toolbar_width(region_type="TOOLS", context=None):
+    context = context or bpy.context
+    area = getattr(context, "area", None)
+    if area is None:
+        return None
+    for i in area.regions:
         if i.type == region_type:
             if region_type == "TOOLS":
                 return i.width
@@ -124,13 +118,13 @@ def get_brush_shape(brush) -> str:
     ):
         return "POLYLINE"
     elif brush in (
-            "builtin.ellipse_hide",
-            "builtin.ellipse_mask",
+            "bbrush.ellipse_hide",
+            "bbrush.ellipse_mask",
     ):
         return "ELLIPSE"
     elif brush in (
-            "builtin.circular_mask",
-            "builtin.circular_hide",
+            "bbrush.circular_mask",
+            "bbrush.circular_hide",
     ):
         return "CIRCULAR"
     elif brush in (
@@ -245,9 +239,13 @@ def check_mouse_in_shortcut_key_area(event) -> bool:
     )
 
 
-def check_modal_operators(bl_idname: str) -> bool:
+def check_modal_operators(bl_idname: str, context=None) -> bool:
     """Return True if a modal operator with bl_idname is running."""
-    for modal in bpy.context.window.modal_operators:
+    context = context or bpy.context
+    window = getattr(context, "window", None)
+    if window is None:
+        return False
+    for modal in window.modal_operators:
         if modal and modal.bl_idname == bl_idname:
             return True
     return False

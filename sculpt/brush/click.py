@@ -6,12 +6,16 @@ from ...utils import is_bbrush_mode, check_mouse_in_model
 
 class BrushClick(bpy.types.Operator):
     bl_idname = "sculpt.bbrush_click"
-    bl_label = "Sculpt"
+    bl_label = "Bbrush Click"
+    bl_description = "Handle click actions for mask and hide brush shelf modes"
     bl_options = {"REGISTER"}
 
     @classmethod
     def poll(cls, context):
-        return is_bbrush_mode()
+        if not is_bbrush_mode():
+            cls.poll_message_set("Bbrush mode is not active")
+            return False
+        return True
 
     def invoke(self, context, event):
         from .. import brush_runtime

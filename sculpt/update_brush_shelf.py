@@ -54,18 +54,19 @@ def append_brush(brush):
         brush_shelf["SCULPT"].append(brush)
 
 
-def tool_ops(tools):
+def tool_ops(tools, context=None):
     from collections.abc import Iterable
+    context = context or bpy.context
     for tool in tools:
         if isinstance(tool, ToolDef):
             append_brush(tool)
         elif hasattr(VIEW3D_PT_tools_active, "_tools_annotate") and tool == VIEW3D_PT_tools_active._tools_annotate[0]:
             brush_shelf["SCULPT"].append(tool)
         elif isinstance(tool, Iterable):
-            tool_ops(tool)
+            tool_ops(tool, context)
         elif getattr(tool, "__call__", False):
-            if hasattr(bpy.context, "tool_settings"):
-                tool_ops(tool(bpy.context))
+            if hasattr(context, "tool_settings"):
+                tool_ops(tool(context), context)
         else:
             brush_shelf["SCULPT"].append(tool)
 
@@ -115,11 +116,15 @@ def set_brush_shelf(shelf_mode):
 
 class UpdateBrushShelf(bpy.types.Operator):
     bl_idname = "sculpt.bbrush_update_brush_shelf"
-    bl_label = "Update Brush Shelf"
+    bl_label = "Bbrush Update Brush Shelf"
+    bl_description = "Switch sculpt tool shelf layout based on Ctrl, Alt, and Shift modifier keys"
 
     @classmethod
     def poll(cls, context):
-        return is_bbrush_mode()
+        if not is_bbrush_mode():
+            cls.poll_message_set("Bbrush mode is not active")
+            return False
+        return True
 
     def invoke(self, context, event):
         self.update_brush_shelf(context, event)
@@ -132,9 +137,7 @@ class UpdateBrushShelf(bpy.types.Operator):
     def update_brush_shelf(cls, context, event):
         """Update sculpt tool shelf for current modifier key combo."""
         if context.space_data is None:
-            # space_data may be None while switching windows
-            # return
-            ...
+            return
 
         key = (event.ctrl, event.alt, event.shift)
         mode = BRUSH_SHELF_MODE[key]  # Shelf mode from ctrl/alt/shift
@@ -190,7 +193,7 @@ class UpdateBrushShelf(bpy.types.Operator):
             "MASK": [],
         })
 
-        tool_ops(origin_brush_toolbar)
+        tool_ops(origin_brush_toolbar, context)
         brush_shelf["MASK"].extend((
             other.circular_mask,
             other.ellipse_mask,

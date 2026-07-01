@@ -66,8 +66,8 @@ def get_use_front_faces_only(context) -> bool:
         "builtin.lasso_mask": "paint.mask_lasso_gesture",
         "builtin.polyline_mask": "paint.mask_polyline_gesture",
 
-        "builtin.circular_mask": "paint.mask_lasso_gesture",
-        "builtin.ellipse_mask": "paint.mask_lasso_gesture",
+        "bbrush.circular_mask": "paint.mask_lasso_gesture",
+        "bbrush.ellipse_mask": "paint.mask_lasso_gesture",
     }.get(active_tool.idname):
         props = active_tool.operator_properties(value)
         last_use_front_faces_only = props.use_front_faces_only
@@ -468,14 +468,18 @@ class ShapeUpdate(DragBase):
 
 class BrushShape(bpy.types.Operator, ShapeUpdate):
     bl_idname = "sculpt.bbrush_shape"
-    bl_label = "Shape"
+    bl_label = "Bbrush Shape Gesture"
+    bl_description = "Draw mask or hide shape gestures for supported sculpt tools"
     bl_options = {"REGISTER"}
 
     click_time = None
 
     @classmethod
     def poll(cls, context):
-        return is_bbrush_mode()
+        if not is_bbrush_mode():
+            cls.poll_message_set("Bbrush mode is not active")
+            return False
+        return True
 
     def start_modal(self, context, event):
         global drag_runtime
@@ -502,16 +506,16 @@ class BrushShape(bpy.types.Operator, ShapeUpdate):
             "builtin.polyline_hide",
 
             # Custom brushes
-            "builtin.circular_mask",
-            "builtin.circular_hide",
-            "builtin.ellipse_mask",
-            "builtin.ellipse_hide",
+            "bbrush.circular_mask",
+            "bbrush.circular_hide",
+            "bbrush.ellipse_mask",
+            "bbrush.ellipse_hide",
         )
         return brush_name in support_brushes_list
 
     def invoke(self, context, event):
         is_in_modal = check_mouse_in_model(context, event)
-        active_tool = ToolSelectPanelHelper.tool_active_from_context(bpy.context)
+        active_tool = ToolSelectPanelHelper.tool_active_from_context(context)
 
         if DEBUG_SHAPE:
             tool_id = getattr(active_tool, "idname", None)

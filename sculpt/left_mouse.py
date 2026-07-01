@@ -11,13 +11,16 @@ from ..utils.manually_manage_events import ManuallyManageEvents
 
 class LeftMouse(bpy.types.Operator, ManuallyManageEvents):
     bl_idname = "sculpt.bbrush_left_mouse"
-    bl_label = "Sculpt"
+    bl_label = "Bbrush Left Mouse"
     bl_description = "Left mouse sculpting and view navigation in Bbrush mode"
     bl_options = {"REGISTER"}
 
     @classmethod
     def poll(cls, context):
-        return is_bbrush_mode()
+        if not is_bbrush_mode():
+            cls.poll_message_set("Bbrush mode is not active")
+            return False
+        return True
 
     def invoke(self, context, event):
         """Manual click/drag handling; CLICK_DRAG is unreliable in Blender 5.0+."""
@@ -27,7 +30,7 @@ class LeftMouse(bpy.types.Operator, ManuallyManageEvents):
         brush_runtime.left_mouse = Vector((event.mouse_x, event.mouse_y))
 
         UpdateBrushShelf.update_brush_shelf(context, event)
-        active_tool = ToolSelectPanelHelper.tool_active_from_context(bpy.context)
+        active_tool = ToolSelectPanelHelper.tool_active_from_context(context)
 
         if check_mouse_in_depth_map_area(event):  # Scale depth map
             bpy.ops.sculpt.bbrush_depth_scale("INVOKE_DEFAULT")
@@ -68,7 +71,7 @@ class LeftMouse(bpy.types.Operator, ManuallyManageEvents):
 
         self.start_manually_manage_events(event)
 
-        in_run = check_modal_operators(self.bl_idname)
+        in_run = check_modal_operators(self.bl_idname, context)
         if DEBUG_LEFT_MOUSE:
             print("left mouse",
                   self.bl_idname, in_run,
@@ -88,7 +91,7 @@ class LeftMouse(bpy.types.Operator, ManuallyManageEvents):
         is_moving = self.check_is_moving(event)
         is_in_modal = check_mouse_in_model(context, event)
         # is_in_active_modal = check_mouse_in_active_modal(context, event)  # Unreliable with modifiers
-        active_tool = ToolSelectPanelHelper.tool_active_from_context(bpy.context)
+        active_tool = ToolSelectPanelHelper.tool_active_from_context(context)
 
         if is_release:  # Click release
             if DEBUG_LEFT_MOUSE:

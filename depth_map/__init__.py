@@ -102,7 +102,7 @@ def draw_depth():
             print(e.args)
 
     if check_depth_map_is_draw(context):
-        if update_depth_map_by_modal_operators():
+        if update_depth_map_by_modal_operators(context):
             clear_gpu_cache()
         filling_data(context)
 
@@ -160,10 +160,14 @@ def filling_data(context):
 update_depth_map_modal_operators_len = 0
 
 
-def update_depth_map_by_modal_operators() -> bool:
+def update_depth_map_by_modal_operators(context=None) -> bool:
     """Return True when view navigation modal operators finish (pan/zoom/rotate)."""
     global update_depth_map_modal_operators_len
-    modal_operators_len = len(bpy.context.window.modal_operators)
+    context = context or bpy.context
+    window = getattr(context, "window", None)
+    if window is None:
+        return False
+    modal_operators_len = len(window.modal_operators)
     if update_depth_map_modal_operators_len != modal_operators_len:
         if modal_operators_len == 0:
             update_depth_map_modal_operators_len = modal_operators_len

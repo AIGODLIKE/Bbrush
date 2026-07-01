@@ -7,13 +7,16 @@ from ..utils.manually_manage_events import ManuallyManageEvents
 
 class RightMouse(bpy.types.Operator, ManuallyManageEvents):
     bl_idname = "sculpt.bbrush_right_mouse"
-    bl_label = "Sculpt"
+    bl_label = "Bbrush Right Mouse"
     bl_description = "Right mouse view navigation and sculpt context menu in Bbrush mode"
     bl_options = {"REGISTER"}
 
     @classmethod
     def poll(cls, context):
-        return is_bbrush_mode()
+        if not is_bbrush_mode():
+            cls.poll_message_set("Bbrush mode is not active")
+            return False
+        return True
 
     def invoke(self, context, event):
 
