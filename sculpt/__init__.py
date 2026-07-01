@@ -49,6 +49,8 @@ class BrushRuntime:
 
     shortcut_key_points = []  # Hit-test bounds for shortcut overlay
 
+    show_floor = None  # Saved overlay.show_floor before entering Bbrush
+
     # SCULPT,SMOOTH,HIDE,MASK,ORIGINAL
     brush_mode = "NONE"
 
@@ -73,6 +75,8 @@ class BbrushStart(bpy.types.Operator):
     @staticmethod
     def start(context, event):
         global brush_runtime
+        from ..depth_map import refresh_draw_handler
+
         brush_runtime = BrushRuntime()
 
         if DEBUG_MODE_TOGGLE:
@@ -87,7 +91,10 @@ class BbrushStart(bpy.types.Operator):
         refresh_ui(context)
         v3d = _first_space_view3d(context)
         if v3d is not None:
+            brush_runtime.show_floor = v3d.overlay.show_floor
             v3d.overlay.show_floor = False
+
+        refresh_draw_handler(context)
 
 class BbrushExit(bpy.types.Operator):
     bl_idname = "sculpt.bbrush_exit"
@@ -99,7 +106,7 @@ class BbrushExit(bpy.types.Operator):
         if DEBUG_MODE_TOGGLE:
             print(self.bl_idname)
         pref = get_pref()
-        if pref.always_use_bbrush_sculpt_mode and self.exit_always:
+        if pref is not None and pref.always_use_bbrush_sculpt_mode and self.exit_always:
             pref["always_use_bbrush_sculpt_mode"] = False
         self.exit(context)
         return {"FINISHED"}
@@ -112,6 +119,13 @@ class BbrushExit(bpy.types.Operator):
         :return:
         """
         global brush_runtime
+        from ..depth_map import refresh_draw_handler
+
+        if brush_runtime is not None:
+            v3d = _first_space_view3d(context)
+            if v3d is not None and brush_runtime.show_floor is not None:
+                v3d.overlay.show_floor = brush_runtime.show_floor
+
         brush_runtime = None
 
         if DEBUG_MODE_TOGGLE:
@@ -122,6 +136,7 @@ class BbrushExit(bpy.types.Operator):
         ViewProperty.restore_view_property(context, un_reg)
 
         refresh_ui(context)
+        refresh_draw_handler(context)
 
 
 class FixBbrushError(bpy.types.Operator):
@@ -184,3 +199,4 @@ def unregister():
     addon_keymap.unregister()
     brush.unregister()
     unregister_class()
+

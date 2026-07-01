@@ -26,7 +26,6 @@ class RightMouse(bpy.types.Operator, ManuallyManageEvents):
         elif check_mouse_in_shortcut_key_area(event) and BrushShortcutKeyScale.poll(context):
             bpy.ops.sculpt.bbrush_shortcut_key_move("INVOKE_DEFAULT")
             return {"FINISHED"}
-        print(self.bl_idname)
 
         context.window_manager.modal_handler_add(self)
         self.start_manually_manage_events(event)

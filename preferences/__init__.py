@@ -21,7 +21,8 @@ class Preferences(
     bl_idname = base_name
 
     def update_always_bbrush_mode(self, context):
-        from ..register_module import try_toggle_bbrush_mode
+        from ..register_module import sync_auto_mode_handlers, try_toggle_bbrush_mode
+        sync_auto_mode_handlers()
         try_toggle_bbrush_mode()
 
     always_use_bbrush_sculpt_mode: bpy.props.BoolProperty(
@@ -96,7 +97,7 @@ class Preferences(
         split = col.split()
 
         column = split.column()
-        self.draw_top_ber(column)
+        self.draw_top_bar(column)
         self.draw_view_navigation_gizmo(column)
         self.draw_view_navigation_property(column)
 

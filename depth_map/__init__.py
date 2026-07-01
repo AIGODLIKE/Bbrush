@@ -27,6 +27,41 @@ def check_depth_map_is_draw(context):
     return check_display_mode_is_draw(context, mode)
 
 
+def needs_viewport_overlay(context=None) -> bool:
+    """Return True when the viewport draw handler should be active."""
+    if not check_pref():
+        return False
+    pref = get_pref()
+    if pref is None:
+        return False
+    context = context or bpy.context
+    if is_bbruse_mode():
+        if pref.show_shortcut_keys:
+            return True
+        return check_depth_map_is_draw(context)
+    return check_depth_map_is_draw(context)
+
+
+def refresh_draw_handler(context=None):
+    """Register or remove the viewport draw handler based on current needs."""
+    global handel
+    if needs_viewport_overlay(context):
+        if handel is None:
+            handel = bpy.types.SpaceView3D.draw_handler_add(draw_depth, (), "WINDOW", "POST_PIXEL")
+    elif handel is not None:
+        bpy.types.SpaceView3D.draw_handler_remove(handel, "WINDOW")
+        handel = None
+
+
+def remove_draw_handler():
+    """Remove the viewport draw handler if registered."""
+    global handel, depth_buffer_check
+    if handel is not None:
+        bpy.types.SpaceView3D.draw_handler_remove(handel, "WINDOW")
+        handel = None
+    depth_buffer_check = {}
+
+
 def draw_depth():
     if not check_pref():
         return
@@ -59,9 +94,6 @@ def draw_depth():
             depth_buffer_check["draw_error"] = draw_error
             if pref.debug:
                 print(draw_error)
-        """
-        draw_gpu_buffer_new_buffer_funcs(sam_width, sam_height, width, height, sampling)
-        """
     elif depth_buffer_check:
         depth_buffer_check = {}
 
@@ -72,6 +104,8 @@ def draw_depth():
 def filling_data(context):
     global depth_buffer_check
     pref = get_pref()
+    if pref is None:
+        return
     depth_scale = pref.depth_scale
 
     width = context.region.width
@@ -126,12 +160,10 @@ def update_depth_map_by_modal_operators() -> bool:
 
 
 def register():
-    global handel
-    handel = bpy.types.SpaceView3D.draw_handler_add(draw_depth, (), "WINDOW", "POST_PIXEL")
+    pass
 
 
 def unregister():
-    global handel
-    if handel:
-        bpy.types.SpaceView3D.draw_handler_remove(handel, "WINDOW")
-        handel = None
+    remove_draw_handler()
+    clear_gpu_cache()
+

@@ -7,8 +7,11 @@ def get_draw_view_navigation_texture_width_height() -> Vector:
     """Return scaled navigation texture draw size."""
     from . import get_pref
     from ..src.view_navigation import texture_draw_size
-    scale = get_pref().view_navigation_gizmo_scale
     w, h = texture_draw_size
+    pref = get_pref()
+    if pref is None:
+        return Vector((w, h))
+    scale = pref.view_navigation_gizmo_scale
     return Vector((int(w * scale), int(h * scale)))
 
 

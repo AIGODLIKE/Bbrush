@@ -18,12 +18,28 @@ DISPLAY_ITEMS = (
 )
 
 
+def get_context_mode(context=None):
+    """Return object mode string, or None when context is restricted (e.g. during register)."""
+    context = context or bpy.context
+    mode = getattr(context, "mode", None)
+    if mode is not None:
+        return mode
+    obj = getattr(context, "object", None)
+    if obj is not None:
+        return getattr(obj, "mode", None)
+    return None
+
+
 def check_display_mode_is_draw(context, display_mode: str) -> bool:
-    is_sculpt = context.mode == "SCULPT"
-    always = display_mode == "ALWAYS_DISPLAY"
+    if display_mode == "ALWAYS_DISPLAY":
+        return True
+    mode = get_context_mode(context)
+    if mode is None:
+        return False
+    is_sculpt = mode == "SCULPT"
     only_sculpt = (display_mode == "ONLY_SCULPT") and is_sculpt
     only_bbrush = (display_mode == "ONLY_BBRUSH") and is_sculpt and is_bbruse_mode()
-    return always or only_sculpt or only_bbrush
+    return only_sculpt or only_bbrush
 
 
 def check_pref() -> bool:
@@ -123,7 +139,9 @@ def get_brush_shape(brush) -> str:
             "builtin.lasso_trim",
     ):
         return "LASSO"
-    print("brush not match shape", brush)
+    pref = get_pref()
+    if pref is not None and pref.debug:
+        print("brush not match shape", brush)
     return "NONE"
 
 
@@ -309,6 +327,10 @@ def get_view_navigation_texture(h, w):
         view_navigation.load_view_navigation_image(default_file_path)
         # print(view_navigation.texture_cache.keys())
         return view_navigation.texture_cache[key]
+
+
+def clear_view_navigation_texture_cache():
+    get_view_navigation_texture.cache_clear()
 
 
 def object_ray_cast(obj, context, mouse):

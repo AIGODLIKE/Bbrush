@@ -1,4 +1,3 @@
-import bpy
 from mathutils import Vector
 from mathutils import geometry
 
@@ -56,7 +55,7 @@ def find_closet(point_list, src_point):
     return find_point
 
 
-def line_to_convex_shell(pos, link=False):
+def line_to_convex_shell(pos):
     """Extract the outer boundary polygon from a self-intersecting polyline."""
     # [v1, v2, v3, v1]
     pos = to_vector(pos)
@@ -91,8 +90,7 @@ def line_to_convex_shell(pos, link=False):
         to_point = find_point
         try:
             from_idx = pos.index(find_point)
-        except Exception as e:
-            print(e)
+        except Exception:
             from_idx = -9999
     else:
         from_idx = end1_idx
@@ -150,35 +148,4 @@ def line_to_convex_shell(pos, link=False):
         counter += 1
         if counter > len(pos) * 12:
             break
-    if link:
-        return circle, circle_test(circle, True)
     return circle
-
-
-def circle_test(circle, new_obj=False):
-    """Debug helper: build a mesh from the boundary loop."""
-    if 'sss' in bpy.data.meshes:
-        bpy.data.meshes.remove(bpy.data.meshes['sss'])
-    me = bpy.data.meshes.new("sss")
-    me.from_pydata(vertices=[v.to_3d() / 100 for v in circle],
-                   edges=[(i, i + 1) for i in range(len(circle) - 1)],
-                   faces=[])
-    me.update()
-
-    import bmesh
-    bm = bmesh.new()
-    bm.from_mesh(me)
-    bmesh.ops.remove_doubles(bm, verts=bm.verts[:], dist=0.0001)
-    bmesh.ops.triangle_fill(bm, edges=bm.edges[:])
-    bm.to_mesh(me)
-    bm.free()
-    if new_obj:
-        if "sss" not in bpy.data.objects:
-            o = bpy.data.objects.new("sss", object_data=me)
-        else:
-            o = bpy.data.objects['sss']
-            o.data = me
-        if o.name not in bpy.context.scene.collection.objects:
-            bpy.context.scene.collection.objects.link(o)
-
-    return (i.vertices[:] for i in me.polygons)

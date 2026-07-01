@@ -206,4 +206,5 @@ def try_restore_brush_shelf():
     global brush_shelf
     if "ORIGINAL" in brush_shelf.keys():
         UpdateBrushShelf.restore_brush_shelf()
-        print("try_restore_brush_shelf ok")
+        if DEBUG_UPDATE_BRUSH_SHELF:
+            print("try_restore_brush_shelf ok")

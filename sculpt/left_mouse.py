@@ -200,10 +200,11 @@ def execute_brush_stroke(event):
 def mouse_offset_compensation(context, event):
     """Compensate cursor drift when starting a stroke near mesh edges."""
     pref = get_pref()
-    if pref.enabled_drag_offset_compensation:
+    if pref is not None and pref.enabled_drag_offset_compensation:
         from . import brush_runtime
         now_mouse = Vector((event.mouse_x, event.mouse_y))
         left = brush_runtime.left_mouse
         offset_mouse = (left - now_mouse) * pref.drag_offset_compensation + left
-        print("mouse_offset_compensation", offset_mouse)
+        if DEBUG_LEFT_MOUSE:
+            print("mouse_offset_compensation", offset_mouse)
         context.window.cursor_warp(int(offset_mouse.x), int(offset_mouse.y))

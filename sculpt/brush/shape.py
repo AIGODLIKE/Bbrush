@@ -58,6 +58,8 @@ last_use_front_faces_only = False
 def get_use_front_faces_only(context) -> bool:
     global last_use_front_faces_only
     active_tool = ToolSelectPanelHelper.tool_active_from_context(context)
+    if active_tool is None:
+        return last_use_front_faces_only
 
     if value := {
         "builtin.box_mask": "paint.mask_box_gesture",
@@ -541,8 +543,9 @@ class BrushShape(bpy.types.Operator, ShapeUpdate):
 
     def modal(self, context, event):
         """Modal while dragging off-model or finishing the gesture."""
-        print("drag_event", self.shape, self.is_reverse, len(self.mouse_route), len(self.mouse_route_convex_shell),
-              event.value, event.type)
+        if DEBUG_SHAPE:
+            print("drag_event", self.shape, self.is_reverse, len(self.mouse_route), len(self.mouse_route_convex_shell),
+                  event.value, event.type)
 
         self.is_reverse = event.alt
 

@@ -36,8 +36,6 @@ def load_view_navigation_image(image_path: str) -> bool:
         assert wi == wf
         assert hi == hf
 
-        # print(len(np_data), pixels_len, len(image.pixels))
-        # print(wi, hi)
         temp_image = bpy.data.images.new(f"temp_{image_path}", wi, hi)
         for w in range(width_split):
             for h in range(height_split):
@@ -57,7 +55,10 @@ def load_view_navigation_image(image_path: str) -> bool:
         texture_cache.update(texture_dict)
         return True
     except RuntimeError as e:
-        print("loading image failed", image_path, e.args)
+        from ...utils import get_pref
+        pref = get_pref()
+        if pref is not None and pref.debug:
+            print("loading image failed", image_path, e.args)
     return False
 
 
@@ -66,4 +67,6 @@ def register():
 
 
 def unregister():
+    from ...utils import clear_view_navigation_texture_cache
     texture_cache.clear()
+    clear_view_navigation_texture_cache()

@@ -16,7 +16,7 @@ class ViewNavigationGizmo:
         default=(-70, -90),
         size=2,
         max=0,
-        min=-114514,
+        min=-4096,
     )
     view_navigation_gizmo_show_tips: bpy.props.BoolProperty(name="Show tips", default=True)
 
