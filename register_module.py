@@ -19,6 +19,7 @@ register_module, unregister_module = register_submodule_factory(model_tuple)
 owner = object()
 _auto_handlers_active = False
 _mode_subscribed = False
+_load_post_draw_registered = False
 
 
 def try_toggle_bbrush_mode(is_start=False):
@@ -36,15 +37,21 @@ def try_toggle_bbrush_mode(is_start=False):
         ...
 
 
+def refresh_viewport_overlay():
+    """Refresh draw handler and silhouette cache after file load or mode change."""
+    depth_map.refresh_draw_handler()
+    depth_map.clear_gpu_cache()
+
+
 def start_update_bbrush_mode():
     """Called when Blender starts."""
     try_toggle_bbrush_mode()
     view_navigation.register()
-    depth_map.refresh_draw_handler()
+    refresh_viewport_overlay()
 
 
 def on_object_mode_change():
-    depth_map.refresh_draw_handler()
+    refresh_viewport_overlay()
     if _auto_handlers_active:
         try_toggle_bbrush_mode()
 
@@ -63,13 +70,21 @@ def ensure_mode_subscribe():
     _mode_subscribed = True
 
 
+def ensure_load_post_draw():
+    """Refresh silhouette draw handler whenever a .blend file finishes loading."""
+    global _load_post_draw_registered
+    if _load_post_draw_registered:
+        return
+    if load_post_draw not in bpy.app.handlers.load_post:
+        bpy.app.handlers.load_post.append(load_post_draw)
+    _load_post_draw_registered = True
+
+
 def enable_auto_mode_handlers():
     global _auto_handlers_active
     if _auto_handlers_active:
         return
     _auto_handlers_active = True
-    if load_post not in bpy.app.handlers.load_post:
-        bpy.app.handlers.load_post.append(load_post)
     if not bpy.app.timers.is_registered(start_update_bbrush_mode):
         bpy.app.timers.register(start_update_bbrush_mode, first_interval=1, persistent=True)
 
@@ -79,8 +94,6 @@ def disable_auto_mode_handlers():
     if not _auto_handlers_active:
         return
     _auto_handlers_active = False
-    if load_post in bpy.app.handlers.load_post:
-        bpy.app.handlers.load_post.remove(load_post)
     if bpy.app.timers.is_registered(start_update_bbrush_mode):
         bpy.app.timers.unregister(start_update_bbrush_mode)
 
@@ -94,26 +107,41 @@ def sync_auto_mode_handlers():
 
 
 @persistent
-def load_post(args):
-    try_toggle_bbrush_mode()
-    depth_map.refresh_draw_handler()
+def load_post_draw(args):
+    """File load hook: sculpt mode may already be active without a mode-change event."""
+    refresh_viewport_overlay()
+
+
+def _deferred_refresh_overlay():
+    """One-shot refresh after register when context is still restricted."""
+    refresh_viewport_overlay()
+    return None
 
 
 def register():
     register_module()
     ensure_mode_subscribe()
+    ensure_load_post_draw()
     sync_auto_mode_handlers()
-    depth_map.refresh_draw_handler()
+    refresh_viewport_overlay()
+    bpy.app.timers.register(_deferred_refresh_overlay, first_interval=0.0)
 
 
 def unregister():
-    global _mode_subscribed
+    global _mode_subscribed, _load_post_draw_registered
     disable_auto_mode_handlers()
     view_navigation.unregister()
     sculpt.BbrushExit.exit(bpy.context, True)
 
     bpy.msgbus.clear_by_owner(owner)
     _mode_subscribed = False
+
+    if load_post_draw in bpy.app.handlers.load_post:
+        bpy.app.handlers.load_post.remove(load_post_draw)
+    _load_post_draw_registered = False
+
+    if bpy.app.timers.is_registered(_deferred_refresh_overlay):
+        bpy.app.timers.unregister(_deferred_refresh_overlay)
 
     depth_map.remove_draw_handler()
     unregister_module()

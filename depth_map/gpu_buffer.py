@@ -25,10 +25,14 @@ _silhouette_cache = {
 def _silhouette_cache_key(context, width, height):
     rv3d = context.space_data.region_3d
     view_matrix = rv3d.view_matrix
+    window_matrix = rv3d.window_matrix
     return (
         width,
         height,
         tuple(round(v, 5) for row in view_matrix for v in row),
+        tuple(round(v, 5) for row in window_matrix for v in row),
+        round(rv3d.view_distance, 5),
+        rv3d.view_perspective,
         len(bpy.context.window.modal_operators),
     )
 

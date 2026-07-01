@@ -60,10 +60,12 @@ def refresh_draw_handler(context=None):
     global handel
     if needs_viewport_overlay(context):
         if handel is None:
+            clear_gpu_cache()
             handel = bpy.types.SpaceView3D.draw_handler_add(draw_depth, (), "WINDOW", "POST_PIXEL")
     elif handel is not None:
         bpy.types.SpaceView3D.draw_handler_remove(handel, "WINDOW")
         handel = None
+        clear_gpu_cache()
 
 
 def remove_draw_handler():
@@ -73,6 +75,7 @@ def remove_draw_handler():
         bpy.types.SpaceView3D.draw_handler_remove(handel, "WINDOW")
         handel = None
     depth_buffer_check = {}
+    clear_gpu_cache()
 
 
 def draw_depth():
@@ -99,6 +102,8 @@ def draw_depth():
             print(e.args)
 
     if check_depth_map_is_draw(context):
+        if update_depth_map_by_modal_operators():
+            clear_gpu_cache()
         filling_data(context)
 
         if draw_error := draw_gpu_buffer(context, depth_buffer_check):
