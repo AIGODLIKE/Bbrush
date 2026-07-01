@@ -23,7 +23,6 @@ paths_exclude_pattern = [
     "/.cursor/",
     "/.editorconfig",
     "/.Bbrush/",
-    "/debug.py",
     "/README.md",
     "/*.zip",
 ]
