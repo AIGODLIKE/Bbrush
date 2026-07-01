@@ -66,17 +66,12 @@ def load_post(args):
     try_toggle_bbrush_mode()
 
 
-@persistent
-def depsgraph_update_post(a, b):
-    ...
-
 
 def register():
     register_module()
 
     load_subscribe()
     bpy.app.handlers.load_post.append(load_post)
-    bpy.app.handlers.depsgraph_update_post.append(depsgraph_update_post)
 
     bpy.app.timers.register(start_update_bbrush_mode, first_interval=1, persistent=True)
 
@@ -87,9 +82,8 @@ def unregister():
 
     bpy.msgbus.clear_by_owner(owner)
 
-    if bpy.app.timers.is_registered(object_mode_update_bbrush_mode):
-        bpy.app.timers.unregister(object_mode_update_bbrush_mode)
+    if bpy.app.timers.is_registered(start_update_bbrush_mode):
+        bpy.app.timers.unregister(start_update_bbrush_mode)
     bpy.app.handlers.load_post.remove(load_post)
-    bpy.app.handlers.depsgraph_update_post.remove(depsgraph_update_post)
 
     unregister_module()

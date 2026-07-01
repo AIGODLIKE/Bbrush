@@ -74,4 +74,5 @@ def try_restore_view_property():
     global view_property_store
     if len(view_property_store) != 0:
         ViewProperty.restore_view_property(bpy.context)
-        print("try_restore_view_property ok")
+        if DEBUG_VIEW_PREF:
+            print("try_restore_view_property ok")

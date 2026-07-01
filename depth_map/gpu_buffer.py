@@ -179,9 +179,11 @@ def draw_gpu_buffer(context, depth_buffer):
                     context.region.height,
                 )
             except Exception as e:
-                import traceback
-                traceback.print_exc()
-                traceback.print_stack()
+                pref = get_pref()
+                if pref is not None and pref.debug:
+                    import traceback
+                    traceback.print_exc()
+                    traceback.print_stack()
                 return e.args
     else:
         error_text = depth_buffer["draw_error"]

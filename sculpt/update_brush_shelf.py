@@ -114,7 +114,7 @@ def set_brush_shelf(shelf_mode):
 
 
 class UpdateBrushShelf(bpy.types.Operator):
-    bl_idname = "sculpt.bbursh_update_brush_shelf"
+    bl_idname = "sculpt.bbrush_update_brush_shelf"
     bl_label = "Update Brush Shelf"
 
     @classmethod

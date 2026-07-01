@@ -18,12 +18,12 @@ MASK_KEYS = [
 ]
 
 UPDATE_BRUSH_SHELF_KEYS = [
-    ("sculpt.bbursh_update_brush_shelf", {"type": "LEFT_CTRL", "value": "ANY", "any": True}, None),
-    ("sculpt.bbursh_update_brush_shelf", {"type": "RIGHT_CTRL", "value": "ANY", "any": True}, None),
-    ("sculpt.bbursh_update_brush_shelf", {"type": "LEFT_ALT", "value": "ANY", "any": True}, None),
-    ("sculpt.bbursh_update_brush_shelf", {"type": "RIGHT_ALT", "value": "ANY", "any": True}, None),
-    ("sculpt.bbursh_update_brush_shelf", {"type": "LEFT_SHIFT", "value": "ANY", "any": True}, None),
-    ("sculpt.bbursh_update_brush_shelf", {"type": "RIGHT_SHIFT", "value": "ANY", "any": True}, None),
+    ("sculpt.bbrush_update_brush_shelf", {"type": "LEFT_CTRL", "value": "ANY", "any": True}, None),
+    ("sculpt.bbrush_update_brush_shelf", {"type": "RIGHT_CTRL", "value": "ANY", "any": True}, None),
+    ("sculpt.bbrush_update_brush_shelf", {"type": "LEFT_ALT", "value": "ANY", "any": True}, None),
+    ("sculpt.bbrush_update_brush_shelf", {"type": "RIGHT_ALT", "value": "ANY", "any": True}, None),
+    ("sculpt.bbrush_update_brush_shelf", {"type": "LEFT_SHIFT", "value": "ANY", "any": True}, None),
+    ("sculpt.bbrush_update_brush_shelf", {"type": "RIGHT_SHIFT", "value": "ANY", "any": True}, None),
 ]
 
 TOOL_KEYMAP_NAMES = (

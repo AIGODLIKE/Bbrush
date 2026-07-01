@@ -3,7 +3,7 @@ schema_version = "1.0.0"
 blender_version_min = "4.4.0"
 id = "Bbrush"
 license = ["SPDX:GPL-3.0-or-later", ]
-maintainer = "ACGGit Community(小萌新)"
+maintainer = "ACGGit Community <https://github.com/AIGODLIKE>"
 name = "Bbrush"
 tagline = "Sculpting using only a pen and keyboard"
 type = "add-on"
@@ -14,3 +14,14 @@ support = "https://github.com/AIGODLIKE/Bbrush/issues"
 
 [permissions]
 files = "View navigation texture load"
+
+[build]
+paths_exclude_pattern = [
+    "__pycache__/",
+    "/.git/",
+    "/.idea/",
+    "/.cursor/",
+    "/debug.py",
+    "/README.md",
+    "/*.zip",
+]

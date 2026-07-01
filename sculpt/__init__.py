@@ -76,7 +76,7 @@ class BbrushStart(bpy.types.Operator):
         brush_runtime = BrushRuntime()
 
         if DEBUG_MODE_TOGGLE:
-            print("exit bbrush")
+            print("start bbrush")
 
         UpdateBrushShelf.start_brush_shelf(context)
         UpdateBrushShelf.update_brush_shelf(context, event)

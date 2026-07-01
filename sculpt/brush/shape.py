@@ -398,7 +398,8 @@ class ShapeUpdate(DragBase):
                 self.mouse_route.append(mouse)
                 return True
             except (ValueError, KeyError) as e:
-                print(e.__repr__())
+                if DEBUG_SHAPE:
+                    print(e.__repr__())
                 return False
 
     def update_polyline_shape(self, context, event):
@@ -411,7 +412,8 @@ class ShapeUpdate(DragBase):
             self.preview_area(lines)
             return True
         except (ValueError, KeyError) as e:
-            print(e.__repr__())
+            if DEBUG_SHAPE:
+                print(e.__repr__())
             return False
 
     def update_circular_shape(self, context, event):
@@ -483,7 +485,7 @@ class BrushShape(bpy.types.Operator, ShapeUpdate):
             context.window_manager.modal_handler_add(self)
             return {'RUNNING_MODAL'}
         else:
-            self.report({"ERROR"}, "未找到笔刷")
+            self.report({"ERROR"}, "Brush not found for shape gesture")
             return {"CANCELLED"}
 
     @classmethod

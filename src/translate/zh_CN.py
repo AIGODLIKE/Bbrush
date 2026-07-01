@@ -154,4 +154,5 @@ data = {
         "从按下位置起光标在屏幕上移动的像素达到该值才视为移动；0 表示任意非零距离即视为移动",
 
     "Debug": "调试",
+    "Brush not found for shape gesture": "未找到笔刷",
 }

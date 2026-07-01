@@ -4,7 +4,7 @@ bl_info = {
     "name": "Bbrush",
     "author": "ACGGit Community(小萌新)",
     "version": (1, 5, 0),
-    "blender": (4, 0, 0),
+    "blender": (4, 4, 0),
     "location": "Sculpt mode",
     "description": "Sculpting using only a pen and keyboard",
     "category": "AIGODLIKE"

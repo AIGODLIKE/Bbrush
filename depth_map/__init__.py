@@ -46,18 +46,19 @@ def draw_depth():
     except ReferenceError as e:
         from ..sculpt import BbrushExit
         BbrushExit.exit(context)
-
-        import traceback
-        traceback.print_exc()
-        traceback.print_stack()
-        print(e.args)
+        if pref.debug:
+            import traceback
+            traceback.print_exc()
+            traceback.print_stack()
+            print(e.args)
 
     if check_depth_map_is_draw(context):
         filling_data(context)
 
         if draw_error := draw_gpu_buffer(context, depth_buffer_check):
-            print(draw_error)
             depth_buffer_check["draw_error"] = draw_error
+            if pref.debug:
+                print(draw_error)
         """
         draw_gpu_buffer_new_buffer_funcs(sam_width, sam_height, width, height, sampling)
         """
