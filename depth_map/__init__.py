@@ -5,9 +5,9 @@ from mathutils import Vector
 
 from .gpu_buffer import draw_gpu_buffer, clear_gpu_cache
 from ..debug import DEBUG_DEPTH_MAP
-from ..utils import check_pref, get_pref, is_bbruse_mode, get_region_height, get_region_width, check_display_mode_is_draw
+from ..utils import check_pref, get_pref, is_bbrush_mode, get_region_height, get_region_width, check_display_mode_is_draw
 
-handel = None
+_draw_handle = None
 _ShortcutKey = None
 _BbrushExit = None
 
@@ -48,7 +48,7 @@ def needs_viewport_overlay(context=None) -> bool:
     if pref is None:
         return False
     context = context or bpy.context
-    if is_bbruse_mode():
+    if is_bbrush_mode():
         if pref.show_shortcut_keys:
             return True
         return check_depth_map_is_draw(context)
@@ -57,23 +57,23 @@ def needs_viewport_overlay(context=None) -> bool:
 
 def refresh_draw_handler(context=None):
     """Register or remove the viewport draw handler based on current needs."""
-    global handel
+    global _draw_handle
     if needs_viewport_overlay(context):
-        if handel is None:
+        if _draw_handle is None:
             clear_gpu_cache()
-            handel = bpy.types.SpaceView3D.draw_handler_add(draw_depth, (), "WINDOW", "POST_PIXEL")
-    elif handel is not None:
-        bpy.types.SpaceView3D.draw_handler_remove(handel, "WINDOW")
-        handel = None
+            _draw_handle = bpy.types.SpaceView3D.draw_handler_add(draw_depth, (), "WINDOW", "POST_PIXEL")
+    elif _draw_handle is not None:
+        bpy.types.SpaceView3D.draw_handler_remove(_draw_handle, "WINDOW")
+        _draw_handle = None
         clear_gpu_cache()
 
 
 def remove_draw_handler():
     """Remove the viewport draw handler if registered."""
-    global handel, depth_buffer_check
-    if handel is not None:
-        bpy.types.SpaceView3D.draw_handler_remove(handel, "WINDOW")
-        handel = None
+    global _draw_handle, depth_buffer_check
+    if _draw_handle is not None:
+        bpy.types.SpaceView3D.draw_handler_remove(_draw_handle, "WINDOW")
+        _draw_handle = None
     depth_buffer_check = {}
     clear_gpu_cache()
 
@@ -91,7 +91,7 @@ def draw_depth():
 
     ShortcutKey, BbrushExit = _sculpt_draw_refs()
     try:
-        if is_bbruse_mode():
+        if is_bbrush_mode():
             ShortcutKey.draw_shortcut_key()
     except ReferenceError as e:
         BbrushExit.exit(context)

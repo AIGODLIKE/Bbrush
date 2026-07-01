@@ -17,7 +17,7 @@ from ...utils import (
     get_active_tool,
     refresh_ui,
     line_to_convex_shell,
-    is_bbruse_mode,
+    is_bbrush_mode,
 )
 from ...utils.gpu import draw_text, draw_line, draw_smooth_line
 
@@ -475,7 +475,7 @@ class BrushShape(bpy.types.Operator, ShapeUpdate):
 
     @classmethod
     def poll(cls, context):
-        return is_bbruse_mode()
+        return is_bbrush_mode()
 
     def start_modal(self, context, event):
         global drag_runtime
@@ -491,7 +491,7 @@ class BrushShape(bpy.types.Operator, ShapeUpdate):
             return {"CANCELLED"}
 
     @classmethod
-    def check_brush_supper(cls, brush_name: str) -> bool:
+    def check_brush_support(cls, brush_name: str) -> bool:
         """Return True if brush_name supports shape gesture drawing."""
         support_brushes_list = (
             "builtin.box_mask",
@@ -529,7 +529,7 @@ class BrushShape(bpy.types.Operator, ShapeUpdate):
             "builtin_brush.Mask",  # Legacy idname
             "builtin_brush.mask",
         )
-        is_support_brushes = active_tool and self.check_brush_supper(active_tool.idname)
+        is_support_brushes = active_tool and self.check_brush_support(active_tool.idname)
 
         if is_support_brushes:
             return self.start_modal(context, event)

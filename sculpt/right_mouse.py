@@ -1,7 +1,7 @@
 import bpy
 
 from .brush import BrushShortcutKeyScale
-from ..utils import check_mouse_in_depth_map_area, check_mouse_in_shortcut_key_area, is_bbruse_mode
+from ..utils import check_mouse_in_depth_map_area, check_mouse_in_shortcut_key_area, is_bbrush_mode
 from ..utils.manually_manage_events import ManuallyManageEvents
 
 
@@ -13,7 +13,7 @@ class RightMouse(bpy.types.Operator, ManuallyManageEvents):
 
     @classmethod
     def poll(cls, context):
-        return is_bbruse_mode()
+        return is_bbrush_mode()
 
     def invoke(self, context, event):
 

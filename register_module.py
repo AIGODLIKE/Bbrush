@@ -3,7 +3,7 @@ from bpy.app.handlers import persistent
 
 from . import depth_map, preferences, topbar, sculpt, src, gizmo
 from .src import view_navigation
-from .utils import register_submodule_factory, get_pref, is_bbruse_mode, get_context_mode
+from .utils import register_submodule_factory, get_pref, is_bbrush_mode, get_context_mode
 
 model_tuple = (
     preferences,
@@ -24,14 +24,14 @@ _load_post_draw_registered = False
 
 def try_toggle_bbrush_mode(is_start=False):
     """Toggle Bbrush mode on sculpt enter/exit, Blender startup, or forced mode."""
-    is_bbruse = is_bbruse_mode()
+    bbrush_active = is_bbrush_mode()
     mode = get_context_mode()
 
     if mode == "SCULPT":
         pref = get_pref()
-        if pref is not None and pref.always_use_bbrush_sculpt_mode and not is_bbruse:
+        if pref is not None and pref.always_use_bbrush_sculpt_mode and not bbrush_active:
             bpy.ops.sculpt.bbrush_start("INVOKE_DEFAULT")
-    elif is_bbruse:
+    elif bbrush_active:
         bpy.ops.sculpt.bbrush_exit("INVOKE_DEFAULT", exit_always=False)
     else:
         ...

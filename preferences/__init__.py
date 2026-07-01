@@ -58,12 +58,7 @@ class Preferences(
         max=2
     )
 
-    refresh_fps: bpy.props.IntProperty(name="Refresh FPS", default=1, min=1, max=120)
     debug: bpy.props.BoolProperty(name="Debug", default=False)
-
-    @property
-    def refresh_interval(self):
-        return 1 / self.refresh_fps
 
     def draw(self, context):
         from ..sculpt import FixBbrushError
@@ -75,7 +70,6 @@ class Preferences(
 
         box = col.box()
         box.label(text="Sculpt")
-        box.prop(self, "refresh_fps")
         box.prop(self, "always_use_bbrush_sculpt_mode")
         box.prop(self, "depth_ray_size")
         box.prop(self, "mouse_move_threshold_px")

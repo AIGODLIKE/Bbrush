@@ -143,9 +143,9 @@ data = {
     "Use view pref": "使用视图偏好设置",
     "BBrush fix": "BBrush 修复",
     "Fix Bbrush error": "修复Bbrush错误",
+    "Reset Bbrush runtime state (tool shelf, shortcuts, navigation prefs). Available in sculpt mode only; Bbrush does not need to be active": "重置 Bbrush 运行时状态（笔刷架、快捷键、导航偏好）。仅在雕刻模式下可用；无需处于 Bbrush 模式",
     "Shortcut Key Move": "移动快捷键",
     "Update Brush Shelf": "更新笔刷架",
-    "Refresh FPS": "刷新FPS",
     "View navigation scale": "视图导览缩放",
     "View navigation offset": "视图导览偏移",
 

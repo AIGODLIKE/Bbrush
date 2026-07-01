@@ -38,7 +38,7 @@ def check_display_mode_is_draw(context, display_mode: str) -> bool:
         return False
     is_sculpt = mode == "SCULPT"
     only_sculpt = (display_mode == "ONLY_SCULPT") and is_sculpt
-    only_bbrush = (display_mode == "ONLY_BBRUSH") and is_sculpt and is_bbruse_mode()
+    only_bbrush = (display_mode == "ONLY_BBRUSH") and is_sculpt and is_bbrush_mode()
     return only_sculpt or only_bbrush
 
 
@@ -253,7 +253,7 @@ def check_modal_operators(bl_idname: str) -> bool:
     return False
 
 
-def is_bbruse_mode() -> bool:
+def is_bbrush_mode() -> bool:
     """Return True when Bbrush sculpt runtime is active."""
     from ..sculpt import brush_runtime
     return brush_runtime is not None

@@ -10,8 +10,8 @@ class ScaleOperator:
 
     @classmethod
     def poll(cls, context):
-        from . import is_bbruse_mode
-        return is_bbruse_mode()
+        from . import is_bbrush_mode
+        return is_bbrush_mode()
 
     def get_start_scale(self) -> float:
         return 0
@@ -58,8 +58,8 @@ class MoveOperator:
 
     @classmethod
     def poll(cls, context):
-        from . import is_bbruse_mode
-        return is_bbruse_mode()
+        from . import is_bbrush_mode
+        return is_bbrush_mode()
 
     def get_start_offset(self) -> Vector:
         return Vector((0, 0))

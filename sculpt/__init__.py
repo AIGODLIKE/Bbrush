@@ -9,7 +9,7 @@ from .shortcut_key import ShortcutKey
 from .update_brush_shelf import UpdateBrushShelf
 from .view_property import ViewProperty
 from ..debug import DEBUG_MODE_TOGGLE
-from ..utils import get_pref, refresh_ui, get_context_mode, is_bbruse_mode
+from ..utils import get_pref, refresh_ui, get_context_mode, is_bbrush_mode
 
 """
 Runtime toggles:
@@ -66,7 +66,7 @@ class BbrushStart(bpy.types.Operator):
         if get_context_mode(context) != "SCULPT":
             cls.poll_message_set("Available in sculpt mode only")
             return False
-        if is_bbruse_mode():
+        if is_bbrush_mode():
             cls.poll_message_set("Bbrush mode is already active")
             return False
         return True
@@ -117,7 +117,7 @@ class BbrushExit(bpy.types.Operator):
 
     @classmethod
     def poll(cls, context):
-        if not is_bbruse_mode():
+        if not is_bbrush_mode():
             cls.poll_message_set("Bbrush mode is not active")
             return False
         return True
@@ -127,7 +127,7 @@ class BbrushExit(bpy.types.Operator):
             print(self.bl_idname)
         pref = get_pref()
         if pref is not None and pref.always_use_bbrush_sculpt_mode and self.exit_always:
-            pref["always_use_bbrush_sculpt_mode"] = False
+            pref.always_use_bbrush_sculpt_mode = False
         self.exit(context)
         return {"FINISHED"}
 
@@ -162,7 +162,10 @@ class BbrushExit(bpy.types.Operator):
 class FixBbrushError(bpy.types.Operator):
     bl_idname = "sculpt.bbrush_fix"
     bl_label = "BBrush fix"
-    bl_description = "Reset Bbrush runtime state if the mode becomes stuck"
+    bl_description = (
+        "Reset Bbrush runtime state (tool shelf, shortcuts, navigation prefs). "
+        "Available in sculpt mode only; Bbrush does not need to be active"
+    )
     bl_options = {"REGISTER"}
 
     @classmethod

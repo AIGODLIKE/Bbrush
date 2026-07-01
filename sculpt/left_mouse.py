@@ -4,7 +4,7 @@ from mathutils import Vector
 
 from .brush import BrushShortcutKeyScale, BrushShape
 from ..debug import DEBUG_LEFT_MOUSE
-from ..utils import object_ray_cast, check_mouse_in_model, is_bbruse_mode, get_pref, check_modal_operators, \
+from ..utils import object_ray_cast, check_mouse_in_model, is_bbrush_mode, get_pref, check_modal_operators, \
     check_mouse_in_depth_map_area, check_mouse_in_shortcut_key_area
 from ..utils.manually_manage_events import ManuallyManageEvents
 
@@ -17,7 +17,7 @@ class LeftMouse(bpy.types.Operator, ManuallyManageEvents):
 
     @classmethod
     def poll(cls, context):
-        return is_bbruse_mode()
+        return is_bbrush_mode()
 
     def invoke(self, context, event):
         """Manual click/drag handling; CLICK_DRAG is unreliable in Blender 5.0+."""
@@ -128,7 +128,7 @@ class LeftMouse(bpy.types.Operator, ManuallyManageEvents):
             elif active_tool and active_tool.idname == "builtin.line_trim":
                 bpy.ops.sculpt.trim_line_gesture("INVOKE_DEFAULT")
 
-            elif active_tool and BrushShape.check_brush_supper(active_tool.idname):  # Shape-capable brushes first
+            elif active_tool and BrushShape.check_brush_support(active_tool.idname):  # Shape-capable brushes first
                 bpy.ops.sculpt.bbrush_shape("INVOKE_DEFAULT")
             elif is_in_modal:  # and is_in_active_modal #
                 return self.brush_stroke(context, event)

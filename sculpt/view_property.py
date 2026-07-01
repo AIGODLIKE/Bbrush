@@ -22,9 +22,7 @@ view_property_store = {}
 
 
 class ViewProperty:
-    """
-    preferences/view.py
-    """
+    """Temporarily apply Bbrush navigation prefs to Blender user preferences."""
 
     @staticmethod
     def start_view_property(context):
