@@ -4,13 +4,42 @@ import gpu
 from gpu_extras.batch import batch_for_shader
 
 from ..utils import check_pref, get_pref, get_region_height, get_region_width
-from ..utils.gpu import apply_gpu_texture_filter
 from ..utils.navigation import *
 from ..adapter import is_5_0_up_version
 """
 Vertical/horizontal navigation axes need rotation handling.
 Axis-aware rotation should use the active axis as the pivot for horizontal/vertical angles.
 """
+
+_image_quad_cache = {}
+
+
+def _image_quad(dw, dh):
+    """Cached image draw batch covering (0, 0)-(dw, dh) with a single oversized triangle.
+
+    Gizmos are drawn with polygon smoothing forced on, which turns the shared diagonal of a
+    two-triangle quad into a visible seam. Texels outside the tile hit the transparent padding.
+    """
+    from ..src.view_navigation import texture_draw_size, TEXTURE_PADDING
+    tw, th = texture_draw_size
+    key = (dw, dh, tw, th)
+    if key not in _image_quad_cache:
+        def uv(x, y):
+            return ((TEXTURE_PADDING + x * tw / dw) / (tw + 2 * TEXTURE_PADDING),
+                    (TEXTURE_PADDING + y * th / dh) / (th + 2 * TEXTURE_PADDING))
+
+        pos = ((-2, -2), (2 * dw + 6, -2), (-2, 2 * dh + 6))
+        shader = gpu.shader.from_builtin("IMAGE_SCENE_LINEAR_TO_REC709_SRGB" if is_5_0_up_version else "IMAGE")
+        batch = batch_for_shader(
+            shader, "TRIS",
+            {
+                "pos": pos,
+                "texCoord": tuple(uv(x, y) for x, y in pos),
+            },
+        )
+        _image_quad_cache.clear()
+        _image_quad_cache[key] = shader, batch
+    return _image_quad_cache[key]
 
 
 class ViewNavigationGizmo(bpy.types.Gizmo):
@@ -39,7 +68,6 @@ class ViewNavigationGizmo(bpy.types.Gizmo):
             return
         gpu.state.blend_set("ALPHA")
         texture = get_view_navigation_texture(*self.rotate_index)
-        apply_gpu_texture_filter(texture)
         dw, dh = draw_size = get_draw_view_navigation_texture_width_height()
 
         area = context.area
@@ -52,17 +80,9 @@ class ViewNavigationGizmo(bpy.types.Gizmo):
             offset = area_offset + draw_offset
             gpu.matrix.translate(offset)
 
-            shader_name ="IMAGE_SCENE_LINEAR_TO_REC709_SRGB" if is_5_0_up_version else "IMAGE"
-            shader = gpu.shader.from_builtin(shader_name)
-            batch = batch_for_shader(
-                shader, "TRI_FAN",
-                {
-                    "pos": ((0, 0), (dw, 0), (dw, dh), (0, dh)),
-                    "texCoord": ((0, 0), (1, 0), (1, 1), (0, 1)),
-                },
-            )
-            shader.uniform_sampler("image", texture)
+            shader, batch = _image_quad(int(dw), int(dh))
             shader.bind()
+            shader.uniform_sampler("image", texture)
             batch.draw(shader)
 
             x1, y1 = offset

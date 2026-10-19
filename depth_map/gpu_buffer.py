@@ -1,4 +1,5 @@
 from functools import cache
+import time
 
 import blf
 import bpy
@@ -6,20 +7,48 @@ import gpu
 from gpu_extras.batch import batch_for_shader
 
 from ..utils import get_pref
-from ..utils.gpu import apply_gpu_texture_filter
 from ..adapter import is_5_0_up_version
 
-# White background, black silhouette. Slight smoothstep for edge softening when GPU linear-filters.
+# White background, black silhouette. The depth texture is drawn minified by depth_scale, so each
+# fragment box-filters the geometry mask (depth < 1.0) over its footprint for anti-aliased edges.
+_SILHOUETTE_FRAG_FUNCS = """
+float geometry_mask(ivec2 size, vec2 p)
+{
+    vec2 q = p - 0.5;
+    ivec2 c = ivec2(floor(q));
+    vec2 f = q - vec2(c);
+    ivec2 hi = size - 1;
+    float m00 = texelFetch(tex, clamp(c, ivec2(0), hi), 0).x < 1.0 ? 1.0 : 0.0;
+    float m10 = texelFetch(tex, clamp(c + ivec2(1, 0), ivec2(0), hi), 0).x < 1.0 ? 1.0 : 0.0;
+    float m01 = texelFetch(tex, clamp(c + ivec2(0, 1), ivec2(0), hi), 0).x < 1.0 ? 1.0 : 0.0;
+    float m11 = texelFetch(tex, clamp(c + ivec2(1, 1), ivec2(0), hi), 0).x < 1.0 ? 1.0 : 0.0;
+    return mix(mix(m00, m10, f.x), mix(m01, m11, f.x), f.y);
+}
+"""
+
 _SILHOUETTE_FRAG_BODY = """
-    float depth = texture(tex, texCoord).x;
-    float silhouette = smoothstep(0.9995, 1.0, depth);
+    ivec2 size = textureSize(tex, 0);
+    vec2 center = texCoord * vec2(size);
+    float span = max(footprint, 1.0);
+    int taps = int(clamp(ceil(span), 1.0, 8.0));
+    float coverage = 0.0;
+    for (int y = 0; y < taps; y++) {
+        for (int x = 0; x < taps; x++) {
+            vec2 offset = (vec2(x, y) + 0.5) / float(taps) - 0.5;
+            coverage += geometry_mask(size, center + offset * span);
+        }
+    }
+    float silhouette = 1.0 - coverage / float(taps * taps);
     FragColor = vec4(silhouette, silhouette, silhouette, 1.0);
 """
 
+# Full-region depth readback stalls the GPU; while a view navigation modal runs, refresh at most this often.
+_NAVIGATION_REFRESH_INTERVAL = 1 / 30
+
 _silhouette_cache = {
-    "key": None,
-    "texture": None,
+    # region pointer: {"key", "texture", "time"}
 }
+_redraw_timer_pending = False
 
 
 def _silhouette_cache_key(context, width, height):
@@ -59,6 +88,7 @@ def shader_50():
 
     shader_info = gpu.types.GPUShaderCreateInfo()
     shader_info.push_constant('MAT4', "ModelViewProjectionMatrix")
+    shader_info.push_constant('FLOAT', "footprint")
     shader_info.vertex_in(0, 'VEC2', "pos")
     shader_info.vertex_in(1, 'VEC2', "texCoordIn")
     shader_info.vertex_out(tex_coord_out)
@@ -75,6 +105,7 @@ def shader_50():
         """)
 
     shader_info.fragment_source(f"""
+        {_SILHOUETTE_FRAG_FUNCS}
         void main()
         {{
         {_SILHOUETTE_FRAG_BODY}
@@ -104,9 +135,10 @@ def depth_shader():
 
         fragment_shader = f"""
             uniform sampler2D tex;
+            uniform float footprint;
             in vec2 texCoord;
             out vec4 FragColor;
-
+            {_SILHOUETTE_FRAG_FUNCS}
             void main()
             {{
             {_SILHOUETTE_FRAG_BODY}
@@ -129,27 +161,58 @@ def depth_shader():
     return shader, batch
 
 
+def _tag_view3d_redraw():
+    global _redraw_timer_pending
+    _redraw_timer_pending = False
+    wm = getattr(bpy.context, "window_manager", None)
+    if wm is None:
+        return None
+    for window in wm.windows:
+        for area in window.screen.areas:
+            if area.type == "VIEW_3D":
+                area.tag_redraw()
+    return None
+
+
+def _schedule_redraw():
+    global _redraw_timer_pending
+    if not _redraw_timer_pending:
+        _redraw_timer_pending = True
+        bpy.app.timers.register(_tag_view3d_redraw, first_interval=_NAVIGATION_REFRESH_INTERVAL)
+
+
 def _read_silhouette_texture(context, width, height):
-    global _silhouette_cache
+    region_key = context.region.as_pointer()
+    entry = _silhouette_cache.get(region_key)
     key = _silhouette_cache_key(context, width, height)
-    if _silhouette_cache["key"] == key and _silhouette_cache["texture"] is not None:
-        return _silhouette_cache["texture"]
+    now = time.perf_counter()
+    if entry is not None:
+        if entry["key"] == key:
+            return entry["texture"]
+        same_size = entry["key"][:2] == key[:2]
+        navigating = key[-1] > 0
+        if same_size and navigating and now - entry["time"] < _NAVIGATION_REFRESH_INTERVAL:
+            # Throttled; make sure the latest view still gets a refresh once navigation pauses.
+            _schedule_redraw()
+            return entry["texture"]
 
     depth_buffer = gpu.state.active_framebuffer_get().read_depth(0, 0, width, height)
     texture = gpu.types.GPUTexture((width, height), format="DEPTH_COMPONENT32F", data=depth_buffer)
-    apply_gpu_texture_filter(texture)
 
-    _silhouette_cache["key"] = key
-    _silhouette_cache["texture"] = texture
+    if entry is None and len(_silhouette_cache) >= 8:
+        _silhouette_cache.clear()
+    _silhouette_cache[region_key] = {"key": key, "texture": texture, "time": now}
     return texture
 
 
-def draw_shader_old(context, width, height):
+def draw_shader_old(context, width, height, depth_scale):
     shader, batch = depth_shader()
     texture = _read_silhouette_texture(context, width, height)
 
     mv = gpu.matrix.get_model_view_matrix()
+    shader.bind()
     shader.uniform_float("ModelViewProjectionMatrix", mv)
+    shader.uniform_float("footprint", 1.0 / max(depth_scale, 1e-3))
     shader.uniform_sampler("tex", texture)
     batch.draw()
 
@@ -184,6 +247,7 @@ def draw_gpu_buffer(context, depth_buffer):
                     context,
                     context.region.width,
                     context.region.height,
+                    depth_scale,
                 )
             except Exception as e:
                 pref = get_pref()
@@ -204,6 +268,4 @@ def draw_gpu_buffer(context, depth_buffer):
 
 
 def clear_gpu_cache():
-    global _silhouette_cache
-    _silhouette_cache["key"] = None
-    _silhouette_cache["texture"] = None
+    _silhouette_cache.clear()
