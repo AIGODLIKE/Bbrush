@@ -25,4 +25,6 @@ paths_exclude_pattern = [
     "/.Bbrush/",
     "/README.md",
     "/*.zip",
+    "/release/",
+    "/dist/",
 ]
