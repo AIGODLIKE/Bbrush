@@ -39,13 +39,17 @@ class RightMouse(bpy.types.Operator, ManuallyManageEvents):
         from . import UpdateBrushShelf
         UpdateBrushShelf.update_brush_shelf(context, event)
 
+        if event.type in {"ESC", "WINDOW_DEACTIVATE"}:
+            return {"CANCELLED"}
+
         is_moving = self.check_is_moving(event)
-        is_release = event.value == "RELEASE"
+        is_release = event.type == "RIGHTMOUSE" and event.value == "RELEASE"
         if is_release:
             try:
                 bpy.ops.wm.call_panel("INVOKE_DEFAULT", name="VIEW3D_PT_sculpt_context_menu")
-            finally:  # Always finish after context menu
-                return {"FINISHED"}
+            except Exception:
+                pass
+            return {"FINISHED"}
         elif is_moving:  # Drag: cannot use PASS_THROUGH; dispatch explicitly
             view3d_event(context, event)
             return {"FINISHED"}

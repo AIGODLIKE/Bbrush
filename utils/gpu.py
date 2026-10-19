@@ -20,8 +20,9 @@ def apply_gpu_texture_filter(gpu_tex) -> None:
         return
 
 
-def _depth_content_ratio(numpy_buffer, *, near_eps=1e-5, far_eps=1e-4):
+def _depth_content_ratio(numpy_buffer, *, near_eps=1e-5, far_eps=0.0):
     """Return ratio of flat depth samples considered geometry (0-1)."""
+    # Background clears to exactly 1.0; perspective depth of distant geometry is within 1e-4 of it.
     d = np.asarray(numpy_buffer, dtype=np.float32).ravel()
     if d.size == 0:
         return 0.0

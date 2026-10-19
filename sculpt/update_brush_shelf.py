@@ -127,6 +127,9 @@ class UpdateBrushShelf(bpy.types.Operator):
         return True
 
     def invoke(self, context, event):
+        if event.type == "MOUSEMOVE" and \
+                BRUSH_SHELF_MODE[(event.ctrl, event.alt, event.shift)] == self.brush_shelf_mode:
+            return {"PASS_THROUGH"}
         self.update_brush_shelf(context, event)
         return {"PASS_THROUGH", "FINISHED"}
 

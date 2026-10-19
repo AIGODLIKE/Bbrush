@@ -1,3 +1,5 @@
+import sys
+
 import bpy
 from bl_ui.space_toolsystem_common import ToolSelectPanelHelper
 from mathutils import Vector
@@ -32,7 +34,15 @@ class LeftMouse(bpy.types.Operator, ManuallyManageEvents):
         UpdateBrushShelf.update_brush_shelf(context, event)
         active_tool = ToolSelectPanelHelper.tool_active_from_context(context)
 
-        if check_mouse_in_depth_map_area(event):  # Scale depth map
+        self.button = event.type
+        self.pending_emulate_check = False
+
+        if event.type == "MIDDLEMOUSE":
+            if not may_be_emulated_alt_click(context, event) or tool_passes_through(active_tool):
+                return {"PASS_THROUGH"}
+            # Physical MMB and emulated Alt+LMB look the same at press; decided on the next event.
+            self.pending_emulate_check = True
+        elif check_mouse_in_depth_map_area(event):  # Scale depth map
             bpy.ops.sculpt.bbrush_depth_scale("INVOKE_DEFAULT")
             return {"FINISHED"}
         elif check_mouse_in_shortcut_key_area(event) and BrushShortcutKeyScale.poll(context):  # Scale shortcut overlay
@@ -41,32 +51,7 @@ class LeftMouse(bpy.types.Operator, ManuallyManageEvents):
 
         elif active_tool and active_tool.idname == "builtin_brush.draw_face_sets":
             return self.brush_stroke(context, event)
-        elif active_tool and "face_set" in active_tool.idname:
-            """
-            "builtin.lasso_face_set",
-            "builtin_brush.draw_face_sets",
-            "builtin.line_face_set",
-            "builtin.polyline_face_set",
-            "builtin.face_set_edit",
-            "builtin.box_face_set",
-            """
-            return {"PASS_THROUGH"}
-        elif active_tool and active_tool.idname in (
-                "builtin.mask_by_color",
-                "builtin.color_filter",
-                "builtin.mesh_filter",
-                "builtin.cloth_filter",
-
-                "builtin.move",
-                "builtin.rotate",
-                "builtin.scale",
-                "builtin.transform",
-
-                "builtin.annotate",
-                "builtin.annotate_line",
-                "builtin.annotate_polygon",
-                "builtin.annotate_eraser",
-        ):
+        elif tool_passes_through(active_tool):
             return {"PASS_THROUGH"}
 
         self.start_manually_manage_events(event)
@@ -86,7 +71,17 @@ class LeftMouse(bpy.types.Operator, ManuallyManageEvents):
         from . import UpdateBrushShelf
         UpdateBrushShelf.update_brush_shelf(context, event)
 
-        is_release = event.value == "RELEASE"
+        if event.type in {"ESC", "WINDOW_DEACTIVATE"}:
+            return {"CANCELLED"}
+
+        is_release = event.type == self.button and event.value == "RELEASE"
+
+        if self.pending_emulate_check:
+            self.pending_emulate_check = False
+            if not event.alt:  # Physical middle mouse: keep Blender's default navigation
+                if not is_release:
+                    middle_mouse_navigation(context, event)
+                return {"FINISHED"}
 
         is_moving = self.check_is_moving(event)
         is_in_modal = check_mouse_in_model(context, event)
@@ -101,11 +96,12 @@ class LeftMouse(bpy.types.Operator, ManuallyManageEvents):
                     res = bpy.ops.object.transfer_mode("INVOKE_DEFAULT")  # Uses C-side GPU depth hit test
                     if "CANCELLED" in res:
                         bpy.ops.sculpt.bbrush_click("INVOKE_DEFAULT")
-                finally:
-                    return {"FINISHED"}  # Always finish from finally/else paths
+                except Exception:
+                    pass
+                return {"FINISHED"}
             else:
                 bpy.ops.sculpt.bbrush_click("INVOKE_DEFAULT")
-                return {"FINISHED"}  # Always finish from finally/else paths
+                return {"FINISHED"}
         elif is_moving:  # Drag: cannot use PASS_THROUGH; dispatch explicitly
             if DEBUG_LEFT_MOUSE:
                 print("is_move", is_in_modal)
@@ -156,8 +152,67 @@ class LeftMouse(bpy.types.Operator, ManuallyManageEvents):
         mouse_offset_compensation(context, event)
         try:
             execute_brush_stroke(event)
-        finally:  # Always return FINISHED after stroke
-            return {"FINISHED"}
+        except Exception:
+            pass
+        return {"FINISHED"}
+
+
+PASS_THROUGH_TOOLS = (
+    "builtin.mask_by_color",
+    "builtin.color_filter",
+    "builtin.mesh_filter",
+    "builtin.cloth_filter",
+
+    "builtin.move",
+    "builtin.rotate",
+    "builtin.scale",
+    "builtin.transform",
+
+    "builtin.annotate",
+    "builtin.annotate_line",
+    "builtin.annotate_polygon",
+    "builtin.annotate_eraser",
+)
+
+
+def tool_passes_through(active_tool) -> bool:
+    """Tools whose own keymaps handle the press (face set tools, filters, transform, annotate)."""
+    if active_tool is None:
+        return False
+    idname = active_tool.idname
+    if idname == "builtin_brush.draw_face_sets":
+        return False
+    return "face_set" in idname or idname in PASS_THROUGH_TOOLS
+
+
+def may_be_emulated_alt_click(context, event) -> bool:
+    """Emulate 3 Button Mouse sends Alt+LMB as MIDDLEMOUSE with Alt cleared on the press event only."""
+    inputs = context.preferences.inputs
+    if not inputs.use_mouse_emulate_3_button:
+        return False
+    if sys.platform == "darwin" and inputs.mouse_emulate_3_button_modifier != "ALT":
+        return False
+    return not event.alt
+
+
+def middle_mouse_navigation(context, event):
+    """Blender default middle mouse view navigation."""
+    rv3d = getattr(context, "region_data", None)
+    if rv3d is None:
+        return
+    try:
+        if event.ctrl and event.shift:
+            bpy.ops.view3d.dolly("INVOKE_DEFAULT")
+        elif event.shift:
+            bpy.ops.view3d.move("INVOKE_DEFAULT")
+        elif event.ctrl:
+            bpy.ops.view3d.zoom("INVOKE_DEFAULT")
+        elif rv3d.lock_rotation:
+            bpy.ops.view3d.move("INVOKE_DEFAULT")
+        else:
+            bpy.ops.view3d.rotate("INVOKE_DEFAULT")
+    except RuntimeError:
+        pass
 
 
 def check_mouse_in_active_modal(context, event) -> bool:

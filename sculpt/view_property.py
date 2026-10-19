@@ -49,11 +49,13 @@ class ViewProperty:
     def restore_view_property(context, save_user_pref=False):
         global view_property_store
         pref = get_pref()
+        restored = False
         if pref is not None and pref.use_navigation_property:
             for p, data in view_property_store.items():
                 prop = getattr(context.preferences, p)
                 for k, v in data.items():
                     setattr(prop, k, v)
+                    restored = True
 
         if DEBUG_VIEW_PREF and pref is not None:
             store = {}
@@ -67,5 +69,6 @@ class ViewProperty:
             print("now pref", store)
 
         view_property_store.clear()
-        if save_user_pref:
+        # Saving unconditionally would also persist unrelated unsaved (or factory-startup) preferences.
+        if save_user_pref and restored and not bpy.app.background and context.preferences.use_preferences_save:
             bpy.ops.wm.save_userpref()

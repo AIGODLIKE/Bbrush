@@ -98,6 +98,7 @@ class BbrushStart(bpy.types.Operator):
 
         ShortcutKey.start_shortcut_key()
         ViewProperty.start_view_property(context)
+        addon_keymap.start_view_modal_keymaps()
         refresh_ui(context)
         v3d = _first_space_view3d(context)
         if v3d is not None:
@@ -154,6 +155,7 @@ class BbrushExit(bpy.types.Operator):
         ShortcutKey.stop_shortcut_key()
         UpdateBrushShelf.restore_brush_shelf()
         ViewProperty.restore_view_property(context, un_reg)
+        addon_keymap.stop_view_modal_keymaps()
 
         refresh_ui(context)
         refresh_draw_handler(context)
